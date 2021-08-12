@@ -1,0 +1,57 @@
+
+###
+POST http://localhost:8000/requestValidation
+Content-Type: application/json
+
+{
+  "address":  "mtu2KgGGpSNo1eemN5x6e1MotN6TMxBB3o"
+}
+
+
+###
+POST http://localhost:8000/submitstar
+Content-Type: application/json
+
+{
+  "address":  "mtu2KgGGpSNo1eemN5x6e1MotN6TMxBB3o",
+  "message":  "mtu2KgGGpSNo1eemN5x6e1MotN6TMxBB3o:1626316437:starRegistry",
+  "signature":  "ILKBqbCbogcGHM4dLweqpGbldISxEsZ696qxqF9AS9imZRmWGEjf6DjHNVvXmYWA6a+OcPMoRGyvI/uwWw5mrPA=",
+  "star":  {
+   "dec": "41 20 60",
+    "ra": "16h",
+    "story": "jo"
+  }
+}
+
+### get block by height
+GET http://localhost:8000/block/height/1
+Accept: application/json
+
+### body humanreadable
+GET http://localhost:8000/block/height/1?human=true
+Accept: application/json
+
+### get block by hash
+GET http://localhost:8000/block/hash/07560bc6b3ed2b4ecca272ea25d0d4a1bc28dc50cc181f48f269fdbc3ee8b88f
+Accept: application/json
+
+
+### get block by hash error
+GET http://localhost:8000/block/hash/NOTFOUND
+Accept: application/json
+
+### get blocks by owner
+GET http://localhost:8000/blocks/mtu2KgGGpSNo1eemN5x6e1MotN6TMxBB3o
+Accept: application/json
+
+### get blocks by owner
+GET http://localhost:8000/validation
+Accept: application/json
+
+### get blocks by owner
+GET http://localhost:8000/show
+Accept: application/json
+
+
+
+
