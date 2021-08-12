@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Deploy a Remix Contract - Ganache</title>
+
+    <link rel="stylesheet" type="text/css" href="../css/main.css">
+
+    <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
+</head>
+
+<body>
+<div>
+    <h1>Ethereum Secret Messenger</h1>
+    <hr>
+
+    <label for="userInput">This site writes a secret message to the Ethereum
+        blockchain!</label>
+    <input id="userInput" type="text">
+
+    <button id="setMessageButton" onclick="setMessageFunction();">Set secret message</button>
+    <button id="getMessageButton" onclick="getMessageFunction();">Get message</button>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+
+<script>
+  // Get the contract address
+  let abi = [
+      {
+        "constant": false,
+        "inputs": [
+          {
+            "name": "x",
+            "type": "string"
+          }
+        ],
+        "name": "setMessage",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "constant": true,
+        "inputs": [],
+        "name": "getMessage",
+        "outputs": [
+          {
+            "name": "",
+            "type": "string"
+          }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ],
+    contractAddress = '0x0C17738b4Efc521f00BcfC6862b22dc4C33421b8';
+
+  async function loadWeb3() {
+    if (window.ethereum) {
+      window.web3 = new Web3(window.ethereum);
+      window.ethereum.enable();
+    }
+    //window.web3 = new Web3(rinkeybi);
+  }
+
+  async function loadContract() {
+    return await new window.web3.eth.Contract(abi, contractAddress);
+  }
+
+  async function setMessageFunction() {
+    message = $("#userInput").val();
+    const account = await getCurrentAccount();
+    await window.contract.methods.setMessage(message).send({ from: account });
+  }
+
+  async function getMessageFunction() {
+    const account = await getCurrentAccount();
+    await window.contract.methods.getMessage().call().then(function(x){
+      alert(x);
+    });
+    // console.log(JSON.stringify(returnedMessage));
+    // alert(JSON.stringify(returnedMessage));
+  }
+
+  async function getCurrentAccount() {
+    const accounts = await window.web3.eth.getAccounts();
+    console.log("accounts", accounts)
+    return accounts[0];
+    //return web3.eth.defaultAccount;
+  }
+
+  async function load() {
+    await loadWeb3();
+    window.contract = await loadContract();
+  }
+
+  load();
+
+</script>
+</body>
+
+</html>
+
+</body>
+
+</html>
