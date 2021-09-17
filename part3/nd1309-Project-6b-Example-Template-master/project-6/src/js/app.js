@@ -72,7 +72,7 @@ App = {
         else if (window.web3) {
             App.web3Provider = window.web3.currentProvider;
         }
-        // If no injected web3 instance is detected, fall back to Ganache
+        // If no injected web3 instance is detected, fall back to GanacheUI
         else {
             App.web3Provider = new Web3.providers.HttpProvider('http://localhost:7545');
         }
@@ -175,7 +175,10 @@ App = {
                 App.originFarmInformation, 
                 App.originFarmLatitude, 
                 App.originFarmLongitude, 
-                App.productNotes
+                App.productNotes,
+              {
+                  from: App.metamaskAccountID // FGZ added to get it working
+              }
             );
         }).then(function(result) {
             $("#ftc-item").text(result);
