@@ -1,14 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "../coffeeaccesscontrol/ConsumerRole.sol";
-import "../coffeeaccesscontrol/DistributorRole.sol";
-import "../coffeeaccesscontrol/FarmerRole.sol";
-import "../coffeeaccesscontrol/RetailerRole.sol";
+import "../coffeebase/Ownable.sol";
+import "../coffeebase/Mortal.sol";
+import "../coffeebase/Accessible.sol";
 // FIXME add state related work to import "./States.sol";
 
 // Define a contract 'Supplychain'
-contract SupplyChain is ConsumerRole, DistributorRole, FarmerRole, RetailerRole {
+contract SupplyChain is Ownable, Mortal, Accessible {
 
   // FIXME defined in owner
   // Define 'owner'
@@ -78,13 +77,6 @@ contract SupplyChain is ConsumerRole, DistributorRole, FarmerRole, RetailerRole 
 //    _;
 //  }
 
-
-  // Define a modifier that verifies the Caller
-  modifier verifyCaller (address _address) {
-    require(msg.sender == _address); 
-    _;
-  }
-
   // Define a modifier that checks if the paid amount is sufficient to cover the price
   modifier paidEnough(uint _price) { 
     require(msg.value >= _price, "You need to have enough Ether");
@@ -108,49 +100,49 @@ contract SupplyChain is ConsumerRole, DistributorRole, FarmerRole, RetailerRole 
 
   // Define a modifier that checks if an item.state of a upc is Harvested
   modifier harvested(uint _upc) {
-    require(items[_upc].itemState == State.Harvested);
+    require(items[_upc].itemState == State.Harvested, "state is not Harvested");
     _;
   }
 
   // Define a modifier that checks if an item.state of a upc is Processed
   modifier processed(uint _upc) {
-    require(items[_upc].itemState == State.Processed);
+    require(items[_upc].itemState == State.Processed, "state is not Processed");
     _;
   }
   
   // Define a modifier that checks if an item.state of a upc is Packed
   modifier packed(uint _upc) {
-    require(items[_upc].itemState == State.Packed);
+    require(items[_upc].itemState == State.Packed, "state is not Packed");
     _;
   }
 
   // Define a modifier that checks if an item.state of a upc is ForSale
   modifier forSale(uint _upc) {
-    require(items[_upc].itemState == State.ForSale);
+    require(items[_upc].itemState == State.ForSale, "state is not ForSale");
     _;
   }
 
   // Define a modifier that checks if an item.state of a upc is Sold
   modifier sold(uint _upc) {
-    require(items[_upc].itemState == State.Sold);
+    require(items[_upc].itemState == State.Sold, "state is not Sold");
     _;
   }
   
   // Define a modifier that checks if an item.state of a upc is Shipped
   modifier shipped(uint _upc) {
-    require(items[_upc].itemState == State.Shipped);
+    require(items[_upc].itemState == State.Shipped, "state is not Shipped");
     _;
   }
 
   // Define a modifier that checks if an item.state of a upc is Received
   modifier received(uint _upc) {
-    require(items[_upc].itemState == State.Received);
+    require(items[_upc].itemState == State.Received, "state is not Received");
     _;
   }
 
   // Define a modifier that checks if an item.state of a upc is Purchased
   modifier purchased(uint _upc) {
-    require(items[_upc].itemState == State.Purchased);
+    require(items[_upc].itemState == State.Purchased, "state is not Purchased");
     _;
   }
 
@@ -158,13 +150,11 @@ contract SupplyChain is ConsumerRole, DistributorRole, FarmerRole, RetailerRole 
   // and set 'sku' to 1
   // and set 'upc' to 1
   constructor() payable {
-    //FIXME set in ownable as origAddress
+    // FIXME set in ownable as origAddress
     // owner = msg.sender;
     sku = 1;
     upc = 1;
   }
-
-
 
   // Define a function 'harvestItem' that allows a farmer to mark an item 'Harvested'
   function harvestItem(
@@ -184,7 +174,7 @@ contract SupplyChain is ConsumerRole, DistributorRole, FarmerRole, RetailerRole 
     items[_upc] = Item({
     sku: sku,
     upc: _upc,
-    ownerID: _originFarmerID, // ?msg.sender
+    ownerID: msg.sender, //_originFarmerID, // ?msg.sender
     originFarmerID: _originFarmerID,
     originFarmName: _originFarmName,
     originFarmInformation: _originFarmInformation,
@@ -207,7 +197,7 @@ contract SupplyChain is ConsumerRole, DistributorRole, FarmerRole, RetailerRole 
   // Define a function 'processItem' that allows a farmer to mark an item 'Processed'
   function processItem(uint _upc) public
     // only farmers can do
-  onlyFarmer
+    onlyFarmer
     // Call modifier to check if upc has passed previous supply chain stage
     harvested(_upc)
     // Call modifier to verify caller of this function

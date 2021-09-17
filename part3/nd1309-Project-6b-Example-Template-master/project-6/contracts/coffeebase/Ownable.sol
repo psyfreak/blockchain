@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "../coffeebase/SupplyChain.sol";
+import "./Mortal.sol";
 
 // FIXME use open zeppelin ownable implementation instead
 //import "../coffeebase/SupplyChain.sol";
 
 /// Provides basic authorization control
-contract Ownable is SupplyChain {
+contract Ownable {
     address private origOwner;
 
     // Define an Event
@@ -41,20 +41,6 @@ contract Ownable is SupplyChain {
         emit TransferOwnership(origOwner, address(0));
     }
 
-    // FIXME moved from supplychain.sol
-    // Define a function 'kill' if required
-    function kill() public onlyOwner {
-        /*
-        // why not owner check
-        if (msg.sender == owner) {
-          address payable addr = payable(owner);
-          selfdestruct(addr);
-        }
-        */
-        address payable addr = payable(origOwner);
-        selfdestruct(addr);
-    }
-
     /// Define a public function to transfer ownership
     function transferOwnership(address newOwner) public onlyOwner {
         _transferOwnership(newOwner);
@@ -66,5 +52,4 @@ contract Ownable is SupplyChain {
         origOwner = newOwner;
         emit TransferOwnership(origOwner, newOwner);
     }
-
 }

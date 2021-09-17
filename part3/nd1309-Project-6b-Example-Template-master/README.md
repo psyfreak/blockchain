@@ -1,115 +1,26 @@
-# Supply chain & data auditing
+# Supply Chain Project: Magic Mushroom
 
-This repository containts an Ethereum DApp that demonstrates a Supply Chain flow between a Seller and Buyer. The user story is similar to any commonly used supply chain process. A Seller can add items to the inventory system stored in the blockchain. A Buyer can purchase such items from the inventory system. Additionally a Seller can mark an item as Shipped, and similarly a Buyer can mark an item as Received.
+## TODOs
+supply chain core
+ownable, mortal
+ACC files
 
-The DApp User Interface when running should look like...
+supplyChain is ownable, mortal, accessible
 
-![truffle test](images/ftc_product_overview.png)
+## Description
 
-![truffle test](images/ftc_farm_details.png)
+## Design & UML
 
-![truffle test](images/ftc_product_details.png)
-
-![truffle test](images/ftc_transaction_history.png)
-
-
-## Getting Started
-
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
-
-### Prerequisites
-
-Please make sure you've already installed ganache-cli, Truffle and enabled MetaMask extension in your browser.
-
-```
-Give examples (to be clarified)
-```
-
-### Installing
-
-> The starter code is written for **Solidity v0.4.24**. At the time of writing, the current Truffle v5 comes with Solidity v0.5 that requires function *mutability* and *visibility* to be specified (please refer to Solidity [documentation](https://docs.soliditylang.org/en/v0.5.0/050-breaking-changes.html) for more details). To use this starter code, please run `npm i -g truffle@4.1.14` to install Truffle v4 with Solidity v0.4.24. 
-
-A step by step series of examples that tell you have to get a development env running
-
-Clone this repository:
-
-```
-git clone https://github.com/udacity/nd1309/tree/master/course-5/project-6
-```
-
-Change directory to ```project-6``` folder and install all requisite npm packages (as listed in ```package.json```):
-
-```
-cd project-6
-npm install
-```
-
-Launch Ganache:
-
-```
-ganache-cli -m "spirit supply whale amount human item harsh scare congress discover talent hamster"
-```
-
-Your terminal should look something like this:
-
-![truffle test](images/ganache-cli.png)
-
-In a separate terminal window, Compile smart contracts:
-
-```
-truffle compile
-```
-
-Your terminal should look something like this:
-
-![truffle test](images/truffle_compile.png)
-
-This will create the smart contract artifacts in folder ```build\contracts```.
-
-Migrate smart contracts to the locally running blockchain, ganache-cli:
-
-```
-truffle migrate
-```
-
-Your terminal should look something like this:
-
-![truffle test](images/truffle_migrate.png)
-
-Test smart contracts:
-
-```
-truffle test
-```
-
-All 10 tests should pass.
-
-![truffle test](images/truffle_test.png)
-
-In a separate terminal window, launch the DApp:
-
-```
-npm run dev
-```
-
-## Built With
-
-* [Ethereum](https://www.ethereum.org/) - Ethereum is a decentralized platform that runs smart contracts
-* [IPFS](https://ipfs.io/) - IPFS is the Distributed Web | A peer-to-peer hypermedia protocol
-to make the web faster, safer, and more open.
-* [Truffle Framework](http://truffleframework.com/) - Truffle is the most popular development framework for Ethereum with a mission to make your life a whole lot easier.
+## 
 
 
-## Authors
-
-See also the list of [contributors](https://github.com/your/project/contributors.md) who participated in this project.
-
-## Acknowledgments
-
-* Solidity
-* Ganache-cli
-* Truffle
-* IPFS
+## Additional remarks:
+- Roles: Only oneself can remove a role, only so. with a specific role can add the same role to a new abitrary address.
+- I am still unhappy about the old code
+- Descriptions of projects are soso for example in requirement 1 you mentioned part A. I have no clue what part A means.
+- State diagram vs UML State Diagram => I really like the diagram style, though  it is not UML standard
+- Architecture vs. Code => What we actually do is reverseEngineering the diagram, which is nice, but not real planning.
+- Contract inheritance => Core => Base => AccessControl.
 
 
 ## Help due to lack of documentation
@@ -119,3 +30,11 @@ See also the list of [contributors](https://github.com/your/project/contributors
 - https://www.youtube.com/watch?v=Tnyrp_W5wdM&ab_channel=EatTheBlocks
 - Rich spec for eth smart contract verification https://arxiv.org/pdf/2104.10274.pdf
 - Diagrams https://knowledge.udacity.com/questions/605356
+
+- https://consensys.net/blog/developers/solidity-best-practices-for-smart-contract-security/
+
+- https://www.linkedin.com/pulse/ethereum-solidity-smart-contract-design-patterns-wael-yousfi/
+- https://fravoll.github.io/solidity-patterns/
+
+## Additional tec
+- Test for events in truffle https://gist.github.com/sogoiii/3ff1bdcd0811dfa7ac99ee6cca53e2c9
