@@ -106,7 +106,6 @@ contract SupplyChain is ConsumerRole, DistributorRole, FarmerRole, RetailerRole 
     items[_upc].ownerID = msg.sender;
   }
 
-
   // Define a modifier that checks if an item.state of a upc is Harvested
   modifier harvested(uint _upc) {
     require(items[_upc].itemState == State.Harvested);
@@ -177,6 +176,7 @@ contract SupplyChain is ConsumerRole, DistributorRole, FarmerRole, RetailerRole 
     string memory _originFarmLongitude,
     string  memory _productNotes
   ) public
+  onlyFarmer
   {
     // Add the new item as part of Harvest
     //address currentOwner = msg.sender; msg sender not used
@@ -184,13 +184,13 @@ contract SupplyChain is ConsumerRole, DistributorRole, FarmerRole, RetailerRole 
     items[_upc] = Item({
     sku: sku,
     upc: _upc,
-    ownerId: _originFarmerID, // ?msg.sender
+    ownerID: _originFarmerID, // ?msg.sender
     originFarmerID: _originFarmerID,
     originFarmName: _originFarmName,
     originFarmInformation: _originFarmInformation,
     originFarmLatitude: _originFarmLatitude,
     originFarmLongitude: _originFarmLongitude,
-    productID: abi.encodePacked(_sku,_upc), // concatenate string
+    productID: sku*1000 + _upc, // build number sku = 1 and _upc = 2 => 1002
     productNotes: _productNotes,
     productPrice: 0, // set to zero defined in sellItem called by farmer
     itemState: defaultState,
@@ -205,11 +205,13 @@ contract SupplyChain is ConsumerRole, DistributorRole, FarmerRole, RetailerRole 
   }
 
   // Define a function 'processItem' that allows a farmer to mark an item 'Processed'
-  function processItem(uint _upc) public 
-  // Call modifier to check if upc has passed previous supply chain stage
-  harvested(_upc)
-  // Call modifier to verify caller of this function
-  verifyCaller(items[_upc].originFarmerID)
+  function processItem(uint _upc) public
+    // only farmers can do
+  onlyFarmer
+    // Call modifier to check if upc has passed previous supply chain stage
+    harvested(_upc)
+    // Call modifier to verify caller of this function
+    verifyCaller(items[_upc].originFarmerID)
   {
     // Update the appropriate fields
     items[_upc].itemState = State.Processed;
@@ -218,7 +220,9 @@ contract SupplyChain is ConsumerRole, DistributorRole, FarmerRole, RetailerRole 
   }
 
   // Define a function 'packItem' that allows a farmer to mark an item 'Packed'
-  function packItem(uint _upc) public 
+  function packItem(uint _upc) public
+  // only farmers can do
+  onlyFarmer
   // Call modifier to check if upc has passed previous supply chain stage
   processed(_upc)
   // Call modifier to verify caller of this function
@@ -231,7 +235,9 @@ contract SupplyChain is ConsumerRole, DistributorRole, FarmerRole, RetailerRole 
   }
 
   // Define a function 'sellItem' that allows a farmer to mark an item 'ForSale'
-  function sellItem(uint _upc, uint _price) public 
+  function sellItem(uint _upc, uint _price) public
+  // only farmers can do
+  onlyFarmer
   // Call modifier to check if upc has passed previous supply chain stage
   packed(_upc)
   // Call modifier to verify caller of this function
@@ -248,6 +254,7 @@ contract SupplyChain is ConsumerRole, DistributorRole, FarmerRole, RetailerRole 
   // Use the above defined modifiers to check if the item is available for sale, if the buyer has paid enough, 
   // and any excess ether sent is refunded back to the buyer
   function buyItem(uint _upc) public payable 
+    onlyDistributor
     // Call modifier to check if upc has passed previous supply chain stage
     forSale(_upc)
     // Call modifier to check if buyer has paid enough
@@ -272,7 +279,8 @@ contract SupplyChain is ConsumerRole, DistributorRole, FarmerRole, RetailerRole 
 
   // Define a function 'shipItem' that allows the distributor to mark an item 'Shipped'
   // Use the above modifiers to check if the item is sold
-  function shipItem(uint _upc) public 
+  function shipItem(uint _upc) public
+    onlyDistributor
     // Call modifier to check if upc has passed previous supply chain stage
     sold(_upc)
     // Call modifier to verify caller of this function
@@ -336,7 +344,7 @@ contract SupplyChain is ConsumerRole, DistributorRole, FarmerRole, RetailerRole 
     // Assign values to the 8 parameters
     itemSKU = items[_upc].sku;
     itemUPC = items[_upc].upc;
-    ownerID = items[_upc].productID;
+    ownerID = items[_upc].ownerID;
     originFarmerID = items[_upc].originFarmerID;
     originFarmName = items[_upc].originFarmName;
     originFarmInformation = items[_upc].originFarmInformation;
@@ -375,7 +383,7 @@ contract SupplyChain is ConsumerRole, DistributorRole, FarmerRole, RetailerRole 
     productID = items[_upc].productID;
     productNotes = items[_upc].productNotes;
     productPrice = items[_upc].productPrice;
-    itemState = items[_upc].itemState; //FIXME potential provide function which returns string
+    itemState = uint(items[_upc].itemState); //FIXME potential provide function which returns string
     distributorID = items[_upc].distributorID;
     retailerID = items[_upc].retailerID;
     consumerID = items[_upc].consumerID;
@@ -403,4 +411,7 @@ contract SupplyChain is ConsumerRole, DistributorRole, FarmerRole, RetailerRole 
   {
     itemsHistory[_upc].push(_txStr);
   }
+
+  //TODO upload
+  //TODO read
 }

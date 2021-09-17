@@ -37,22 +37,9 @@ contract Ownable is SupplyChain {
 
     /// Define a function to renounce ownerhip
     function renounceOwnership() public onlyOwner {
-        emit TransferOwnership(origOwner, address(0));
         origOwner = address(0);
+        emit TransferOwnership(origOwner, address(0));
     }
-
-    /// Define a public function to transfer ownership
-    function transferOwnership(address newOwner) public onlyOwner {
-        _transferOwnership(newOwner);
-    }
-
-    /// Define an internal function to transfer ownership
-    function _transferOwnership(address newOwner) internal {
-        require(newOwner != address(0));
-        emit TransferOwnership(origOwner, newOwner);
-        origOwner = newOwner;
-    }
-
 
     // FIXME moved from supplychain.sol
     // Define a function 'kill' if required
@@ -67,4 +54,17 @@ contract Ownable is SupplyChain {
         address payable addr = payable(origOwner);
         selfdestruct(addr);
     }
+
+    /// Define a public function to transfer ownership
+    function transferOwnership(address newOwner) public onlyOwner {
+        _transferOwnership(newOwner);
+    }
+
+    /// Define an internal function to transfer ownership
+    function _transferOwnership(address newOwner) internal {
+        require(newOwner != address(0));
+        origOwner = newOwner;
+        emit TransferOwnership(origOwner, newOwner);
+    }
+
 }
