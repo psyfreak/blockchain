@@ -88,6 +88,7 @@ contract SupplyChain is Ownable, Mortal, Accessible {
     _;
     uint _price = items[_upc].productPrice;
     uint amountToReturn = msg.value - _price;
+    // Feedback Udacity: You may want to return the change to msg.sender instead since the Distributor role can also buy.
     address payable buyer = payable(items[_upc].consumerID);
     buyer.transfer(amountToReturn);
   }

@@ -9,6 +9,10 @@ Transaction ID: **0xebe574e1f0a9a8e06702684f4b093b8a0d0f227678527f2ccebf3142fc7a
 - UI has not been changed but all fixes so that the application properly runs.
   It was unclear due to Rubric (https://review.udacity.com/#!/rubrics/1710/view) what to do.
   Full process from harvest to purchase ran successful. 
+  
+  IPFS was not used. I see that you also wanted to implement this and you can look here for a baseline implementation. It uses the ipfs-api package which is now renamed to ipfs-http-client to interact with the dapp.
+  https://github.com/Dev-rick/Simple-Supply-Chain-Udacity
+  https://www.npmjs.com/package/ipfs-http-client
 
 ## Get Started
 
