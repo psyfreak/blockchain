@@ -1,0 +1,44 @@
+POST http://192.168.178.40/api/v2/clients
+Content-Type: application/json
+
+{ "client": "<client identifier>" }
+
+###
+GET http://192.168.178.37/api/v2/
+Accept: application/json
+
+###
+
+GET 192.168.178.37/api/v2/uiconfig
+Accept: application/json
+
+###
+
+
+GET http://192.168.178.40/api/uiconfig/
+Accept: application/json
+
+###
+
+GET http://192.168.178.40/api/v2/values/jlkj
+Content-Type: application/json
+Accept: application/json
+
+###
+
+GET 192.168.178.40/api/v2/uiconfig?token=wlkTNYIsYLJLsrw68Z3goYdQf6uiO4jD
+Content-Type: application/json
+Accept: application/json
+
+###
+
+GET https://192.168.178.37/api/v2 HTTP/1.1
+Accept: application/json,text/html
+
+###
+
+GET /api/
+Host: 192.168.178.35
+Accept: application/json,text/html
+
+

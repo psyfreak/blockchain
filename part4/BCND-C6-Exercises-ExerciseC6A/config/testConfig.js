@@ -1,6 +1,7 @@
 
 var ExerciseC6A = artifacts.require("ExerciseC6A");
 
+// set config whereas the owner will be accounts[0]
 var Config = async function(accounts) {
     
     // These test addresses are useful when you need to add

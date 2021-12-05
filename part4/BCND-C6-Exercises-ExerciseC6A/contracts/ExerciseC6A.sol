@@ -1,11 +1,12 @@
-pragma solidity ^0.4.25;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
 
 contract ExerciseC6A {
 
     /********************************************************************************************/
     /*                                       DATA VARIABLES                                     */
     /********************************************************************************************/
-
+    bool public isOperational; // = true instead of public you can set it private and add getter
 
     struct UserProfile {
         bool isRegistered;
@@ -29,10 +30,10 @@ contract ExerciseC6A {
     */
     constructor
                                 (
-                                ) 
-                                public 
+                                )
     {
         contractOwner = msg.sender;
+        isOperational = true;
     }
 
     /********************************************************************************************/
@@ -48,6 +49,19 @@ contract ExerciseC6A {
     modifier requireContractOwner()
     {
         require(msg.sender == contractOwner, "Caller is not contract owner");
+        _;
+    }
+
+
+    modifier requireAdmin()
+    {
+        require(userProfiles[msg.sender].isAdmin, "Caller is not an admin");
+        _;
+    }
+
+    modifier requireIsOperational()
+    {
+        require(isOperational, "Contract is paused");
         _;
     }
 
@@ -76,6 +90,17 @@ contract ExerciseC6A {
     /*                                     SMART CONTRACT FUNCTIONS                             */
     /********************************************************************************************/
 
+    function setOperational
+    (
+        bool enabled
+    )
+    external
+    requireContractOwner
+    {
+        isOperational = enabled;
+    }
+
+
     function registerUser
                                 (
                                     address account,
@@ -83,6 +108,7 @@ contract ExerciseC6A {
                                 )
                                 external
                                 requireContractOwner
+                                requireIsOperational
     {
         require(!userProfiles[account].isRegistered, "User is already registered.");
 

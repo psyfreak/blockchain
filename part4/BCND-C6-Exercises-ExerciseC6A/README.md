@@ -44,3 +44,8 @@ This code was created with the following versions of tools:
 * Ensure you have at least the versions of the tools specified above
 * Delete node_modules folder and run "npm install" to refresh dependencies
 * If you get compiler errors, change the "pragma" line in all .sol files to match your version
+
+
+# Issues
+- truffle command does nothing / no output => start ganache
+- solc compiler not equal - set compile version in truffle-config.js + check if package.json defines old hd wallet, local/old truffle package 
