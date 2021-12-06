@@ -106,6 +106,7 @@ contract ExerciseC6A {
 
         // check if sender has already voted if not add to votingMapping
         bool isDuplicate = false;
+        // better use a mapping e.g. you might have an lockout scenario for bigger arrays
         for(uint c=0; c<multiCalls.length; c++) {
             if (multiCalls[c] == account) {
                 isDuplicate = true;
@@ -145,6 +146,7 @@ contract ExerciseC6A {
 
         // check if voting completed
         if (multiCalls.length >= mMultiPartyConsensus) {
+            // voting complete set mode and reset votingArray
             isOperational = mode;
             multiCalls = new address[](0);
         }

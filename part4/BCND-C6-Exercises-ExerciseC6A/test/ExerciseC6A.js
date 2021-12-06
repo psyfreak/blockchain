@@ -3,7 +3,13 @@ var Test = require('../config/testConfig.js');
 
 async function foo() {throw new Error("Foo");}
 
+// samples for exceptions: http://trufflesuite.com/docs/truffle/testing/writing-tests-in-solidity
+//ify one would not to redeploy the contract (faster): https://platon-truffle.readthedocs.io/en/v0.1.0/testing/writing-tests-in-javascript.html
 
+// TODO
+// use multiparty consensus as function modifier
+// percentage for airlines 33% of all airlines can vote
+// voting is only allowed for a specific duration
 
 contract('ExerciseC6A', async (accounts) => {
 
@@ -87,7 +93,7 @@ contract('ExerciseC6A', async (accounts) => {
   it('function call is made when multi-party threshold is reached', async () => {
 
     // ARRANGE
-    let admin1 = accounts[1];
+    let admin1 = accounts[1]; // here we use accounts, because they exist in the test network
     let admin2 = accounts[2];
     let admin3 = accounts[3];
 
@@ -96,9 +102,10 @@ contract('ExerciseC6A', async (accounts) => {
     await config.exerciseC6A.registerUser(admin3, true, {from: config.owner});
 
     let startStatus = await config.exerciseC6A.isOperational.call();
-    let changeStatus = !startStatus;
+    let changeStatus = !startStatus; // invert status so that repeating calls work
 
     // ACT
+    // two operation and m = 2 => so it will work
     await config.exerciseC6A.setOperational(changeStatus, {from: admin1});
     await config.exerciseC6A.setOperational(changeStatus, {from: admin2});
 
