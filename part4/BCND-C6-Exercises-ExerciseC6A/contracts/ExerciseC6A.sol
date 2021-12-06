@@ -8,6 +8,11 @@ contract ExerciseC6A {
     /********************************************************************************************/
     bool public isOperational; // = true instead of public you can set it private and add getter
 
+    uint private nMultiPartyConsensus = 5; // max amount of admins
+
+    uint private constant mMultiPartyConsensus = 2;// min. amount of
+    address[] multiCalls = new address[](0);
+
     struct UserProfile {
         bool isRegistered;
         bool isAdmin;
@@ -16,7 +21,7 @@ contract ExerciseC6A {
     address private contractOwner;                  // Account used to deploy contract
     mapping(address => UserProfile) userProfiles;   // Mapping for storing user profiles
 
-
+    // we could define m available admin in a mapping, which is defined at deployment time or use register version
 
     /********************************************************************************************/
     /*                                       EVENT DEFINITIONS                                  */
@@ -86,20 +91,64 @@ contract ExerciseC6A {
         return userProfiles[account].isRegistered;
     }
 
+    /**
+     * @dev vote
+     *
+    */
+     function hasAlreadyVoted
+    (
+        address account
+    )
+     private
+     returns(bool)
+    {
+        require(account != address(0), "'account' must be a valid address.");
+
+        // check if sender has already voted if not add to votingMapping
+        bool isDuplicate = false;
+        for(uint c=0; c<multiCalls.length; c++) {
+            if (multiCalls[c] == account) {
+                isDuplicate = true;
+                break;
+            }
+        }
+        require(!isDuplicate, "Caller has already called this function.");
+        multiCalls.push(account);
+        return true;
+    }
+
     /********************************************************************************************/
     /*                                     SMART CONTRACT FUNCTIONS                             */
     /********************************************************************************************/
 
-    function setOperational
+    function setOperationalByOwner
     (
-        bool enabled
+        bool mode
     )
     external
     requireContractOwner
     {
-        isOperational = enabled;
+        isOperational = mode;
     }
 
+    function setOperational
+    (
+        bool mode
+    )
+    external
+    //requireContractOwner //prev. version without multi-party consensus
+    requireAdmin
+    {
+        require(mode != isOperational, "New mode must be different from existing mode");
+
+        hasAlreadyVoted(msg.sender);
+
+        // check if voting completed
+        if (multiCalls.length >= mMultiPartyConsensus) {
+            isOperational = mode;
+            multiCalls = new address[](0);
+        }
+    }
 
     function registerUser
                                 (

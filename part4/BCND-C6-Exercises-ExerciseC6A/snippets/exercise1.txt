@@ -1,3 +1,5 @@
+    // addings for Lesson 2.2. Pausing a samrt contract
+
     bool private operational = true;                                    // Blocks all state changes throughout the contract if false
 
 
