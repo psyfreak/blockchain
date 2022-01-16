@@ -1,3 +1,18 @@
+# Exerice C
+1. Create application contract 
+    - add file ExerciceseC6CApp.sol by using code in snipptes/C/ExerciseC6CApp.txt
+2. Move application logic
+
+Actually AppContract use in its ctor the address of the data contract, thus the data contract must be deployed before the app contract.
+You can do this either in the ctor or delay it and set the data contract address in another function etc.
+The ctor is not deployed, but the state changes done in the ctor.
+The app is unidrectional connected to the dataContract.
+
+
+## Additional references
+- https://blockgeeks.com/introduction-to-solidity-part-1/
+
+
 ## Blockchain Course 6 Exercises
 
 To install, download or clone the repo, then move to the required exercise branch with either:

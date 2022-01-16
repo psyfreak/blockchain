@@ -4,7 +4,10 @@ var Test = require('../config/testConfig.js');
 
 contract('ExerciseC6D', async (accounts) => {
 
-  const TEST_ORACLES_COUNT = 20;
+  // use the addresse in ganache if you have only 10 accouts, then everything above 10 gives an error...
+  // you can increase the number either in truffle-config.js provider settings or you add further account in ganache...
+  const TEST_ORACLES_COUNT = 8;
+
   var config;
   before('setup contract', async () => {
     config = await Test.Config(accounts);
@@ -32,8 +35,11 @@ contract('ExerciseC6D', async (accounts) => {
     let fee = await config.exerciseC6D.REGISTRATION_FEE.call();
 
     // ACT
-    for(let a=1; a<TEST_ORACLES_COUNT; a++) {      
+    for(let a=0; a<TEST_ORACLES_COUNT; a++) {
+      console.log(`Oracle address: ${accounts[a]} ${fee}`);
       await config.exerciseC6D.registerOracle({ from: accounts[a], value: fee });
+      let result = await config.exerciseC6D.getOracle.call(accounts[a]);
+      console.log(`Oracle registered: ${result[0]}, ${result[1]}, ${result[2]}`);
     }
   });
 
@@ -52,14 +58,16 @@ contract('ExerciseC6D', async (accounts) => {
     // loop through all the accounts and for each account, all its Indexes (indices?)
     // and submit a response. The contract will reject a submission if it was
     // not requested so while sub-optimal, it's a good test of that feature
-    for(let a=1; a<TEST_ORACLES_COUNT; a++) {
+    for(let a=0; a<TEST_ORACLES_COUNT; a++) {
 
       // Get oracle information
       // For a real contract, we would not want to have this capability
       // so oracles can remain secret (at least to the extent one doesn't look
       // in the blockchain data)
       let oracleIndexes = await config.exerciseC6D.getOracle(accounts[a]);
-      for(let idx=0;idx<3;idx++) {
+      // every oracle is assigned to 3 random indices
+      const ASSIGNED_ORACLES_INDICES = 3;
+      for(let idx=0;idx<ASSIGNED_ORACLES_INDICES;idx++) {
 
         try {
           // Submit a response...it will only be accepted if there is an Index match

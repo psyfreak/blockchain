@@ -1,3 +1,13 @@
+# Issues
+in test case const TEST_ORACLES_COUNT = 8; wa set to 20, whereas there were only 10 accounts.
+You can add user this in truffle-config, or in ganache.
+
+- indexes to create and iterate over oracles starts at 1 instead of 0 
+- The indexed are not equal distributed meaning: One index cannot be there at all or only one time for all oracles,
+so when you min responses are set o 3 and an index is hit with only one oracle you cannot get a verified result.
+
+
+
 ## Blockchain Course 6 Exercises
 
 To install, download or clone the repo, then move to the required exercise branch with either:

@@ -10,24 +10,24 @@ import "../../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol";
 contract ExerciseC6CApp {
     using SafeMath for uint256; // Allow SafeMath functions to be called for all uint256 types (similar to "prototype" in Javascript)
 
+    ExerciseC6C exerciseC6C; // reference to data contract
 
     address private contractOwner;              // Account used to deploy contract
-    ExerciseC6C exerciseC6C;
 
     modifier requireContractOwner()
     {
         require(msg.sender == contractOwner, "Caller is not contract owner");
         _;
     }
-    
+
     constructor
                                 (
-                                    address dataContract
+                                address dataContract // exercise 3
                                 ) 
                                 public 
     {
         contractOwner = msg.sender;
-        exerciseC6C = ExerciseC6C(dataContract);
+        exerciseC6C = ExerciseC6C(dataContract); // exercise 3
     }
 
 
@@ -36,7 +36,8 @@ contract ExerciseC6CApp {
                                 uint256 sales
                             )
                             internal
-                            pure
+                            view
+                            requireContractOwner
                             returns(uint256)
     {
         if (sales < 100) {
@@ -51,41 +52,38 @@ contract ExerciseC6CApp {
     }
 
     function addSale
-                                (
-                                    string id,
-                                    uint256 amount
-                                )
-                                external
+                    (
+                        string id,
+                        uint256 amount
+                    )
+                    external
+                    requireContractOwner
     {
+        // before it was without reference
         exerciseC6C.updateEmployee(
-                        id,
-                        amount,
-                        calculateBonus(amount)
+            id,
+            amount,
+            calculateBonus(amount)
         );
     }
 
+    // stub for refactoring before externalize function in EcerciseC6C.sol
+    /*
+    function updateEmployee
+    (
+        string id,
+        uint256 sales,
+        uint256 bonus
+
+    )
+    internal
+    {}
+    */
 
 }
 
-// in solidity 0.4.25
-// These abstract contracts are only provided to make the
-// interface known to the compiler. Note the function
-// without body. If a contract does not implement all
-// functions it can only be used as an interface.
-
+// declaration / add interface
 contract ExerciseC6C {
     function updateEmployee(string id, uint256 sales, uint256 bonus) external;
 }
-
-/** in 0.8.10 **/
-// These abstract contracts are only provided to make the
-// interface known to the compiler. Note the function
-// without body. If a contract does not implement all
-// functions it can only be used as an interface.
-/*
-abstract contract Config {
-function lookup(uint id) public virtual returns (address adr);
-}
-*/
-
 

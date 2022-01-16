@@ -4,10 +4,10 @@ pragma solidity ^0.4.25;
 // OpenZeppelin's SafeMath library, when used correctly, protects agains such bugs
 // More info: https://www.nccgroup.trust/us/about-us/newsroom-and-events/blog/2018/november/smart-contract-insecurity-bad-arithmetic/
 
-import "../../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 
-contract ExerciseC6C {
+contract ExerciseC6CSave {
     using SafeMath for uint256; // Allow SafeMath functions to be called for all uint256 types (similar to "prototype" in Javascript)
 
     /********************************************************************************************/
@@ -25,8 +25,6 @@ contract ExerciseC6C {
 
     address private contractOwner;              // Account used to deploy contract
     mapping(string => Profile) employees;      // Mapping for storing employees
-
-    mapping(address => uint256) private authorizedContracts;     // Mapping for storing allowed originating contracts
 
     /********************************************************************************************/
     /*                                       EVENT DEFINITIONS                                  */
@@ -62,37 +60,9 @@ contract ExerciseC6C {
         _;
     }
 
-
-    modifier requireIsCallerAuthorized()
-    {
-        require(authorizedContracts[msg.sender] == 1, "Caller is not contract owner");
-        _;
-    }
-
-
     /********************************************************************************************/
     /*                                       UTILITY FUNCTIONS                                  */
     /********************************************************************************************/
-
-    function authorizeContract
-                                (
-                                    address contractAddress
-                                )
-                                external
-                                requireContractOwner
-    {
-        authorizedContracts[contractAddress] = 1;
-    }
-
-    function deauthorizeContract
-                                (
-                                    address contractAddress
-                                )
-                                external
-                                requireContractOwner
-    {
-        delete authorizedContracts[contractAddress];
-    }
 
    /**
     * @dev Check if an employee is registered
@@ -154,11 +124,8 @@ contract ExerciseC6C {
                                     uint256 bonus
 
                                 )
-                                external // before internal but it is accessed in ExerciseC6CApp.sol
-                                //requireContractOwner in step 3 (TODO but not clear why....)
-                                // before it was the one who deployed the app contract, but the msg.sender of app and data contract might defer.this
-                                // i.e. the AppContract calls this function, then msg.sender is the contract address or the address that deployed the contract (check for contract msg.sender != tx.origin)
-                                // tx.origin = will be the account that initiated the chain of contract calls.
+                                internal
+                                requireContractOwner
     {
         require(employees[id].isRegistered, "Employee is not registered.");
 
@@ -167,9 +134,40 @@ contract ExerciseC6C {
 
     }
 
+    function calculateBonus
+                            (
+                                uint256 sales
+                            )
+                            internal
+                            view
+                            requireContractOwner
+                            returns(uint256)
+    {
+        if (sales < 100) {
+            return sales.mul(5).div(100);
+        }
+        else if (sales < 500) {
+            return sales.mul(7).div(100);
+        }
+        else {
+            return sales.mul(10).div(100);
+        }
+    }
 
-
-
+    function addSale
+                                (
+                                    string id,
+                                    uint256 amount
+                                )
+                                external
+                                requireContractOwner
+    {
+        updateEmployee(
+                        id,
+                        amount,
+                        calculateBonus(amount)
+        );
+    }
 
 
 }
