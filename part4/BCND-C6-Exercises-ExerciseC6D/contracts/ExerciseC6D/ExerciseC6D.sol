@@ -189,6 +189,7 @@ contract ExerciseC6D {
                         )
                         external
     {
+        // check if the oracles has assigned the given index
         require((oracles[msg.sender][0] == index) || (oracles[msg.sender][1] == index) || (oracles[msg.sender][2] == index), "Index does not match oracle request");
 
 

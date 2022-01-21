@@ -1,16 +1,20 @@
-pragma solidity ^0.4.25;
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8;
 
 // It's important to avoid vulnerabilities due to numeric overflow bugs
 // OpenZeppelin's SafeMath library, when used correctly, protects agains such bugs
 // More info: https://www.nccgroup.trust/us/about-us/newsroom-and-events/blog/2018/november/smart-contract-insecurity-bad-arithmetic/
 
-import "../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol";
-
+import "../node_modules/openzeppelin-solidity/contracts/utils/math/SafeMath.sol";
+import "./FlightSuretyData.sol";
 /************************************************** */
 /* FlightSurety Smart Contract                      */
 /************************************************** */
 contract FlightSuretyApp {
     using SafeMath for uint256; // Allow SafeMath functions to be called for all uint256 types (similar to "prototype" in Javascript)
+
+    FlightSuretyData flightSuretyData;
+    //address flightSuretyData;
 
     /********************************************************************************************/
     /*                                       DATA VARIABLES                                     */
@@ -19,7 +23,7 @@ contract FlightSuretyApp {
     // Flight status codees
     uint8 private constant STATUS_CODE_UNKNOWN = 0;
     uint8 private constant STATUS_CODE_ON_TIME = 10;
-    uint8 private constant STATUS_CODE_LATE_AIRLINE = 20;
+    uint8 private constant STATUS_CODE_LATE_AIRLINE = 20; // => payment process gets triggered
     uint8 private constant STATUS_CODE_LATE_WEATHER = 30;
     uint8 private constant STATUS_CODE_LATE_TECHNICAL = 40;
     uint8 private constant STATUS_CODE_LATE_OTHER = 50;
@@ -31,8 +35,11 @@ contract FlightSuretyApp {
         uint8 statusCode;
         uint256 updatedTimestamp;        
         address airline;
+        // might add all insurance bids here via array address + funding
     }
     mapping(bytes32 => Flight) private flights;
+
+    string public test = "jo";
 
  
     /********************************************************************************************/
@@ -49,8 +56,8 @@ contract FlightSuretyApp {
     */
     modifier requireIsOperational() 
     {
-         // Modify to call data contract's status
-        require(true, "Contract is currently not operational");  
+         // TODO Modify to call data contract's status
+        require(flightSuretyData.isOperational(), "Contract is currently not operational");
         _;  // All modifiers require an "_" which indicates where the function body will be added
     }
 
@@ -73,10 +80,16 @@ contract FlightSuretyApp {
     */
     constructor
                                 (
-                                ) 
-                                public 
+                                    FlightSuretyData dataContract
+                                    //address dataContract
+                                )
     {
         contractOwner = msg.sender;
+        // call the data contract and set this address
+        flightSuretyData = FlightSuretyData(dataContract);
+        //flightSuretyData.authorizeContract(address(this)); //not working with this address, because this contract did not deploy the datacontract.
+        //flightSuretyData.registerAirline();
+        // registerFirstAirline when contract is deployed (TODO which contract, app or data contract, might be better?)
     }
 
     /********************************************************************************************/
@@ -98,21 +111,39 @@ contract FlightSuretyApp {
   
    /**
     * @dev Add an airline to the registration queue
-    *
+    * It is only defined that below 5 airlines, existing airlines must register new ones but there is no restriction
+    * how airlines may register greater or equal 5 airlines.
+    * I defined it this way, that 5<= airlines can register themselve publically, so an airline can directly call this function.this.this
+    * Easist solution would be to just change the voting for the first registration, there is no vote needed, for <=4 only one vote needed
+    * and for >=5 we need a majority vote from existing airlines.
+    * One could implement it in this way that only available airlines can suggest other airlines either with or without voting.
+    * Airline can be registered, but does not participate in contract
+    * This is unclear => I assume, that only reigstered airlines with funding can only vote and/or
     */   
     function registerAirline
-                            (   
+                            (
+
                             )
                             external
-                            pure
                             returns(bool success, uint256 votes)
     {
-        return (success, 0);
+        // TODO only existing airlines may call this function
+        // first airline directly via address parameter
+
+        // <=4 airlines - directly via address parameter but caller must be one of the existing airlines
+
+        // > 4 airlines - can be registerd directly by the other airline
+        test = "ko";
+        // registerAirline by Address <=4 airlines or
+        // public registration via msg.sender
+        // call dataContract.registerAirline(
+        return (success, 1);
     }
 
 
    /**
     * @dev Register a future flight for insuring.
+    * Optional part - UI defines the flights.
     *
     */  
     function registerFlight
@@ -126,6 +157,10 @@ contract FlightSuretyApp {
     
    /**
     * @dev Called after oracle has updated flight status
+    * triggered, when oracle gets back.
+    * if not status != 20 - there is money, which can be allocated and not for example.
+    * If the the status != 20 meaning that the investment by insurance purchases goes into the pool again.
+    * and you can dissolve the insurance mapping for a specific flight.
     *
     */  
     function processFlightStatus
@@ -138,15 +173,25 @@ contract FlightSuretyApp {
                                 internal
                                 pure
     {
+        // add payout etc. in the case statusCode is 10
+        /*
+        oracleResponses[key].isOpen = false;
+        // CODE EXERCISE 3: Announce to the world that verified flight status information is available
+        emit FlightStatusInfo(flight, timestamp, statusId, true);
+        // Save the flight information for posterity
+        bytes32 flightKey = keccak256(abi.encodePacked(flight, timestamp));
+        flights[flightKey] = FlightStatus(true, statusId);
+        */
     }
 
 
     // Generate a request for oracles to fetch flight information
+    // Triggered by button click in UI
     function fetchFlightStatus
                         (
                             address airline,
-                            string flight,
-                            uint256 timestamp                            
+                            string calldata flight,
+                            uint256 timestamp
                         )
                         external
     {
@@ -154,10 +199,17 @@ contract FlightSuretyApp {
 
         // Generate a unique key for storing the request
         bytes32 key = keccak256(abi.encodePacked(index, airline, flight, timestamp));
+
+        /*
+        // before solidity 0.7
         oracleResponses[key] = ResponseInfo({
                                                 requester: msg.sender,
                                                 isOpen: true
                                             });
+        */
+        // new
+        oracleResponses[key].requester = msg.sender;
+        oracleResponses[key].isOpen = true;
 
         emit OracleRequest(index, airline, flight, timestamp);
     } 
@@ -169,7 +221,7 @@ contract FlightSuretyApp {
     uint8 private nonce = 0;    
 
     // Fee to be paid when registering oracle
-    uint256 public constant REGISTRATION_FEE = 1 ether;
+    uint256 public constant REGISTRATION_FEE = 1 wei; //ether;
 
     // Number of oracles that must respond for valid status
     uint256 private constant MIN_RESPONSES = 3;
@@ -181,6 +233,7 @@ contract FlightSuretyApp {
     }
 
     // Track all registered oracles
+    uint8 public oracleCount = 0;
     mapping(address => Oracle) private oracles;
 
     // Model for responses from oracles
@@ -199,6 +252,9 @@ contract FlightSuretyApp {
     // Event fired each time an oracle submits a response
     event FlightStatusInfo(address airline, string flight, uint256 timestamp, uint8 status);
 
+
+    event OracleRegistered(address oracle, uint8[3] indexes, uint8 count);
+
     event OracleReport(address airline, string flight, uint256 timestamp, uint8 status);
 
     // Event fired when flight status request is submitted
@@ -216,6 +272,7 @@ contract FlightSuretyApp {
     {
         // Require registration fee
         require(msg.value >= REGISTRATION_FEE, "Registration fee is required");
+        // check if already registered
 
         uint8[3] memory indexes = generateIndexes(msg.sender);
 
@@ -223,6 +280,8 @@ contract FlightSuretyApp {
                                         isRegistered: true,
                                         indexes: indexes
                                     });
+        oracleCount++;
+        emit OracleRegistered(msg.sender, indexes, oracleCount);
     }
 
     function getMyIndexes
@@ -230,7 +289,7 @@ contract FlightSuretyApp {
                             )
                             view
                             external
-                            returns(uint8[3])
+                            returns(uint8[3] memory)
     {
         require(oracles[msg.sender].isRegistered, "Not registered as an oracle");
 
@@ -248,7 +307,7 @@ contract FlightSuretyApp {
                         (
                             uint8 index,
                             address airline,
-                            string flight,
+                            string calldata flight,
                             uint256 timestamp,
                             uint8 statusCode
                         )
@@ -278,7 +337,7 @@ contract FlightSuretyApp {
     function getFlightKey
                         (
                             address airline,
-                            string flight,
+                            string calldata flight,
                             uint256 timestamp
                         )
                         pure
@@ -294,7 +353,7 @@ contract FlightSuretyApp {
                                 address account         
                             )
                             internal
-                            returns(uint8[3])
+                            returns(uint8[3] memory)
     {
         uint8[3] memory indexes;
         indexes[0] = getRandomIndex(account);
