@@ -9,6 +9,7 @@ module.exports = {
       host: "127.0.0.1",     // Localhost (default: none)
       port: 7545,
       network_id: '*'
+      // gas cost per default 0
     },
     devHd: {
       host: "127.0.0.1",     // Localhost (default: none)

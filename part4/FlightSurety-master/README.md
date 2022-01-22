@@ -62,7 +62,7 @@ Please update the following libraries before useage
     change in solidity 0.7 (see https://stackoverflow.com/questions/64200059/solidity-problem-creating-a-struct-containing-mappings-inside-a-mapping)
 
     see solution here: https://howtofix.io/solidity-error-construction-of-struct-that-contains-a-nested-mapping-id1411686
-  
+- Fixing this article to fix node-gyp issues https://spin.atomicobject.com/2019/03/27/node-gyp-windows/ on Windows.  
 
 ## Develop Client
 
