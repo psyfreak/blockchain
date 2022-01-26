@@ -48,4 +48,19 @@ router.get('/test2', /*async*/ (req, res) => {
   })
 })
 
+router.get('/buy', async (req, res) => {
+
+  let flight = 'ND1309', // Course number
+    timestamp = Math.floor(Date.now() / 1000);
+
+  let purchased = await flightSuretyApp.methods
+    .buy(global.accounts[0], flight, timestamp)
+    .send({from: global.accounts[0], value: 160, gas: 2800707 });
+
+
+  res.send({
+    message: JSON.stringify(purchased)
+  })
+})
+
 module.exports = router;

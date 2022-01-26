@@ -6,19 +6,18 @@ pragma solidity ^0.8;
 // More info: https://www.nccgroup.trust/us/about-us/newsroom-and-events/blog/2018/november/smart-contract-insecurity-bad-arithmetic/
 
 import "../node_modules/openzeppelin-solidity/contracts/utils/math/SafeMath.sol";
+import "../node_modules/openzeppelin-solidity/contracts/access/Ownable.sol";
+import {Util} from "./base/Util.sol";
 import "./FlightSuretyData.sol";
+
 /************************************************** */
 /* FlightSurety Smart Contract                      */
 /************************************************** */
-contract FlightSuretyApp {
+contract FlightSuretyApp is Ownable {
     using SafeMath for uint256; // Allow SafeMath functions to be called for all uint256 types (similar to "prototype" in Javascript)
 
-    FlightSuretyData flightSuretyData;
-    //address flightSuretyData;
-
-    /********************************************************************************************/
-    /*                                       DATA VARIABLES                                     */
-    /********************************************************************************************/
+    // Fee to be paid when registering oracle
+    uint256 public constant ORACLE_REGISTRATION_FEE = 10 wei; //1 ether;
 
     // Flight status codees
     uint8 private constant STATUS_CODE_UNKNOWN = 0;
@@ -28,7 +27,15 @@ contract FlightSuretyApp {
     uint8 private constant STATUS_CODE_LATE_TECHNICAL = 40;
     uint8 private constant STATUS_CODE_LATE_OTHER = 50;
 
-    address private contractOwner;          // Account used to deploy contract
+    event OnChangeBalances(uint256 balanceApp, uint256 balanceData);
+
+
+    /********************************************************************************************/
+    /*                                       DATA VARIABLES                                     */
+    /********************************************************************************************/
+
+    FlightSuretyData flightSuretyData;
+    //address flightSuretyData;
 
     struct Flight {
         bool isRegistered;
@@ -39,9 +46,9 @@ contract FlightSuretyApp {
     }
     mapping(bytes32 => Flight) private flights;
 
-    string public test = "jo";
 
- 
+
+
     /********************************************************************************************/
     /*                                       FUNCTION MODIFIERS                                 */
     /********************************************************************************************/
@@ -61,15 +68,42 @@ contract FlightSuretyApp {
         _;  // All modifiers require an "_" which indicates where the function body will be added
     }
 
-    /**
-    * @dev Modifier that requires the "ContractOwner" account to be the function caller
-    */
-    modifier requireContractOwner()
+    modifier IsFeeSufficientChangeBack (uint _amount) {
+        require(msg.value >= _amount, "Amount is not sufficient");
+        _;
+        if (msg.value > _amount) {
+            payable(msg.sender).transfer(msg.value - _amount);
+        }
+    }
+
+    modifier requireIsAirlineAuthorized(address airline)
     {
-        require(msg.sender == contractOwner, "Caller is not contract owner");
+        require(flightSuretyData.isAirlineFunded(airline), "Airline is not authorized");
         _;
     }
 
+
+/*
+    modifier ElectionAirlineRegistration (address airline) {
+        // less or equal than 4 airlines
+        uint256 threshold = flightSuretyData.VOTING_THRESHOLD;
+        // below or equal threshold
+        if(threshold >= flightSuretyData.numOfFundedAirlines) {
+            // only one vote by funded airline
+            if(flightSuretyData.isAirlineFunded(msg.sender)) {
+                // set voting
+                _;
+            }
+        }
+        mapping(ElectionTopics => mapping(address => bool[])) private elections;
+        } else {
+            // 50%
+            if(.length >= numOfFundedAirlines.div(2) )
+            // check duplicate
+
+        }
+    }
+*/
     /********************************************************************************************/
     /*                                       CONSTRUCTOR                                        */
     /********************************************************************************************/
@@ -81,14 +115,12 @@ contract FlightSuretyApp {
     constructor
                                 (
                                     FlightSuretyData dataContract
-                                    //address dataContract
                                 )
     {
-        contractOwner = msg.sender;
         // call the data contract and set this address
         flightSuretyData = FlightSuretyData(dataContract);
+        // add first airline
         //flightSuretyData.authorizeContract(address(this)); //not working with this address, because this contract did not deploy the datacontract.
-        //flightSuretyData.registerAirline();
         // registerFirstAirline when contract is deployed (TODO which contract, app or data contract, might be better?)
     }
 
@@ -104,6 +136,9 @@ contract FlightSuretyApp {
         return true;  // Modify to call data contract's status
     }
 
+
+
+
     /********************************************************************************************/
     /*                                     SMART CONTRACT FUNCTIONS                             */
     /********************************************************************************************/
@@ -111,6 +146,12 @@ contract FlightSuretyApp {
   
    /**
     * @dev Add an airline to the registration queue
+    * msg.sender is the airline to be registered
+    * any msg.sender can register / authentication if address is airline is not done here.
+    * if <=4 airlines one vote of any invested airline is sufficient
+    * if >4 airlines at least > #airlines/2 roundedUp must be voted for / so one could vote true or false or not at all
+
+
     * It is only defined that below 5 airlines, existing airlines must register new ones but there is no restriction
     * how airlines may register greater or equal 5 airlines.
     * I defined it this way, that 5<= airlines can register themselve publically, so an airline can directly call this function.this.this
@@ -119,41 +160,98 @@ contract FlightSuretyApp {
     * One could implement it in this way that only available airlines can suggest other airlines either with or without voting.
     * Airline can be registered, but does not participate in contract
     * This is unclear => I assume, that only reigstered airlines with funding can only vote and/or
+
+    * easiest version if other existing airlines just call registerAirline it counts as a voting for such airline
     */   
     function registerAirline
                             (
-
+                                address newAirline
                             )
                             external
-                            returns(bool success, uint256 votes)
+                            requireIsAirlineAuthorized(msg.sender)
+                            //TODO can only be called by authoirzedCallers
+                            //one should trigger an event ... returns(bool success, uint256 votes)
     {
-        // TODO only existing airlines may call this function
-        // first airline directly via address parameter
-
-        // <=4 airlines - directly via address parameter but caller must be one of the existing airlines
-
-        // > 4 airlines - can be registerd directly by the other airline
-        test = "ko";
-        // registerAirline by Address <=4 airlines or
-        // public registration via msg.sender
-        // call dataContract.registerAirline(
-        return (success, 1);
+        // add airline if not available
+        flightSuretyData.createAirline(newAirline);
+        if(true) {
+            // if election fine then register Airline
+            flightSuretyData.registerAirline(newAirline);
+        }
+        //return (success, 1); // draft contains this, but statechanging methods cannot have return values
     }
+     // TODO is this needed ? one could also
+    function fundAirline ( ) external {
+        flightSuretyData.fundAirline();
+    }
+
 
 
    /**
     * @dev Register a future flight for insuring.
     * Optional part - UI defines the flights.
-    *
+    * Only a fully registered airline can register a flight with a name + timestamp
+    * A flight can be only registered by a registered and funded airline.
     */  
     function registerFlight
                                 (
+                                    string calldata flight,
+                                    uint256 timestamp
                                 )
                                 external
-                                pure
+                                requireIsAirlineAuthorized(msg.sender)
+    {
+        bytes32 flightKey = Util.getFlightKey(msg.sender, flight, timestamp);
+        flightSuretyData.createFlight(flightKey);
+    }
+
+    /**
+       * @dev Buy insurance for a flight
+       * modifer check if flight is available, insuree is a passanger
+       */
+
+
+    function bookFlight
+    (
+        address airline,
+        string memory flight,
+        uint256 timestamp
+    )
+    external
+    payable
+    requireIsOperational
+    //must be greater than 0 and less < 150
     {
 
     }
+
+    function buyFlightInsurance
+    (
+        address airline,
+        string calldata flight,
+        uint256 timestamp
+    )
+    external
+    payable
+    requireIsOperational
+    //must be greater than 0 and less < 150
+    {
+
+        //flightSuretyData.escrow.deposit(tx.origin) won´t work in our case we not one account
+        bytes32 flightKey = Util.getFlightKey(airline, flight, timestamp);
+        /*
+        if(flightInsurances[flightKey].length == 0) {
+
+        }
+        */
+
+        flightSuretyData.createInsuranceForFlight(flightKey, msg.sender); //payable function vs. transfer afterwards
+        // msg.value lands here => also balance is updated for this contract
+        // we might transfer the data to address(flightSuretyData).transfer(msg.value);
+    }
+
+    // deposit function needed from to actually all payables send ether to AppContract
+
     
    /**
     * @dev Called after oracle has updated flight status
@@ -166,22 +264,26 @@ contract FlightSuretyApp {
     function processFlightStatus
                                 (
                                     address airline,
-                                    string memory flight,
+                                    string calldata flight,
                                     uint256 timestamp,
                                     uint8 statusCode
                                 )
                                 internal
-                                pure
     {
-        // add payout etc. in the case statusCode is 10
-        /*
-        oracleResponses[key].isOpen = false;
+        bytes32 flightKey = Util.getFlightKey (airline, flight, timestamp);
+
+        oracleResponses[flightKey].isOpen = false;
+
         // CODE EXERCISE 3: Announce to the world that verified flight status information is available
-        emit FlightStatusInfo(flight, timestamp, statusId, true);
+        emit FlightStatusInfo(airline, flight, timestamp, statusCode);
         // Save the flight information for posterity
-        bytes32 flightKey = keccak256(abi.encodePacked(flight, timestamp));
-        flights[flightKey] = FlightStatus(true, statusId);
-        */
+
+        //flights[flightKey] = FlightStatus(true, statusId);
+
+        // add payout etc. in the case statusCode is delay
+        if(statusCode == STATUS_CODE_LATE_AIRLINE) {
+            flightSuretyData.creditInsurees(flightKey);
+        }
     }
 
 
@@ -195,7 +297,7 @@ contract FlightSuretyApp {
                         )
                         external
     {
-        uint8 index = getRandomIndex(msg.sender);
+        uint8 index = Util.getRandomIndex10(msg.sender, 0);
 
         // Generate a unique key for storing the request
         bytes32 key = keccak256(abi.encodePacked(index, airline, flight, timestamp));
@@ -212,16 +314,33 @@ contract FlightSuretyApp {
         oracleResponses[key].isOpen = true;
 
         emit OracleRequest(index, airline, flight, timestamp);
-    } 
+    }
+
+    /**
+     *  @dev Transfers eligible payout funds to insuree
+     * This is the particular withdraw function, which is called by an insuree to get a full payout of their credit.
+     * Potentially move to app contract => withdraw function
+     *
+    */
+    function withdrawInsurance
+    (
+    )
+    external
+    requireIsOperational
+    {
+        emit OnChangeBalances(address(this).balance, address(flightSuretyData).balance);
+        //uint256 payout = flightSuretyData.payouts[msg.sender];
+        //flightSuretyData.payouts[msg.sender] = 0;
+        //payable(msg.sender).transfer(payout);
+        //emit InsuranceWithdrawn(msg.sender, payout);
+    }
 
 
 // region ORACLE MANAGEMENT
 
     // Incremented to add pseudo-randomness at various points
-    uint8 private nonce = 0;    
+    uint8 private nonce = 0;
 
-    // Fee to be paid when registering oracle
-    uint256 public constant REGISTRATION_FEE = 1 wei; //ether;
 
     // Number of oracles that must respond for valid status
     uint256 private constant MIN_RESPONSES = 3;
@@ -269,12 +388,12 @@ contract FlightSuretyApp {
                             )
                             external
                             payable
+                            IsFeeSufficientChangeBack(ORACLE_REGISTRATION_FEE)
     {
-        // Require registration fee
-        require(msg.value >= REGISTRATION_FEE, "Registration fee is required");
         // check if already registered
+        require(!oracles[msg.sender].isRegistered, "Oracle is already registered");
 
-        uint8[3] memory indexes = generateIndexes(msg.sender);
+        uint8[3] memory indexes = Util.generateIndexes(msg.sender);
 
         oracles[msg.sender] = Oracle({
                                         isRegistered: true,
@@ -332,65 +451,6 @@ contract FlightSuretyApp {
             processFlightStatus(airline, flight, timestamp, statusCode);
         }
     }
+}
 
 
-    function getFlightKey
-                        (
-                            address airline,
-                            string calldata flight,
-                            uint256 timestamp
-                        )
-                        pure
-                        internal
-                        returns(bytes32) 
-    {
-        return keccak256(abi.encodePacked(airline, flight, timestamp));
-    }
-
-    // Returns array of three non-duplicating integers from 0-9
-    function generateIndexes
-                            (                       
-                                address account         
-                            )
-                            internal
-                            returns(uint8[3] memory)
-    {
-        uint8[3] memory indexes;
-        indexes[0] = getRandomIndex(account);
-        
-        indexes[1] = indexes[0];
-        while(indexes[1] == indexes[0]) {
-            indexes[1] = getRandomIndex(account);
-        }
-
-        indexes[2] = indexes[1];
-        while((indexes[2] == indexes[0]) || (indexes[2] == indexes[1])) {
-            indexes[2] = getRandomIndex(account);
-        }
-
-        return indexes;
-    }
-
-    // Returns array of three non-duplicating integers from 0-9
-    function getRandomIndex
-                            (
-                                address account
-                            )
-                            internal
-                            returns (uint8)
-    {
-        uint8 maxValue = 10;
-
-        // Pseudo random number...the incrementing nonce adds variation
-        uint8 random = uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - nonce++), account))) % maxValue);
-
-        if (nonce > 250) {
-            nonce = 0;  // Can only fetch blockhashes for last 256 blocks so we adapt
-        }
-
-        return random;
-    }
-
-// endregion
-
-}   

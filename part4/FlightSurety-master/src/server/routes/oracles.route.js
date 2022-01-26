@@ -9,6 +9,7 @@ router.get("/register", async (req, res)=> {
   let result = [];
   console.log("jo")
   //register all oracles here
+  /*
   for(let acc of global.accounts) {
     let newOracle = await global.flightSuretyApp.methods
     .registerOracle()
@@ -16,14 +17,15 @@ router.get("/register", async (req, res)=> {
     result.push(newOracle);
   }
 
+   */
 
-  /*
-  await flightSuretyApp.methods
+
+
+  let newOracle = await flightSuretyApp.methods
     .registerOracle()
-    .send({from: global.accounts[0], value: 1, gas: 2800707 }).then(function(result){
-    console.log(result)
-  });
-  */
+    .send({from: global.accounts[0], value: 11, gas: 2800707 });
+  result.push(newOracle);
+
 
 
   //console.log("metaObj", metaObj);

@@ -19,12 +19,31 @@ var Config = async function(accounts) {
         "0x2f2899d6d35b1a48a4fbdc93a37a72f264a9fca7"
     ];
 
+    let timestamp = Math.floor(Date.now() / 1000);
+    const flights =  [
+        {
+            name: "F-001",
+            departure: timestamp
+        },
+        {
+            name: "F-002",
+            departure: timestamp
+        },
+        {
+            name: "F-003",
+            departure: timestamp
+        },
+    ];
+
 
     let owner = accounts[0];
-    let firstAirline = accounts[1];
+    let firstAirline = accounts[9]; // see deployment script atm. firstAirline acc9
 
-    let flightSuretyData = await FlightSuretyData.new();
-    let flightSuretyApp = await FlightSuretyApp.new();
+    //let flightSuretyData = await FlightSuretyData.new();
+    //let flightSuretyApp = await FlightSuretyApp.new(flightSuretyData.address, {from: owner});
+
+    let flightSuretyData = await FlightSuretyData.deployed();
+    let flightSuretyApp = await FlightSuretyApp.deployed();
 
     
     return {

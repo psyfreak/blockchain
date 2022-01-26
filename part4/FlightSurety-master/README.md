@@ -1,5 +1,6 @@
 # FlightSurety
 
+// checked https://github.com/JeromeSolis/dapp-flight-surety/blob/main/contracts/FlightSuretyApp.sol
 
 FlightSurety is a sample application project for Udacity's Blockchain course.
 https://medium.com/quillhash/how-to-write-upgradable-smart-contracts-in-solidity-d8f1b95a0e9a
@@ -12,8 +13,14 @@ https://medium.com/quillhash/how-to-write-upgradable-smart-contracts-in-solidity
    2. Status is delayed (passengers get payout - iterate over passengers)
       and add insurance * 1.5 to balance (increment existing amount)
       
-3.      
-      
+3.     
+ 
+## Remarks + Questions
+### Remarks
+* I transferred randomization and key to Util library i.e. I got rid of nonce as state var
+* All money is hold within the data contract, which is sth. I am not sure about i.e. about increasing gas costs.
+Furthermore one needs to transfer the money, when data contract gets updated. I think it might be better to hold the ether in the app contract.
+* One particular flight can be identified by airline, flight, and timestamp      
 
 
 ## Requirements
