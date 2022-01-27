@@ -14,8 +14,11 @@ contract FlightSuretyData is Ownable {
     using SafeMath for uint256;
 
     //Result is 2, all integer divison rounds DOWN to the nearest integer
-    uint256 internal constant RISK_RETURN = 2; //1.5 but solidity cannot use fractionals;
     uint256 public constant VOTING_THRESHOLD = 4; //1.5 but solidity cannot use fractionals;
+
+    // RoI is 3/2 => 1.5 => solidity cannot calculate with decimals and still rounding is applied.
+    uint256 public constant ROI_NOMINATOR = 3;
+    uint256 public constant ROI_DENOMINATOR = 2;
 
     uint256 internal constant AIRLINE_REGISTRATION_FEE = 10 wei; //10 ether;
     uint256 internal constant MAX_INSURANCE_FEE = 150 wei; //ether;
@@ -80,7 +83,7 @@ contract FlightSuretyData is Ownable {
         uint256 insurance;
     }
     // mapping for passengers flight towards insurance balance / a passenger might have multiple insurances for different flights flight 1: 1 ether, flight 2: 0.6 ether etc.
-    mapping(bytes32 => Insurance[]) private flightInsurances;// mapping of passenger towards Insurance Info (insurance balanace per flight)
+    mapping(bytes32 => Insurance[]) flightInsurances;// mapping of passenger towards Insurance Info (insurance balanace per flight)
 
     // payouts
     mapping(address => uint256) public payouts; // after oracle submission payout is aggregated 1.5 times insurance flight value;
@@ -94,7 +97,10 @@ contract FlightSuretyData is Ownable {
     event AirlineFunded(address airline, uint256 id, bool isRegistered, address registeredBy, uint256 investment, uint256 timestamp);
 
     event FlightRegistered(address airline, uint256 id, bool isRegistered, address registeredB, uint256 investment, uint256 timestamp);
-    event PassengerRegistered(address passenger, address airline, string flight, uint256 timestamp);
+    event FlightCreated(bytes32 flightKey, address origin, address airline);
+    event FlightUpdated(bytes32 flightKey, uint8 newStatus);
+
+    event PassengerRegistered(bytes32 flightKey, address origin, address passenger);
 
     event InsurancePurchased(address indexed payee, uint256 weiAmount);
     event InsuranceDeposited(address indexed payee, uint256 weiAmount);
@@ -230,13 +236,24 @@ contract FlightSuretyData is Ownable {
 
     modifier requireIsFlightExisting(bytes32 flightKey)
     {
-        require(flights[flightKey].isRegistered, "Flight is not existing, though it should .");
+        require(isFlightRegisteredByKey(flightKey), "Flight is not existing, though it should .");
         _;
     }
 
     modifier requireIsFlightNotExisting(bytes32 flightKey)
     {
-        require(!flights[flightKey].isRegistered, "Flight is existing, though it should not.");
+        require(!isFlightRegisteredByKey(flightKey), "Flight is existing, though it should not.");
+        _;
+    }
+
+    modifier requireIsPassengerOnFlight(bytes32 flightKey, address passenger)
+    {
+        require(isPassengerRegisteredByKey(flightKey, passenger), "Passenger is not on board, though it should .");
+        _;
+    }
+    modifier requireIsPassengerNotOnFlight(bytes32 flightKey, address passenger)
+    {
+        require(!isPassengerRegisteredByKey(flightKey, passenger), "Passenger is already on board, though it should not.");
         _;
     }
 
@@ -321,7 +338,7 @@ contract FlightSuretyData is Ownable {
     }
 
     function getAirlineInvestment (address airline)
-        external
+        public
         view
         returns(uint256)
     {
@@ -329,40 +346,158 @@ contract FlightSuretyData is Ownable {
     }
 
 
-
-    function isRegisteredFlight (bytes32 flight)
-        external
+    function isFlightRegisteredByKey (bytes32 flight)
+        public
         view
         returns(bool)
     {
         return (flights[flight].isRegistered);
     }
 
-    function isRegisteredPassenger (bytes32 flight, address passenger)
-        external
+    function isFlightRegistered (
+        address airline,
+        string calldata flight,
+        uint256 timestamp
+    )
+        public
+        view
+        returns(bool)
+    {
+        bytes32 flightKey = Util.getFlightKey(airline, flight, timestamp);
+        return isFlightRegisteredByKey(flightKey);
+    }
+
+    function isPassengerRegisteredByKey (bytes32 flight, address passenger)
+        public
         view
         returns(bool)
     {
         return (passengers[flight][passenger]);
     }
 
-    function isInsuredPassenger (bytes32 flight, address passenger)
-        external
+    function isPassengerRegistered (
+        address airline,
+        string calldata flight,
+        uint256 timestamp,
+        address passenger
+    )
+    public
+    view
+    returns(bool)
+    {
+        bytes32 flightKey = Util.getFlightKey(airline, flight, timestamp);
+        return isPassengerRegisteredByKey(flightKey, passenger);
+    }
+
+    event LogInsuranceIt(uint counter, address passenger, uint256 balance);
+
+    function getInsuranceByKey (bytes32 flightKey, address passenger)
+        public
         view
+        //requireIsPassengerOnFlight(flight, passenger)
+        returns(address, uint256)
+    {
+        return (
+            flightInsurances[flightKey][0].passenger,
+            flightInsurances[flightKey][0].insurance
+        );
+    }
+
+    function getInsurance (
+        address airline,
+        string calldata flight,
+        uint256 timestamp,
+        address passenger
+    )
+        public
+        view
+        returns(address, uint256)
+    {
+        bytes32 flightKey = Util.getFlightKey(airline, flight, timestamp);
+        return getInsuranceByKey(flightKey, passenger);
+    }
+
+    function isPassengerInsuredByKey (bytes32 flight, address passenger)
+        public
+        //view
+        //requireIsPassengerOnFlight(flight, passenger)
         returns(bool)
     {
         // for loop  I need the possibility to iterate over all insured passenger for a flight therefore an array
         // TODO better we could also add insurance to passenger list to have direct access and only safe the address in the passenger array
         // check first if passenger is on flight at all
-        if(passengers[flight][passenger]) {
-            for(uint i=0; i<flightInsurances[flight].length; i++) {
-                // if passenger on the list and insurance is greater than 0
-                if(flightInsurances[flight][i].insurance > 0 && (flightInsurances[flight][i].passenger == passenger)) {
-                    return true;
-                }
+
+        bool found = false;
+        Insurance[] storage insuranceOfFlight = flightInsurances[flight];
+        //flightInsurances[flightKey].push(Insurance({passenger: passenger, insurance: msg.value}));
+        // https://github.com/ethereum/solidity/issues/4115
+
+        for(uint i=0; i<insuranceOfFlight.length; i++) {
+            emit LogInsuranceIt(i, insuranceOfFlight[i].passenger,insuranceOfFlight[i].insurance);
+            // if passenger on the list and insurance is greater than 0
+            if(
+                //insuranceOfFlight[i].insurance > 0 &&
+                (insuranceOfFlight[i].passenger == passenger)
+            ) {
+                found = true;
+                break;
             }
         }
-        return false;
+        /*
+        for(uint i=0; i<flightInsurances[flight].length; i++) {
+            emit LogInsuranceIt(i, flightInsurances[flight][i].passenger, flightInsurances[flight][i].insurance);
+            // if passenger on the list and insurance is greater than 0
+            if(
+                flightInsurances[flight][i].insurance > 0 &&
+                (flightInsurances[flight][i].passenger == passenger)
+            ) {
+                found = true;
+                break;
+            }
+        }
+        */
+        return found;
+    }
+
+    function isPassengerInsured (
+        address airline,
+        string calldata flight,
+        uint256 timestamp,
+        address passenger
+    )
+    public
+    //view
+    returns(bool)
+    {
+        bytes32 flightKey = Util.getFlightKey(airline, flight, timestamp);
+        return isPassengerInsuredByKey(flightKey, passenger);
+    }
+
+    /*
+    function getInsuredPassengersForFlight (
+        address airline,
+        string calldata flight,
+        uint256 timestamp
+    )
+    public
+    view
+    returns(Insurance[] calldata)
+    {
+        bytes32 flightKey = Util.getFlightKey(airline, flight, timestamp);
+        return flightInsurances[flightKey];
+    }
+    */
+    function getAmountOfFlightInsurees (
+        address airline,
+        string calldata flight,
+        uint256 timestamp
+    )
+    public
+    view
+    returns(uint)
+    {
+        bytes32 flightKey = Util.getFlightKey(airline, flight, timestamp);
+        return flightInsurances[flightKey].length;
     }
 
     /********************************************************************************************/
@@ -478,7 +613,14 @@ contract FlightSuretyData is Ownable {
         flights[flightKey].registeredBy = tx.origin; //TODO better as parameter
         flights[flightKey].status = 0; //STATUS_CODE_UNKNOWN from app contract // TODO better modularization
         flights[flightKey].passengers = new address[](0);
+
+        //TODO add create insurances
+        //flights[flightKey].passengers = new address[](0);
+        delete flightInsurances[flightKey];// = new Insurance[](0);
+        //below is not working due to: Copying of type struct FlightSuretyData.Insurance memory[] memory to storage not yet
+        // flightInsurances[flightKey] = new Insurance[](0);
         //TODO add emit()
+        emit FlightCreated(flightKey, msg.sender, tx.origin);
     }
 
 
@@ -493,8 +635,7 @@ contract FlightSuretyData is Ownable {
     {
         //bytes32 flightKey = Util.getFlightKey(airline, flight, timestamp);
         flights[flightKey].status = newStatus; //STATUS_CODE_UNKNOWN from app contract // TODO better modularization
-
-        //TODO add emit()
+        emit FlightUpdated(flightKey, newStatus);
     }
 
     /**
@@ -509,9 +650,11 @@ contract FlightSuretyData is Ownable {
     )
         external
         requireIsOperational
+        requireIsFlightExisting(flightKey)
+        requireIsPassengerNotOnFlight(flightKey, passenger)
     {
         passengers[flightKey][passenger] = true;
-        //TODO add emit()
+        emit PassengerRegistered(flightKey, msg.sender, passenger);
     }
 
    /**
@@ -526,6 +669,8 @@ contract FlightSuretyData is Ownable {
         external
         payable
         requireIsOperational
+        requireIsFlightExisting(flightKey) //TODO move everything to app contract
+        requireIsPassengerOnFlight(flightKey, passenger)
         Cap(MAX_INSURANCE_FEE)
     {
         //flightSuretyData.escrow.deposit(tx.origin) won´t work in our case we not one account
@@ -578,7 +723,7 @@ contract FlightSuretyData is Ownable {
         */
 
         for(uint i=0; i<flightInsurances[flightKey].length; i++) {
-            uint256 newBalance = (flightInsurances[flightKey][i].insurance).mul(RISK_RETURN);
+            uint256 newBalance = Util.getRoI(flightInsurances[flightKey][i].insurance, ROI_NOMINATOR, ROI_DENOMINATOR);
             address passenger = flightInsurances[flightKey][i].passenger;
             payouts[passenger] = payouts[passenger].add(newBalance);
         }

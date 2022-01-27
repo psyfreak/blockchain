@@ -1,4 +1,6 @@
 # FlightSurety
+## TODO 
+- get rid of init script and use in ctor => change testConfig from deployed to new again.
 
 // checked https://github.com/JeromeSolis/dapp-flight-surety/blob/main/contracts/FlightSuretyApp.sol
 

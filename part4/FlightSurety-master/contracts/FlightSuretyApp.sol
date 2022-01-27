@@ -210,11 +210,10 @@ contract FlightSuretyApp is Ownable {
        * modifer check if flight is available, insuree is a passanger
        */
 
-
     function bookFlight
     (
         address airline,
-        string memory flight,
+        string calldata flight,
         uint256 timestamp
     )
     external
@@ -222,7 +221,9 @@ contract FlightSuretyApp is Ownable {
     requireIsOperational
     //must be greater than 0 and less < 150
     {
-
+        bytes32 flightKey = Util.getFlightKey(airline, flight, timestamp);
+        // check if flight is existing
+        flightSuretyData.registerPassengerForFlight(flightKey, msg.sender);
     }
 
     function buyFlightInsurance
@@ -234,6 +235,7 @@ contract FlightSuretyApp is Ownable {
     external
     payable
     requireIsOperational
+    //TODO passenger should
     //must be greater than 0 and less < 150
     {
 
@@ -247,7 +249,9 @@ contract FlightSuretyApp is Ownable {
 
         flightSuretyData.createInsuranceForFlight(flightKey, msg.sender); //payable function vs. transfer afterwards
         // msg.value lands here => also balance is updated for this contract
-        // we might transfer the data to address(flightSuretyData).transfer(msg.value);
+        // we might transfer the data to
+        payable(address(flightSuretyData)).transfer(msg.value);
+        emit OnChangeBalances(address(this).balance, address(flightSuretyData).balance);
     }
 
     // deposit function needed from to actually all payables send ether to AppContract

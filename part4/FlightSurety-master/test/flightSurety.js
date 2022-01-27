@@ -5,6 +5,9 @@ var BigNumber = require('bignumber.js');
 contract('Flight Surety Tests', async (accounts) => {
 
   var config;
+  let FLIGHT_NAME = 'ND1309', // Course number
+    FLIGHT_timestamp = Math.floor(Date.now() / 1000);
+
   before('setup contract', async () => {
     config = await Test.Config(accounts);
 
@@ -179,8 +182,6 @@ contract('Flight Surety Tests', async (accounts) => {
 
     // ARRANGE
     let airline = config.firstAirline,
-      flight = 'ND1309', // Course number
-      timestamp = Math.floor(Date.now() / 1000),
       fail = false;
     // ACT
     let isRegistered = await config.flightSuretyData.isAirlineRegistered.call(airline);
@@ -188,7 +189,7 @@ contract('Flight Surety Tests', async (accounts) => {
     console.log("airline: " + airline + " isRegistered: " + isRegistered + " isFunded" + isFunded);
 
     try {
-      await config.flightSuretyApp.registerFlight(flight, timestamp, {from: airline});
+      await config.flightSuretyApp.registerFlight(FLIGHT_NAME, FLIGHT_timestamp, {from: airline});
     }
     catch(e) {
       fail= true;
@@ -199,7 +200,7 @@ contract('Flight Surety Tests', async (accounts) => {
     // second time
     fail= false;
     try {
-      await config.flightSuretyApp.registerFlight(flight, timestamp, {from: airline});
+      await config.flightSuretyApp.registerFlight(FLIGHT_NAME, FLIGHT_timestamp, {from: airline});
     }
     catch(e) {
       fail= true;
@@ -215,7 +216,7 @@ contract('Flight Surety Tests', async (accounts) => {
     // ARRANGE
     let
       airline = accounts[1],
-      flight = 'ND1309', // Course number
+      flight = 'ND1308', // Course number
       timestamp = Math.floor(Date.now() / 1000),
       fail = false;
     // ACT
@@ -234,10 +235,100 @@ contract('Flight Surety Tests', async (accounts) => {
   });
 
   it('(passenger) register Passenger for flight', async () => {
+    let passenger = accounts[8],
+      notonBoard = accounts[6],
+      airline = config.firstAirline,
+      fail = false;
 
+    try {
+      await config.flightSuretyApp.bookFlight(airline, FLIGHT_NAME, FLIGHT_timestamp, {from: passenger});
 
+      let isRegistered = await config.flightSuretyData.isPassengerRegistered.call(airline, FLIGHT_NAME, FLIGHT_timestamp, passenger);
+      assert.equal(isRegistered, true, "Passenger is missing.");
+      let notRegistered = await config.flightSuretyData.isPassengerRegistered.call(airline, FLIGHT_NAME, FLIGHT_timestamp, notonBoard);
+      assert.equal(notRegistered, false, "Beware a psycho blind passenger .");
+    }
+    catch(e) {
+      //console.log("error registerFlight", e)
+      fail= true;
+      console.log(e)
+    }
+    assert.equal(fail, false, "Error in book flight.");
 
   });
- 
+
+  it('(passenger) purchase insurance for flight', async () => {
+    let passengerOnBoard = accounts[8],
+      airline = config.firstAirline,
+      fail = false;
+
+    try {
+
+      await config.flightSuretyApp.buyFlightInsurance(airline, FLIGHT_NAME, FLIGHT_timestamp, {from: passengerOnBoard, value: 1000});
+    }
+    catch(e) {
+      //console.log("error registerFlight", e)
+      fail= true;
+      console.log(e)
+    }
+    assert.equal(fail, false, "Error in book flight.");
+    let numOfInsurees = await config.flightSuretyData.getAmountOfFlightInsurees.call(airline, FLIGHT_NAME, FLIGHT_timestamp);
+    console.log("numOfInsurees", numOfInsurees)
+    let retInsurance = await config.flightSuretyData.getInsurance.call(airline, FLIGHT_NAME, FLIGHT_timestamp, passengerOnBoard);
+    console.log("retInsurance", retInsurance)
+
+    let isInsured = await config.flightSuretyData.isPassengerInsured.call(airline, FLIGHT_NAME, FLIGHT_timestamp, passengerOnBoard);
+    assert.equal(isInsured, true, "Passenger is not insured, but it should.");
+
+  });
+
+  it('(passenger) check for passenger without insurance purchase insurance for flight for p', async () => {
+    let passengerWithoutInsurance = accounts[7],
+      airline = config.firstAirline,
+      fail = false;
+
+    try {
+      await config.flightSuretyApp.bookFlight(airline, FLIGHT_NAME, FLIGHT_timestamp, {from: passengerWithoutInsurance});
+
+      //await config.flightSuretyApp.buyFlightInsurance(airline, FLIGHT_NAME, FLIGHT_timestamp, {from: passengerWithoutInsurance, value: 1000});
+      //let numOfInsurees = await config.flightSuretyData.getAmountOfFlightInsurees.call(airline, FLIGHT_NAME, FLIGHT_timestamp);
+      //console.log("numOfInsurees", numOfInsurees)
+
+      let notInsured = await config.flightSuretyData.isPassengerInsured.call(airline, FLIGHT_NAME, FLIGHT_timestamp, passengerWithoutInsurance);
+      assert.equal(notInsured, false, "Passenger is not on board, but is insured, but it should not.");
+    }
+    catch(e) {
+      //console.log("error registerFlight", e)
+      fail= true;
+      console.log(e)
+    }
+    assert.equal(fail, false, "Error in book flight.");
+
+  });
+
+
+
+  it('(passenger) block purchase insurance for non-passenger', async () => {
+    let notonBoard = accounts[6],
+      airline = config.firstAirline,
+      fail = false;
+    let onBoardAndNotInsured = await config.flightSuretyData.isPassengerInsured.call(airline, FLIGHT_NAME, FLIGHT_timestamp, notonBoard);
+    assert.equal(onBoardAndNotInsured, false, "Passenger is onboard and insured, but it should not.");
+
+    try {
+
+      // cannot purchase insurance because not on board, but nice gambling idea...
+      await config.flightSuretyApp.buyFlightInsurance(airline, FLIGHT_NAME, FLIGHT_timestamp, {from: notonBoard, value: 1000});
+    }
+    catch(e) {
+      //console.log("error registerFlight", e)
+      fail= true;
+      //console.log(e.reason)
+    }
+    assert.equal(fail, true, "Error in book flight.");
+
+  });
+
+
 
 });
