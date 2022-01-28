@@ -505,15 +505,16 @@ contract('Flight Surety Tests', async (accounts) => {
       fail = false;
 
     try {
-
-      await config.flightSuretyApp.buyFlightInsurance(airline, FLIGHT_NAME, FLIGHT_timestamp, {from: passengerOnBoard, value: 1000});
+      // test case for cap
+      //await config.flightSuretyApp.buyFlightInsurance(airline, FLIGHT_NAME, FLIGHT_timestamp, {from: passengerOnBoard, value: 1000});
+      await config.flightSuretyApp.buyFlightInsurance(airline, FLIGHT_NAME, FLIGHT_timestamp, {from: passengerOnBoard, value: 120});
     }
     catch(e) {
       //console.log("error registerFlight", e)
       fail= true;
       //console.log(e)
     }
-    assert.equal(fail, false, "Error in book flight.");
+    assert.equal(fail, false, "Error in buyFlightInsurance flight.");
     let numOfInsurees = await config.flightSuretyData.getAmountOfFlightInsurees.call(airline, FLIGHT_NAME, FLIGHT_timestamp);
     console.log("numOfInsurees", numOfInsurees)
     let retInsurance = await config.flightSuretyData.getInsurance.call(airline, FLIGHT_NAME, FLIGHT_timestamp, passengerOnBoard);
@@ -571,6 +572,44 @@ contract('Flight Surety Tests', async (accounts) => {
 
   });
 
+  it('(passenger) processFlightStatus', async () => {
+    let passengerOnBoard = accounts[8],
+      airline = config.firstAirline,
+      fail = false;
+
+    let balanceAcc9 = await web3.eth.getBalance(passengerOnBoard);
+    let payout = await config.flightSuretyData.getPayoutForInsuree.call(passengerOnBoard);
+    console.log("passengerOnBoard (balance/payout)", balanceAcc9, payout);
+    let retInsurance = await config.flightSuretyData.getInsurance.call(airline, FLIGHT_NAME, FLIGHT_timestamp, passengerOnBoard);
+    console.log("retInsurance", retInsurance);
+
+    let isInsured = await config.flightSuretyData.isPassengerInsured.call(airline, FLIGHT_NAME, FLIGHT_timestamp, passengerOnBoard);
+    assert.equal(isInsured, true, "Passenger is not insured.");
+
+
+    try {
+      // normally fct. is internal, but for testing purpose
+      await config.flightSuretyApp.processFlightStatus(airline, FLIGHT_NAME, FLIGHT_timestamp, 20, {from: passengerOnBoard});
+      //await config.flightSuretyApp.processFlightStatus(airline, FLIGHT_NAME, FLIGHT_timestamp, 10, {from: passengerOnBoard, value: 1000});
+    }
+    catch(e) {
+      console.log("error processFlightStatus", e)
+      fail= true;
+      //console.log(e)
+    }
+    assert.equal(fail, false, "Error in processFlightStatus");
+
+    balanceAcc9 = await web3.eth.getBalance(passengerOnBoard);
+    payout = await config.flightSuretyData.getPayoutForInsuree.call(passengerOnBoard);
+    console.log("passengerOnBoard (balance/payout)", balanceAcc9, payout);
+    retInsurance = await config.flightSuretyData.getInsurance.call(airline, FLIGHT_NAME, FLIGHT_timestamp, passengerOnBoard);
+    console.log("retInsurance", retInsurance)
+
+    isInsured = await config.flightSuretyData.isPassengerInsured.call(airline, FLIGHT_NAME, FLIGHT_timestamp, passengerOnBoard);
+    assert.equal(isInsured, false, "Passenger is still insured.");
+
+  });
+
 
 
 });
@@ -583,4 +622,6 @@ var helper = {
     let funded = await config.flightSuretyData.numOfFundedAirlines.call();
     console.log(`Airlines (total/registered/funded): ${total.toString()} / ${registered.toString()} / ${funded.toString()} `)
   }
+  // TODO add passenger info
+  // TODO add logger for reason only / exceptions
 }

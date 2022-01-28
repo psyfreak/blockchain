@@ -88,6 +88,11 @@ contract FlightSuretyApp is Ownable {
         _;
     }
 
+    modifier Cap (uint _amount) {
+        require(msg.value <= _amount, "Amount is capped");
+        _;
+    }
+
     /********************************************************************************************/
     /*                                       CONSTRUCTOR                                        */
     /********************************************************************************************/
@@ -247,6 +252,8 @@ contract FlightSuretyApp is Ownable {
         flightSuretyData.registerPassengerForFlight(flightKey, msg.sender);
     }
 
+
+
     function buyFlightInsurance
     (
         address airline,
@@ -256,6 +263,7 @@ contract FlightSuretyApp is Ownable {
     external
     payable
     requireIsOperational
+    Cap(flightSuretyData.MAX_INSURANCE_FEE())
     //TODO passenger should
     //must be greater than 0 and less < 150
     {
@@ -268,10 +276,10 @@ contract FlightSuretyApp is Ownable {
         }
         */
 
-        flightSuretyData.createInsuranceForFlight(flightKey, msg.sender); //payable function vs. transfer afterwards
+        flightSuretyData.createInsuranceForFlight(flightKey, msg.sender, msg.value); //payable function vs. transfer afterwards
         // msg.value lands here => also balance is updated for this contract
         // we might transfer the data to
-        payable(address(flightSuretyData)).transfer(msg.value);
+        //payable(address(flightSuretyData)).transfer(msg.value);
         emit OnChangeBalances(address(this).balance, address(flightSuretyData).balance);
     }
 
@@ -293,8 +301,10 @@ contract FlightSuretyApp is Ownable {
                                     uint256 timestamp,
                                     uint8 statusCode
                                 )
-                                internal
+                                //internal
+                               public
     {
+
         bytes32 flightKey = Util.getFlightKey (airline, flight, timestamp);
 
         oracleResponses[flightKey].isOpen = false;
@@ -309,6 +319,11 @@ contract FlightSuretyApp is Ownable {
         if(statusCode == STATUS_CODE_LATE_AIRLINE) {
             flightSuretyData.creditInsurees(flightKey);
         }
+        else {
+            //TODO one must delete existing insurances
+        }
+
+
     }
 
 

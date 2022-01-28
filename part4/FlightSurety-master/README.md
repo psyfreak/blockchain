@@ -1,6 +1,14 @@
 # FlightSurety
 ## TODO 
 - get rid of init script and use in ctor => change testConfig from deployed to new again.
+- Passenger Repayment 
+- Withdraw funds
+- add voting to operational
+- structure contract i.e. modularize 
+
+Question adding:
+- Why no interface when including dataContract in app / old solidity version?
+
 
 // checked https://github.com/JeromeSolis/dapp-flight-surety/blob/main/contracts/FlightSuretyApp.sol
 https://medium.com/hellogold/ethereum-multi-signature-wallets-77ab926ab63b
@@ -28,6 +36,7 @@ https://medium.com/quillhash/how-to-write-upgradable-smart-contracts-in-solidity
 Furthermore one needs to transfer the money, when data contract gets updated. I think it might be better to hold the ether in the app contract.
 * One particular flight can be identified by airline, flight, and timestamp      
 
+* createInsurance (better set this fct. payable or extra msg. value and work with app payable and transfer function?)
 
 ### Deployment 
 - initialization of airline can be done in deployment script, in contract ctor or via init function.

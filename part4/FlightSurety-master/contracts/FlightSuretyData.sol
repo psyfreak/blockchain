@@ -20,8 +20,8 @@ contract FlightSuretyData is Ownable {
     uint256 public constant ROI_NOMINATOR = 3;
     uint256 public constant ROI_DENOMINATOR = 2;
 
-    uint256 internal constant AIRLINE_REGISTRATION_FEE = 10 wei; //10 ether;
-    uint256 internal constant MAX_INSURANCE_FEE = 150 wei; //ether;
+    uint256 public constant AIRLINE_REGISTRATION_FEE = 10 wei; //10 ether;
+    uint256 public constant MAX_INSURANCE_FEE = 150 wei; //ether;
 
     /********************************************************************************************/
     /*                                       DATA VARIABLES                                     */
@@ -190,10 +190,7 @@ contract FlightSuretyData is Ownable {
         require(msg.value >= _amount, "Amount is not sufficient");
         _;
     }
-    modifier Cap (uint _amount) {
-        require(msg.value <= _amount, "Amount is capped");
-        _;
-    }
+
 
     modifier onlyEOA() {
         require(msg.sender == tx.origin, "Must use EOA");
@@ -414,10 +411,15 @@ contract FlightSuretyData is Ownable {
         //requireIsPassengerOnFlight(flight, passenger)
         returns(address, uint256)
     {
-        return (
-            flightInsurances[flightKey][0].passenger,
-            flightInsurances[flightKey][0].insurance
-        );
+        //TODO add modifer
+        if (flightInsurances[flightKey].length >0) {
+            return (
+                flightInsurances[flightKey][0].passenger,
+                flightInsurances[flightKey][0].insurance
+            );
+        } else {
+            return  (address(0),0);
+        }
     }
 
     function getInsurance (
@@ -516,6 +518,19 @@ contract FlightSuretyData is Ownable {
         bytes32 flightKey = Util.getFlightKey(airline, flight, timestamp);
         return flightInsurances[flightKey].length;
     }
+
+    // TODO get my payout only add to app
+    function getPayoutForInsuree (
+        address passenger
+    )
+    public
+    view
+    returns(uint256)
+    {
+        return payouts[passenger];
+    }
+
+
 
     /********************************************************************************************/
     /*                                     SMART CONTRACT FUNCTIONS                             */
@@ -698,14 +713,14 @@ contract FlightSuretyData is Ownable {
     function createInsuranceForFlight
     (
         bytes32 flightKey,
-        address passenger
+        address passenger,
+        uint256 value
     )
         external
-        payable
+        //payable
         requireIsOperational
         requireIsFlightExisting(flightKey) //TODO move everything to app contract
         requireIsPassengerOnFlight(flightKey, passenger)
-        Cap(MAX_INSURANCE_FEE)
     {
         //flightSuretyData.escrow.deposit(tx.origin) won´t work in our case we not one account
         /*
@@ -713,8 +728,9 @@ contract FlightSuretyData is Ownable {
 
         }
         */
-        flightInsurances[flightKey].push(Insurance({passenger: passenger, insurance: msg.value}));
-        emit InsurancePurchased(passenger, msg.value);
+        //TODO check: payable and then use msg.value?!
+        flightInsurances[flightKey].push(Insurance({passenger: passenger, insurance: value}));
+        emit InsurancePurchased(passenger, value);
         emit OnChangeBalances(address(msg.sender).balance, address(this).balance);
         //     event PurchasedOrigin(address indexed payee, uint256 weiAmount, uint256 balance);
         //emit PurchasedOrigin(msg.sender, msg.value, address(this).balance);
