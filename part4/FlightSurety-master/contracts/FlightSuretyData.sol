@@ -144,6 +144,9 @@ contract FlightSuretyData is Ownable {
 
         authorizedCallers[airlineAddr] = true;
         numOfAirlines = numOfAirlines.add(1);
+        numOfRegisteredAirlines = numOfRegisteredAirlines.add(1);
+        numOfFundedAirlines = numOfFundedAirlines.add(1);
+
         //Airline memory newAirline =
         airlines[airlineAddr] = Airline({id:numOfAirlines, isRegistered: true, investment: 0, registeredBy: tx.origin, timestamp: block.timestamp});
         // fire event newAirline
@@ -556,7 +559,7 @@ contract FlightSuretyData is Ownable {
     {
 
         airlines[airlineAddr].isRegistered = true;
-        numOfRegisteredAirlines++;
+        numOfRegisteredAirlines = numOfRegisteredAirlines.add(1);
 
 
         emit AirlineRegistered (
@@ -622,7 +625,7 @@ contract FlightSuretyData is Ownable {
         //airlines[msg.sender].balance = msg.value;
         airlines[msg.sender].investment = msg.value;
 
-        numOfFundedAirlines++;
+        numOfFundedAirlines = numOfFundedAirlines.add(1);
 
         //emit
         emit AirlineFunded(msg.sender, airlines[msg.sender].id, airlines[msg.sender].isRegistered, airlines[msg.sender].registeredBy, airlines[msg.sender].investment, airlines[msg.sender].timestamp);
