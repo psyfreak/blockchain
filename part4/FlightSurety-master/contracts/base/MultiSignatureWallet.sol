@@ -94,6 +94,7 @@ contract MultiSignatureWallet {
     /// @dev Allows an owner to confirm a transaction.
     /// @param transactionId Transaction ID.
     function confirmTransaction(uint transactionId)
+    //TODO add ownable
     public
     {
         require(isOwner[msg.sender], "should be owner");

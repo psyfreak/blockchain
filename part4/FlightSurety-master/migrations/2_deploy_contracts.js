@@ -1,6 +1,6 @@
 const FlightSuretyApp = artifacts.require("FlightSuretyApp");
 const FlightSuretyData = artifacts.require("FlightSuretyData");
-const MultiSignatureWallet = artifacts.require("MultiSignatureWallet");
+//const MultiSignatureWallet = artifacts.require("MultiSignatureWallet");
 const fs = require('fs');
 
 module.exports = async function(deployer, network, accounts) {
@@ -45,7 +45,7 @@ module.exports = async function(deployer, network, accounts) {
   */
 
   // deploy M
-    await deployer.deploy(MultiSignatureWallet, [firstAirline, accounts[8],  accounts[7]], 1);
+    //await deployer.deploy(MultiSignatureWallet, [firstAirline, accounts[8],  accounts[7]], 1);
 
     deployer.deploy(FlightSuretyData)
     .then((resultData) => {

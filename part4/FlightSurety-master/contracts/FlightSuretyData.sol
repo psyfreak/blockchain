@@ -42,8 +42,10 @@ contract FlightSuretyData is Ownable {
         registration per airline
     */
     //votations[airline] = struct(array[airlines])
+    // TODO might transfer to modular contract
     enum ElectionTopics { AIRLINE_REGISTRATION, SET_OPERATIONAL }
-    mapping(ElectionTopics => mapping(address => bool[])) private elections;
+
+    mapping(ElectionTopics => mapping(address => address[])) public ballots;
 
 
     // airlines
@@ -196,11 +198,13 @@ contract FlightSuretyData is Ownable {
     }
 
     modifier requireIsAirlineExisting(address airlineAddr) {
-        if(airlines[airlineAddr].registeredBy != address(0)) {
-            _;
-        }
+        require(isAirlineExisting(airlineAddr), "Airline does not exist");
+        _;
     }
-
+    modifier requireIsAirlineNotExisting(address airlineAddr) {
+        require(!isAirlineExisting(airlineAddr), "Airline does already exist");
+        _;
+    }
     /**
     * @dev Modifier that requires the "ContractOwner" account to be the function caller
     */
@@ -319,6 +323,15 @@ contract FlightSuretyData is Ownable {
         )
     {
         return (airlines[airline].id, airlines[airline].isRegistered, airlines[airline].registeredBy, airlines[airline].investment, airlines[airline].timestamp);
+    }
+
+
+    function isAirlineExisting (address airline)
+        public
+        view
+        returns(bool)
+    {
+        return (airlines[airline].registeredBy != address(0));
     }
 
     function isAirlineRegistered (address airline)
@@ -517,7 +530,7 @@ contract FlightSuretyData is Ownable {
         external
         requireIsOperational
         // TODO can only be called by app contract
-        //requireIsAirlineExisting(airlineAddr) // no hard condition
+        requireIsAirlineNotExisting(airlineAddr) // no hard condition
         //requireIsCallerAuthorized
     {
         // msg.sender is now address of the calling contract therefore use tx.origin for registeredBy
@@ -556,16 +569,33 @@ contract FlightSuretyData is Ownable {
         );
     }
 
+    /*
+        submitAirline
+        if not existing
+            createAirline
+        confirmAirline
+        if(votingSuccess)
+            registerAirline
+    */
 
-    function confirmAirline(address airlineAddr)
+    ///
+    // confirmedBy could be substituted with tx.origin
+    function confirmAirline(address airlineAddr, address confirmedBy)
         external
         requireIsOperational
         // TODO can only be called by app contract
         requireIsAirlineExisting(airlineAddr)
         //requireIsCallerAuthorized
     {
-        // now voting
-        //airlines[airlineAddr].votes++;
+        ballots[ElectionTopics.AIRLINE_REGISTRATION][airlineAddr].push(confirmedBy);
+    }
+
+    function getAirlineBallotsByAirlineAddress(address airlineAddr)
+        public
+        view
+        returns (address[] memory)
+    {
+        return ballots[ElectionTopics.AIRLINE_REGISTRATION][airlineAddr];
     }
 
     // fundAirline

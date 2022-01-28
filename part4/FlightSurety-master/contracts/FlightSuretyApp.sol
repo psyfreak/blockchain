@@ -88,28 +88,6 @@ contract FlightSuretyApp is Ownable {
         _;
     }
 
-
-/*
-    modifier ElectionAirlineRegistration (address airline) {
-        // less or equal than 4 airlines
-        uint256 threshold = flightSuretyData.VOTING_THRESHOLD;
-        // below or equal threshold
-        if(threshold >= flightSuretyData.numOfFundedAirlines) {
-            // only one vote by funded airline
-            if(flightSuretyData.isAirlineFunded(msg.sender)) {
-                // set voting
-                _;
-            }
-        }
-        mapping(ElectionTopics => mapping(address => bool[])) private elections;
-        } else {
-            // 50%
-            if(.length >= numOfFundedAirlines.div(2) )
-            // check duplicate
-
-        }
-    }
-*/
     /********************************************************************************************/
     /*                                       CONSTRUCTOR                                        */
     /********************************************************************************************/
@@ -178,14 +156,51 @@ contract FlightSuretyApp is Ownable {
                             //TODO can only be called by authoirzedCallers
                             //one should trigger an event ... returns(bool success, uint256 votes)
     {
-        // add airline if not available
-        flightSuretyData.createAirline(newAirline);
-        if(true) {
+        // if not existing create Airlin
+        // check if airline is available if not submit
+
+        if(!flightSuretyData.isAirlineExisting(newAirline)) {
+            flightSuretyData.createAirline(newAirline);
+        }
+
+        //see require airline must be authorized therefore registered + invested if(flightSuretyData.isAirlineFunded(msg.sender)) { }
+        flightSuretyData.confirmAirline(newAirline, msg.sender);
+        if(isConfirmed(newAirline)) {
             // if election fine then register Airline
             flightSuretyData.registerAirline(newAirline);
         }
         //return (success, 1); // draft contains this, but statechanging methods cannot have return values
     }
+
+    /********************** helper **********************/
+    function isConfirmed(address newAirline)
+        private
+        view
+        returns (bool)
+    {
+        bool confirmed = false;
+        // less or equal than 4 airlines
+        address[] memory confirmationsForAirline = flightSuretyData.getAirlineBallotsByAirlineAddress(newAirline);
+        uint numOfConfirmations = confirmationsForAirline.length;
+        uint256 numOfFundedAirlines = flightSuretyData.numOfFundedAirlines();
+
+        // below or equal threshold => confirmation ok if the msg.sender is an already confirmed airline
+        if(flightSuretyData.VOTING_THRESHOLD() >= numOfFundedAirlines) {
+            // only one vote by funded airline
+            if(numOfConfirmations > 0) {
+                confirmed = true;
+            }
+        }
+        else { // if more than 4 airlines
+            // 50%
+            if(numOfConfirmations >= numOfFundedAirlines.div(2) ) {
+                // check duplicate
+                confirmed = true;
+            }
+        }
+        return confirmed;
+    }
+
      // TODO is this needed ? one could also
     function fundAirline ( ) external {
         flightSuretyData.fundAirline();
@@ -344,6 +359,8 @@ contract FlightSuretyApp is Ownable {
         //payable(msg.sender).transfer(payout);
         //emit InsuranceWithdrawn(msg.sender, payout);
     }
+
+
 
 
 // region ORACLE MANAGEMENT
