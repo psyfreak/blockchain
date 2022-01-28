@@ -145,7 +145,7 @@ contract FlightSuretyData is Ownable {
         authorizedCallers[airlineAddr] = true;
         numOfAirlines = numOfAirlines.add(1);
         numOfRegisteredAirlines = numOfRegisteredAirlines.add(1);
-        numOfFundedAirlines = numOfFundedAirlines.add(1);
+        //done in funded method which is called in deploy script - numOfFundedAirlines = numOfFundedAirlines.add(1);
 
         //Airline memory newAirline =
         airlines[airlineAddr] = Airline({id:numOfAirlines, isRegistered: true, investment: 0, registeredBy: tx.origin, timestamp: block.timestamp});

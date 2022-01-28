@@ -219,12 +219,14 @@ contract('Flight Surety Tests', async (accounts) => {
     // ARRANGE
     let registeredAirline = accounts[2],
       newAirline3 = accounts[3],
-      newAirline4 = accounts[4];
-
+      newAirline4 = accounts[4],
+      newAirline5 = accounts[5];
 
     let result = await config.flightSuretyData.isAirlineRegistered.call(newAirline3);
     assert.equal(result, false, "Airline is registered");
     result = await config.flightSuretyData.isAirlineRegistered.call(newAirline4);
+    assert.equal(result, false, "Airline is registered");
+    result = await config.flightSuretyData.isAirlineRegistered.call(newAirline5);
     assert.equal(result, false, "Airline is registered");
 
     helper.printAmounts(config);
@@ -235,6 +237,7 @@ contract('Flight Surety Tests', async (accounts) => {
     try {
       await config.flightSuretyApp.registerAirline(newAirline3, {from: registeredAirline});
       await config.flightSuretyApp.registerAirline(newAirline4, {from: registeredAirline});
+      await config.flightSuretyApp.registerAirline(newAirline5, {from: registeredAirline});
     }
     catch(e) {
       console.log("registerAirline error", e)
@@ -244,49 +247,121 @@ contract('Flight Surety Tests', async (accounts) => {
     assert.equal(result, true, "Airline is not registered");
     result = await config.flightSuretyData.isAirlineRegistered.call(newAirline4);
     assert.equal(result, true, "Airline is not registered");
-
-    result = await config.flightSuretyData.isAirlineRegistered.call(newAirline4);
+    result = await config.flightSuretyData.isAirlineRegistered.call(newAirline5);
     assert.equal(result, true, "Airline is not registered");
-
 
     helper.printAmounts(config);
 
     assert.equal(fail, false, "Airlines could not be registered");
   });
 
-/*
-  it('(airline) can register 5 airlines and the first 4 are registered and the 5fth is not', async () => {
+  it('(airline) newly registered airlines can fund themselves (=4 in total)', async () => {
 
     // ARRANGE
-    let registeredAirline = config.firstAirline,
-      newAirline = accounts[2];
+    let registeredAirline3 = accounts[3],
+      registeredAirline4 = accounts[4],
+      registeredAirline5 = accounts[5];
 
 
-    let result = await config.flightSuretyData.isAirlineRegistered.call(newAirline);
-    assert.equal(result, false, "Airline is registered");
-    // ACT
+    let result = await config.flightSuretyData.isAirlineFunded.call(registeredAirline3);
+    assert.equal(result, false, "Airline is funded");
+    result = await config.flightSuretyData.isAirlineFunded.call(registeredAirline4);
+    assert.equal(result, false, "Airline is funded");
+    result = await config.flightSuretyData.isAirlineFunded.call(registeredAirline5);
+    assert.equal(result, false, "Airline is funded");
+
+    helper.printAmounts(config);
+
 
 
     let fail = false;
     try {
-      await config.flightSuretyApp.registerAirline(newAirline, {from: accounts[3]});
-      await config.flightSuretyApp.registerAirline(newAirline, {from: accounts[4]});
-      await config.flightSuretyApp.registerAirline(newAirline, {from: accounts[5]});
+      await config.flightSuretyData.fundAirline({from: registeredAirline3, value: 10});
+      await config.flightSuretyData.fundAirline({from: registeredAirline4, value: 10});
+      await config.flightSuretyData.fundAirline({from: registeredAirline5, value: 10});
     }
     catch(e) {
       console.log("registerAirline error", e)
       fail = true;
     }
-    result = await config.flightSuretyData.isAirlineRegistered.call(newAirline);
-    assert.equal(result, true, "Airline is not registered");
-    result = await config.flightSuretyData.getAirlineByAddress.call(newAirline);
-    console.log("getAirlineByAddress", result)
 
+    result = await config.flightSuretyData.isAirlineFunded.call(registeredAirline3);
+    assert.equal(result, true, "Airline is not funded");
+    result = await config.flightSuretyData.isAirlineFunded.call(registeredAirline4);
+    assert.equal(result, true, "Airline is not funded");
+    result = await config.flightSuretyData.isAirlineFunded.call(registeredAirline5);
+    assert.equal(result, true, "Airline is not funded");
+
+    helper.printAmounts(config);
+
+    assert.equal(fail, false, "Airlines could not be registered");
+  });
+
+  it('(airline) cannot register an Airline without further confirmation for the 5th airline ', async () => {
+
+    // ARRANGE
+    let unregisteredAirline = accounts[6],
+      fundedAirline = accounts[5];
+
+    helper.printAmounts(config);
+
+    let result = await config.flightSuretyData.isAirlineRegistered.call(unregisteredAirline);
+    assert.equal(result, false, "Airline used to test if unauthorized airline can register new ones is authorized (added?!)");
+    // ACT
+    result = await config.flightSuretyData.isAirlineFunded.call(fundedAirline);
+    assert.equal(result, true, "Airline used to test if unauthorized airline can register new ones is authorized (added?!)");
+
+
+    let fail = false;
+    try {
+      await config.flightSuretyApp.registerAirline(unregisteredAirline, {from: fundedAirline});
+    }
+    catch(e) {
+      console.log("registerAirline error", e)
+      fail = true;
+    }
+    helper.printAmounts(config);
     // ASSERT
     //assert.equal(fail, true, "Airline should not be able to register another airline if it hasn't provided funding");
+    result = await config.flightSuretyData.isAirlineRegistered.call(unregisteredAirline);
+    assert.equal(result, false, "Airline used to test if unauthorized airline can register new ones is authorized (added?!)");
 
   });
-*/
+
+  it('(airline) can register an Airline with further confirmation for the 5th airline ', async () => {
+
+    // ARRANGE
+    let unregisteredAirline = accounts[6],
+      fundedAirline2 = accounts[2],
+      fundedAirline3 = accounts[3];
+
+      helper.printAmounts(config);
+
+    let result = await config.flightSuretyData.isAirlineRegistered.call(unregisteredAirline);
+    assert.equal(result, false, "Airline used to test if unauthorized airline can register new ones is authorized (added?!)");
+    // ACT
+    result = await config.flightSuretyData.isAirlineFunded.call(fundedAirline2);
+    assert.equal(result, true, "Airline used to test if unauthorized airline can register new ones is authorized (added?!)");
+    result = await config.flightSuretyData.isAirlineFunded.call(fundedAirline3);
+    assert.equal(result, true, "Airline used to test if unauthorized airline can register new ones is authorized (added?!)");
+
+
+    let fail = false;
+    try {
+      await config.flightSuretyApp.registerAirline(unregisteredAirline, {from: fundedAirline2});
+     // await config.flightSuretyApp.registerAirline(unregisteredAirline, {from: fundedAirline3});
+    }
+    catch(e) {
+      console.log("registerAirline error", e)
+      fail = true;
+    }
+    helper.printAmounts(config);
+    // ASSERT
+    //assert.equal(fail, true, "Airline should not be able to register another airline if it hasn't provided funding");
+    result = await config.flightSuretyData.isAirlineRegistered.call(unregisteredAirline);
+    assert.equal(result, true, "Airline used to test if unauthorized airline can register new ones is authorized (added?!)");
+
+  });
 
 
   it(`(multiparty) has correct initial isOperational() value`, async function () {
