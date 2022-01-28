@@ -391,6 +391,7 @@ contract FlightSuretyData is Ownable {
 
     event LogInsuranceIt(uint counter, address passenger, uint256 balance);
 
+    // TODO
     function getInsuranceByKey (bytes32 flightKey, address passenger)
         public
         view

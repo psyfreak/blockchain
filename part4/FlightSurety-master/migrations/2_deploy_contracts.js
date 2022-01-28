@@ -1,12 +1,13 @@
 const FlightSuretyApp = artifacts.require("FlightSuretyApp");
 const FlightSuretyData = artifacts.require("FlightSuretyData");
+const MultiSignatureWallet = artifacts.require("MultiSignatureWallet");
 const fs = require('fs');
 
-module.exports = async function(deployer) {
+module.exports = async function(deployer, network, accounts) {
 
-    let firstAirline = '0x60f73337800add20c1a18540d085c2ECFA16B6dD';
+    let firstAirline = accounts[9]; //'0x60f73337800add20c1a18540d085c2ECFA16B6dD';
 
-/*
+  /*
   let resultData = await deployer.deploy(FlightSuretyData);
   //FlightSuretyData.deployed()
   let resultDataApp = await deployer.deploy(FlightSuretyApp, FlightSuretyData.address); // parameter must set as an address
@@ -41,7 +42,10 @@ module.exports = async function(deployer) {
 
   fs.writeFileSync(__dirname + '/../src/dapp/config.json',JSON.stringify(config, null, '\t'), 'utf-8');
   fs.writeFileSync(__dirname + '/../src/server/config.json',JSON.stringify(config, null, '\t'), 'utf-8');
-*/
+  */
+
+  // deploy M
+    await deployer.deploy(MultiSignatureWallet, [firstAirline, accounts[8],  accounts[7]], 1);
 
     deployer.deploy(FlightSuretyData)
     .then((resultData) => {
@@ -60,7 +64,8 @@ module.exports = async function(deployer) {
                     console.log("result ", result)
                     return resultData.fundAirline({from: firstAirline, value: 10}).then(function(result2) {
                       // Same transaction result object as above.
-                      console.log("fundAirline trans ", result2);
+
+                      //console.log("fundAirline trans ", result2);
 
                       // here we might register the first airline
                       //FlightSuretyApp.registerAirline()

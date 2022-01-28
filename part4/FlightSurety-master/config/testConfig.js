@@ -1,6 +1,8 @@
 
-var FlightSuretyApp = artifacts.require("FlightSuretyApp");
-var FlightSuretyData = artifacts.require("FlightSuretyData");
+const FlightSuretyApp = artifacts.require("FlightSuretyApp"),
+    FlightSuretyData = artifacts.require("FlightSuretyData"),
+    MultiSignatureWallet = artifacts.require("MultiSignatureWallet");
+;
 var BigNumber = require('bignumber.js');
 
 var Config = async function(accounts) {
@@ -44,15 +46,17 @@ var Config = async function(accounts) {
 
     let flightSuretyData = await FlightSuretyData.deployed();
     let flightSuretyApp = await FlightSuretyApp.deployed();
-
+    let multiSignatureWallet = await MultiSignatureWallet.deployed();
     
     return {
         owner: owner,
         firstAirline: firstAirline,
+        flights: flights,
         weiMultiple: (new BigNumber(10)).pow(18),
         testAddresses: testAddresses,
         flightSuretyData: flightSuretyData,
-        flightSuretyApp: flightSuretyApp
+        flightSuretyApp: flightSuretyApp,
+        multiSignatureWallet: multiSignatureWallet
     }
 }
 

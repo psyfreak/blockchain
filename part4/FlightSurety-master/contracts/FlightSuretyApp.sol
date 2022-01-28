@@ -82,6 +82,12 @@ contract FlightSuretyApp is Ownable {
         _;
     }
 
+    // Define a modifier that verifies the Caller
+    modifier verifyCaller (address _address) {
+        require(msg.sender == _address, "caller is not verified");
+        _;
+    }
+
 
 /*
     modifier ElectionAirlineRegistration (address airline) {

@@ -3,6 +3,10 @@
 - get rid of init script and use in ctor => change testConfig from deployed to new again.
 
 // checked https://github.com/JeromeSolis/dapp-flight-surety/blob/main/contracts/FlightSuretyApp.sol
+https://medium.com/hellogold/ethereum-multi-signature-wallets-77ab926ab63b
+https://medium.com/hellogold/ethereum-multi-sig-wallets-part-ii-19077f6280a
+
+https://github.com/ConsenSys-Academy/multisig-wallet-exercise/tree/master/contracts
 
 FlightSurety is a sample application project for Udacity's Blockchain course.
 https://medium.com/quillhash/how-to-write-upgradable-smart-contracts-in-solidity-d8f1b95a0e9a
@@ -24,6 +28,14 @@ https://medium.com/quillhash/how-to-write-upgradable-smart-contracts-in-solidity
 Furthermore one needs to transfer the money, when data contract gets updated. I think it might be better to hold the ether in the app contract.
 * One particular flight can be identified by airline, flight, and timestamp      
 
+
+### Deployment 
+- initialization of airline can be done in deployment script, in contract ctor or via init function.
+The choice you made have different impact on the project.
+
+Ctor:
+- Advantage: everything in one place and you can be sure, that everything is automatically initalized
+-  
 
 ## Requirements
 
