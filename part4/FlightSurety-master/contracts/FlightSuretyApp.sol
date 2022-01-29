@@ -120,6 +120,7 @@ contract FlightSuretyApp is Ownable {
 
      // TODO is this needed ? one could also
     function fundAirline ( ) external payable {
+
         //a.blah{value: ValueToSend}(2, 3)
         flightSuretyData.fundAirline{value: msg.value}(msg.sender);// we could also call and send it to directly via msg.value
         //payable(address(flightSuretyData)).transfer(msg.value);
@@ -268,19 +269,14 @@ contract FlightSuretyApp is Ownable {
      * Potentially move to app contract => withdraw function
      *
     */
-    function withdrawInsurance
+    function withdraw
     (
     )
     external
     requireIsOperational
+    //TODO add check if money is sufficient to payout
     {
-        /*
-        emit OnChangeBalances(address(this).balance, address(flightSuretyData).balance);
-        uint256 payout = flightSuretyData.payouts[msg.sender];
-        flightSuretyData.payouts[msg.sender] = 0;
-        payable(msg.sender).transfer(payout);
-        emit InsuranceWithdrawn(msg.sender, payout);
-        */
+        flightSuretyData.withdrawInsuree(msg.sender);
     }
 
     // Function to receive Ether. msg.data must be empty

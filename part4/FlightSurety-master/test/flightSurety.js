@@ -7,7 +7,9 @@ contract('Flight Surety Tests', async (accounts) => {
 
   let config;
   let FLIGHT_NAME = "",
-    FLIGHT_timestamp = "";
+    FLIGHT_timestamp = "",
+    INSURANCE_PAYMENT = 100,
+    ROI_PAYMENT = 150;
 
   before('setup contract', async () => {
     config = await Test.Config(accounts);
@@ -499,7 +501,7 @@ contract('Flight Surety Tests', async (accounts) => {
     try {
       // test case for cap
       //await config.flightSuretyApp.buyFlightInsurance(airline, FLIGHT_NAME, FLIGHT_timestamp, {from: passengerOnBoard, value: 1000});
-      await config.flightSuretyApp.buyFlightInsurance(airline, FLIGHT_NAME, FLIGHT_timestamp, {from: passengerOnBoard, value: 120});
+      await config.flightSuretyApp.buyFlightInsurance(airline, FLIGHT_NAME, FLIGHT_timestamp, {from: passengerOnBoard, value: INSURANCE_PAYMENT});
     }
     catch(e) {
       //console.log("error registerFlight", e)
@@ -599,6 +601,36 @@ contract('Flight Surety Tests', async (accounts) => {
 
     isInsured = await config.flightSuretyData.isPassengerInsured.call(airline, FLIGHT_NAME, FLIGHT_timestamp, passengerOnBoard);
     assert.equal(isInsured, false, "Passenger is still insured.");
+  });
+
+
+  it('(passenger) withdraw', async () => {
+    let passengerOnBoard = accounts[8],
+      airline = config.firstAirline,
+      fail = false;
+
+    let payout = await config.flightSuretyData.getPayoutForInsuree.call(passengerOnBoard);
+    assert.equal(payout, ROI_PAYMENT, "Payout should be 1.5x of " + INSURANCE_PAYMENT);
+    console.log("passengerOnBoard (balance/payout)", payout); // 100
+
+    Util.helper.printBalance(config, passengerOnBoard);
+
+    try {
+      // normally fct. is internal, but for testing purpose
+      await config.flightSuretyApp.withdraw({from: passengerOnBoard});
+      //await config.flightSuretyApp.processFlightStatus(airline, FLIGHT_NAME, FLIGHT_timestamp, 10, {from: passengerOnBoard, value: 1000});
+    }
+    catch(e) {
+      console.log("error withdraw", e)
+      fail= true;
+      //console.log(e)
+    }
+    assert.equal(fail, false, "Error in withdrawInsuree");
+
+    payout = await config.flightSuretyData.getPayoutForInsuree.call(passengerOnBoard);
+    assert.equal(payout, 0, "Payout should be zero after withdrawing.");
+
+    Util.helper.printBalance(config, passengerOnBoard);
   });
 });
 

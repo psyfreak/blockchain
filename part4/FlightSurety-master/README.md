@@ -1,10 +1,9 @@
 # FlightSurety
 ## TODO 
 - get rid of init script and use in ctor => change testConfig from deployed to new again.
-- Passenger Repayment 
-- Withdraw funds
 - add voting to operational
 - structure contract i.e. modularize 
+- add https://github.com/adamgruber/mochawesome
 
 Question adding:
 - Why no interface when including dataContract in app / old solidity version?
@@ -37,7 +36,7 @@ Furthermore one needs to transfer the money, when data contract gets updated. I 
 * One particular flight can be identified by airline, flight, and timestamp      
 
 * createInsurance (better set this fct. payable or extra msg. value and work with app payable and transfer function?)
-
+- withDraw in data contract ?!??!?!
 ### Deployment 
 - initialization of airline can be done in deployment script, in contract ctor or via init function.
 The choice you made have different impact on the project.

@@ -107,7 +107,7 @@ contract FlightSuretyData is Ownable {
 
     event InsurancePurchased(address indexed payee, uint256 weiAmount);
     event InsuranceDeposited(address indexed payee, uint256 weiAmount);
-    event InsuranceWithdrawn(address indexed payee, uint256 weiAmount);
+    event InsuranceWithdrawn(address indexed payee, uint256 weiAmount, uint256 weiBalanceDataContractBefore, uint256 weiBalanceDataContractAfter);
 
     event OnChangeBalances(uint256 balanceApp, uint256 balanceData);
 
@@ -796,6 +796,20 @@ contract FlightSuretyData is Ownable {
         //flightInsurances[flightKey].length = 0;// = new Insurance[](0);
         // emit event to tell how many passenger investment + payout
         //emit InsuranceDeposited(msg.sender, payout);
+    }
+
+    function withdrawInsuree
+    (
+        address insuree
+    )
+    external
+    requireIsOperational
+    {
+        uint256 currentBalance = address(this).balance;
+        uint256 payout = payouts[insuree];
+        payouts[insuree] = 0;
+        payable(insuree).transfer(payout);
+        emit InsuranceWithdrawn(msg.sender, payout, currentBalance, address(this).balance);
     }
 
     /**
