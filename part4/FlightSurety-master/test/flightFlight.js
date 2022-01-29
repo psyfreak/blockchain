@@ -3,7 +3,7 @@ var Test = require('../config/testConfig.js');
 var BigNumber = require('bignumber.js');
 var Util = require('./util.js');
 
-contract('Flight Surety Tests', async (accounts) => {
+contract('Flight Surety - Flights', async (accounts) => {
 
   let config;
   let FLIGHT_NAME = "",
