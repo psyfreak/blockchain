@@ -8,11 +8,15 @@
   "repository": "https://github.com/techbubble/flightsurety",
   "license": "MIT",
   "scripts": {
-    "test": "truffle test ./test/flightSurety.js",
+    "testAll": "truffle test ./test/flightSurety.js",
+    "testAirline": "truffle test ./test/flightAirlines.js",
+    "testFlight": "truffle test ./test/flightFlight.js",
     "testFunding": "truffle test ./test/flightFunding.js",
+    "testPassenger": "truffle test ./test/flightPassenger.js",
+    "testMultiparty": "truffle test ./test/flightMultiparty.js",
     "testOracles": "truffle test ./test/flightOracles.js",
     "testMultiSig": "truffle test ./test/multiSig.js",
-    "testExperiment": "truffle test ./test/index.js",
+
     "dapp": " webpack serve --mode development --config webpack.config.dapp.js",
     "dapp:prod": "webpack --mode production  --config webpack.config.dapp.js",
     "server": "rm -rf ./build/server && webpack --config webpack.config.server.js",
