@@ -1,4 +1,4 @@
-
+// how to sep https://www.alxolr.com/articles/how-to-separate-mocha-tests-in-multiple-files
 var Test = require('../config/testConfig.js');
 var BigNumber = require('bignumber.js');
 var Util = require('./util.js');
@@ -255,7 +255,7 @@ contract('Flight Surety Tests', async (accounts) => {
     assert.equal(fail, false, "Airlines could not be registered");
   });
 
-  it('(airline) newly registered airlines can fund themselves (=4 in total)', async () => {
+  it('(airline) newly registered airlines can fund themselves (=5 in total)', async () => {
 
     // ARRANGE
     let registeredAirline3 = accounts[3],
@@ -270,15 +270,11 @@ contract('Flight Surety Tests', async (accounts) => {
     result = await config.flightSuretyData.isAirlineFunded.call(registeredAirline5);
     assert.equal(result, false, "Airline is funded");
 
-
-
-
     let fail = false;
     try {
       await config.flightSuretyApp.fundAirline({from: registeredAirline3, value: 10});
       await config.flightSuretyApp.fundAirline({from: registeredAirline4, value: 10});
       await config.flightSuretyApp.fundAirline({from: registeredAirline5, value: 10});
-
     }
     catch(e) {
       console.log("registerAirline error", e)
@@ -311,6 +307,8 @@ contract('Flight Surety Tests', async (accounts) => {
 
 
     let fail = false;
+
+    // TODO
     try {
       await config.flightSuretyApp.registerAirline(unregisteredAirline, {from: fundedAirline});
     }
@@ -318,6 +316,7 @@ contract('Flight Surety Tests', async (accounts) => {
       console.log("registerAirline error", e)
       fail = true;
     }
+
     // ASSERT
     //assert.equal(fail, true, "Airline should not be able to register another airline if it hasn't provided funding");
     result = await config.flightSuretyData.isAirlineRegistered.call(unregisteredAirline);

@@ -41,9 +41,10 @@ var Config = async function(accounts) {
     let owner = accounts[0];
     let firstAirline = accounts[9]; // see deployment script atm. firstAirline acc9
 
-    //let flightSuretyData = await FlightSuretyData.new();
+    //let flightSuretyData = await FlightSuretyData.new(firstAirline, {from: owner, value: 10});
     //let flightSuretyApp = await FlightSuretyApp.new(flightSuretyData.address, {from: owner});
 
+    // if initialize script is used we need this other wise our contract gets lost and we would need to the initialization in the test scripts.
     let flightSuretyData = await FlightSuretyData.deployed();
     let flightSuretyApp = await FlightSuretyApp.deployed();
     //let multiSignatureWallet = await MultiSignatureWallet.deployed();

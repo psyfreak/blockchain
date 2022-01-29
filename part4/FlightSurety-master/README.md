@@ -1,6 +1,5 @@
 # FlightSurety
 ## TODO 
-- get rid of init script and use in ctor => change testConfig from deployed to new again.
 - add voting to operational
 - structure contract i.e. modularize 
 - add https://github.com/adamgruber/mochawesome
@@ -37,6 +36,13 @@ Furthermore one needs to transfer the money, when data contract gets updated. I 
 
 * createInsurance (better set this fct. payable or extra msg. value and work with app payable and transfer function?)
 - withDraw in data contract ?!??!?!
+- TX.origin or msg.sender as parameter in contract to contract transfers (imo if data contract can only be called by app contract, then use of tx.origin would be fine
+  and therefore we do not need the additional parameter. I only added em because I read that tx.origin should not be used for future compatibility)
+  
+- what is the purpose of using contract.new() function in test-config.js. We already deploy the contract during tests with the migration script, which is 
+  running every time one uses test. It would mean that we deploy the contract twice, which needs more time. Is this right?
+  
+- initialization script versus ctor init
 ### Deployment 
 - initialization of airline can be done in deployment script, in contract ctor or via init function.
 The choice you made have different impact on the project.

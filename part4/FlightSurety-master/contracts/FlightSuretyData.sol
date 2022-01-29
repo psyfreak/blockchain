@@ -117,7 +117,9 @@ contract FlightSuretyData is Ownable {
     */
     constructor
                                 (
+                                 address firstAirline // not needed if init function
                                 )
+        payable // needed if we fund directly via ctor call
     {
         authorizedCallers[owner()] = true;// initialize so that contractOwner can register first airline
         //escrow = new Escrow();
@@ -125,12 +127,28 @@ contract FlightSuretyData is Ownable {
         // so that we are able to create register and fund an airline via deploy script
         // one could also do it here directly in the data structure
 
+        authorizedCallers[firstAirline] = true;
+        numOfAirlines = numOfAirlines.add(1);
+        numOfRegisteredAirlines = numOfRegisteredAirlines.add(1);
+        //done in funded method which is called in deploy script - numOfFundedAirlines = numOfFundedAirlines.add(1);
+
+        //Airline memory newAirline = // also different here due to payable fct.
+        airlines[firstAirline] = Airline({id:numOfAirlines, isRegistered: true, investment: msg.value, registeredBy: owner(), timestamp: block.timestamp});
+        // fire event newAirline
+        emit AirlineRegistered (
+            firstAirline,
+            airlines[firstAirline].id,
+            airlines[firstAirline].isRegistered,
+            airlines[firstAirline].registeredBy,
+            airlines[firstAirline].investment,
+            airlines[firstAirline].timestamp
+        );
 
         // we could add fundAirline here as well
     }
 
-
-
+/*
+    /////////////////// now initialization via payable ctor - funding is done as well
     function initialize
     (
         address airlineAddr
@@ -161,7 +179,7 @@ contract FlightSuretyData is Ownable {
         );
 
     }
-
+*/
     /********************************************************************************************/
     /*                                       FUNCTION MODIFIERS                                 */
     /********************************************************************************************/

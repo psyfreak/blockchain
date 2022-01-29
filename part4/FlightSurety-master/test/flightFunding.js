@@ -81,6 +81,9 @@ contract('Flight Surety Tests', async (accounts) => {
 
     let result = await config.flightSuretyData.isAirlineRegistered.call(config.firstAirline);
     assert.equal(result, true, "Airline should be registered");
+
+    result = await config.flightSuretyData.getAirlineByAddress.call(config.firstAirline);
+    console.log("getAirlineByAddress", result)
   });
 
 
