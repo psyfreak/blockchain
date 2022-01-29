@@ -130,6 +130,7 @@ contract FlightSuretyData is Ownable {
         authorizedCallers[firstAirline] = true;
         numOfAirlines = numOfAirlines.add(1);
         numOfRegisteredAirlines = numOfRegisteredAirlines.add(1);
+        numOfFundedAirlines = numOfFundedAirlines.add(1);
         //done in funded method which is called in deploy script - numOfFundedAirlines = numOfFundedAirlines.add(1);
 
         //Airline memory newAirline = // also different here due to payable fct.
@@ -430,7 +431,7 @@ contract FlightSuretyData is Ownable {
         //requireIsPassengerOnFlight(flight, passenger)
         returns(address, uint256)
     {
-        //TODO add modifer
+        //TODO add modifier
         if (flightInsurances[flightKey].length >0) {
             return (
                 flightInsurances[flightKey][0].passenger,

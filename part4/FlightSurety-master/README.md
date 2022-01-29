@@ -3,6 +3,8 @@
 - add voting to operational
 - structure contract i.e. modularize 
 - add https://github.com/adamgruber/mochawesome
+- change data structures of insurance to avoid for loop
+- move setter/getter require
 
 Question adding:
 - Why no interface when including dataContract in app / old solidity version?
