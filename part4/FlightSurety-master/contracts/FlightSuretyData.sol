@@ -97,6 +97,7 @@ contract FlightSuretyData is Ownable {
     event AirlineNewRegistration(address airline, uint256 id, address registeredBy, uint256 timestamp);
     event AirlineRegistered(address airline, uint256 id, bool isRegistered, address registeredBy, uint256 investment, uint256 timestamp);
     event AirlineFunded(address airline, uint256 id, bool isRegistered, address registeredBy, uint256 investment, uint256 timestamp);
+    event AirlineRefunded(address airline, uint256 id, uint256 investment);
 
     event FlightRegistered(address airline, uint256 id, bool isRegistered, address registeredB, uint256 investment, uint256 timestamp);
     event FlightCreated(bytes32 flightKey, address origin, address airline);
@@ -627,25 +628,39 @@ contract FlightSuretyData is Ownable {
      *   3. this function to fund and activate an airline for (voting, and insurances)
      *
      */
-    function fundAirline()
+    function fundAirline(address airline) // TODO check 1. if it is better to use tx.origin 2. payable function or use receive or fallback one?
         public
         payable
         requireIsOperational
         //IsFeeSufficientChangeBack(AIRLINE_REGISTRATION_FEE)
     {
-        require(airlines[msg.sender].isRegistered, "Airline is not registered yet");
-        require(airlines[msg.sender].investment == 0, "Airline has been already funded");
+        require(airlines[airline].isRegistered, "Airline is not registered yet");
+        require(airlines[airline].investment == 0, "Airline has been already funded");
         require(msg.value == AIRLINE_REGISTRATION_FEE, "Airline funding must be exactly 10 ether");
 
-        //airlines[msg.sender].balance = msg.value;
-        airlines[msg.sender].investment = msg.value;
+        //airlines[airline].balance = msg.value;
+        airlines[airline].investment = msg.value;
 
         numOfFundedAirlines = numOfFundedAirlines.add(1);
 
         //emit
-        emit AirlineFunded(msg.sender, airlines[msg.sender].id, airlines[msg.sender].isRegistered, airlines[msg.sender].registeredBy, airlines[msg.sender].investment, airlines[msg.sender].timestamp);
+        emit AirlineFunded(airline, airlines[airline].id, airlines[airline].isRegistered, airlines[airline].registeredBy, airlines[airline].investment, airlines[airline].timestamp);
     }
 
+    function refundAirline(address airline) // TODO check 1. if it is better to use tx.origin 2. payable function or use receive or fallback one?
+    public
+    payable
+    requireIsOperational
+        //IsFeeSufficientChangeBack(AIRLINE_REGISTRATION_FEE)
+    {
+        require(airlines[airline].isRegistered, "Airline must be registered for refunding");
+        require(airlines[airline].investment >= AIRLINE_REGISTRATION_FEE, "Airline must be funded for refunding");
+
+        //airlines[airline].balance = msg.value;
+        airlines[airline].investment = airlines[airline].investment.add(msg.value);
+        //emit
+        emit AirlineRefunded(airline, airlines[airline].id, airlines[airline].investment);
+    }
     /**
      * @dev Register a future flight for insuring.
      * Optional part - UI defines the flights.
@@ -792,12 +807,22 @@ contract FlightSuretyData is Ownable {
     // (there is no other function except the receive function).
     // Any call with non-empty calldata to this contract will execute
     // the fallback function (even if Ether is sent along with the call).
+    /*
     fallback()
         external
         payable
         requireIsOperational
     {
-    //    fundAirline();
+        //fundAirline();
+
+    }
+    */
+
+
+    // Function to receive Ether. msg.data must be empty
+    receive() external payable {
+        // TODO how to use this.
+        refundAirline(tx.origin);
     }
 
 

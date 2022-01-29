@@ -62,7 +62,7 @@ module.exports = async function(deployer, network, accounts) {
                   return resultData.initialize(firstAirline).then(function(result) {
                     // Same transaction result object as above.
                     console.log("result ", result)
-                    return resultData.fundAirline({from: firstAirline, value: 10}).then(function(result2) {
+                    return resultData.fundAirline(firstAirline,{from: firstAirline, value: 10}).then(function(result2) {
                       // Same transaction result object as above.
 
                       //console.log("fundAirline trans ", result2);

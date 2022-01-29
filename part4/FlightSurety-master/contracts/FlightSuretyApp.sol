@@ -128,6 +128,7 @@ contract FlightSuretyApp is Ownable {
 
 
 
+
     /********************************************************************************************/
     /*                                     SMART CONTRACT FUNCTIONS                             */
     /********************************************************************************************/
@@ -207,8 +208,10 @@ contract FlightSuretyApp is Ownable {
     }
 
      // TODO is this needed ? one could also
-    function fundAirline ( ) external {
-        flightSuretyData.fundAirline();
+    function fundAirline ( ) external payable {
+        //a.blah{value: ValueToSend}(2, 3)
+        flightSuretyData.fundAirline{value: msg.value}(msg.sender);// we could also call and send it to directly via msg.value
+        //payable(address(flightSuretyData)).transfer(msg.value);
     }
 
 
@@ -368,14 +371,29 @@ contract FlightSuretyApp is Ownable {
     external
     requireIsOperational
     {
+        /*
         emit OnChangeBalances(address(this).balance, address(flightSuretyData).balance);
-        //uint256 payout = flightSuretyData.payouts[msg.sender];
-        //flightSuretyData.payouts[msg.sender] = 0;
-        //payable(msg.sender).transfer(payout);
-        //emit InsuranceWithdrawn(msg.sender, payout);
+        uint256 payout = flightSuretyData.payouts[msg.sender];
+        flightSuretyData.payouts[msg.sender] = 0;
+        payable(msg.sender).transfer(payout);
+        emit InsuranceWithdrawn(msg.sender, payout);
+        */
     }
 
+    // Function to receive Ether. msg.data must be empty
+    receive() external payable {
+        // we could also directly call refund such as in fund, but would like to test receive function
+        //payable(address(flightSuretyData)).transfer(msg.value);
+        /*
+        // no gas available - only 2300 gas
+        address payable jo = payable(address(flightSuretyData));
+        jo.transfer(msg.value);
+        */
+        // this work juhuuu
+        (bool sent, bytes memory data) = address(flightSuretyData).call{value: msg.value}("");
+        require(sent, "Failed to send Ether");
 
+    }
 
 
 // region ORACLE MANAGEMENT
