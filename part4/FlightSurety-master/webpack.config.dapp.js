@@ -40,8 +40,22 @@ module.exports = {
     extensions: [".js"]
   },
   devServer: {
-    contentBase: path.join(__dirname, "dapp"),
+
     port: 8000,
-    stats: "minimal"
+    static: {
+      directory:path.join(__dirname, "dapp"),
+      //contentBase:
+    },
+    devMiddleware: {
+      stats: "minimal"
+     /*
+      index: true,
+      mimeTypes: { "text/html": ["phtml"] },
+      publicPath: "/publicPathForDevServe",
+      serverSideRender: true,
+      writeToDisk: true,
+
+      */
+    },
   }
 };

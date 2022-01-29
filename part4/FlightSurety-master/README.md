@@ -100,7 +100,8 @@ Please update the following libraries before useage
 
     see solution here: https://howtofix.io/solidity-error-construction-of-struct-that-contains-a-nested-mapping-id1411686
 - Fixing this article to fix node-gyp issues https://spin.atomicobject.com/2019/03/27/node-gyp-windows/ on Windows.  
-
+- Dapp change webpack-dev-server to webpack serve https://stackoverflow.com/questions/40379139/cannot-find-module-webpack-bin-config-yargs/41182205
+  "webpack serve --config config/webpack.dev.js --progress"
 ## Develop Client
 
 To run truffle tests:

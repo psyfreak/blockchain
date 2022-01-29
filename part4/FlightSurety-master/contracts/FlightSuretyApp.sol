@@ -213,11 +213,9 @@ contract FlightSuretyApp is Ownable {
     {
 
         bytes32 flightKey = Util.getFlightKey (airline, flight, timestamp);
-
-        oracleResponses[flightKey].isOpen = false;
-
+        //oracleResponses[flightKey].isOpen = false; // wrong!!!
         // CODE EXERCISE 3: Announce to the world that verified flight status information is available
-        emit FlightStatusInfo(airline, flight, timestamp, statusCode);
+
         // Save the flight information for posterity
 
         //flights[flightKey] = FlightStatus(true, statusId);
@@ -243,6 +241,7 @@ contract FlightSuretyApp is Ownable {
                             uint256 timestamp
                         )
                         external
+                        //TODO by anyone?
     {
         uint8 index = Util.getRandomIndex10(msg.sender, 0);
 
@@ -345,6 +344,7 @@ contract FlightSuretyApp is Ownable {
 
 
     // Register an oracle with the contract
+    /// Every oracles response to 3 random generated indices
     function registerOracle
                             (
                             )
@@ -355,6 +355,7 @@ contract FlightSuretyApp is Ownable {
         // check if already registered
         require(!oracles[msg.sender].isRegistered, "Oracle is already registered");
 
+        // pseudo random indices
         uint8[3] memory indexes = Util.generateIndexes(msg.sender);
 
         oracles[msg.sender] = Oracle({
@@ -394,22 +395,28 @@ contract FlightSuretyApp is Ownable {
                         )
                         external
     {
-        require((oracles[msg.sender].indexes[0] == index) || (oracles[msg.sender].indexes[1] == index) || (oracles[msg.sender].indexes[2] == index), "Index does not match oracle request");
-
-
+        // check if the assigned index is matched to one requested
+        require(
+            (oracles[msg.sender].indexes[0] == index) ||
+            (oracles[msg.sender].indexes[1] == index) ||
+            (oracles[msg.sender].indexes[2] == index),
+                "Index does not match oracle request"
+        );
+        // if index matches, generate key and check if request still open
         bytes32 key = keccak256(abi.encodePacked(index, airline, flight, timestamp)); 
         require(oracleResponses[key].isOpen, "Flight or timestamp do not match oracle request");
 
+        // push calculated value to responses array (different results have different array with all approvers
         oracleResponses[key].responses[statusCode].push(msg.sender);
 
         // Information isn't considered verified until at least MIN_RESPONSES
         // oracles respond with the *** same *** information
         emit OracleReport(airline, flight, timestamp, statusCode);
         if (oracleResponses[key].responses[statusCode].length >= MIN_RESPONSES) {
-
+            oracleResponses[key].isOpen = false;
             emit FlightStatusInfo(airline, flight, timestamp, statusCode);
-
             // Handle flight status as appropriate
+            // TODO not right - index is missing
             processFlightStatus(airline, flight, timestamp, statusCode);
         }
     }
