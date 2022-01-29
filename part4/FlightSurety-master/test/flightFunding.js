@@ -9,6 +9,7 @@ contract('Flight Surety Tests', async (accounts) => {
   let FLIGHT_NAME = "",
     FLIGHT_timestamp = "";
 
+
   before('setup contract', async () => {
     config = await Test.Config(accounts);
     FLIGHT_NAME = config.flights[0].name;
@@ -18,8 +19,7 @@ contract('Flight Surety Tests', async (accounts) => {
     console.log("firstAirline", config.firstAirline, "Test flight", FLIGHT_NAME, " departure", FLIGHT_timestamp);
     console.log("config.flightSuretyApp adr: ", config.flightSuretyApp.address);
     console.log("config.flightSuretyData adr: ", config.flightSuretyData.address);
-    await Util.helper.printBalance(config, config.firstAirline);
-    await Util.helper.printAmounts(config);
+
 
     /*
     (config.flightSuretyData).events.allEvents({
@@ -59,7 +59,16 @@ contract('Flight Surety Tests', async (accounts) => {
 
   });
 
-
+  beforeEach('setup contract', async () => {
+    config = await Test.Config(accounts);
+    await Util.helper.printBalance(config);
+    await Util.helper.printAmounts(config);
+  });
+  afterEach('setup contract', async () => {
+    config = await Test.Config(accounts);
+    await Util.helper.printBalance(config);
+    await Util.helper.printAmounts(config);
+  });
   /****************************************************************************************/
   /* Operations and Settings                                                              */
   /****************************************************************************************/
@@ -109,8 +118,7 @@ contract('Flight Surety Tests', async (accounts) => {
 
     // ARRANGE
     let registeredAirline = accounts[2];
-    await Util.helper.printBalance(config, config.firstAirline);
-    await Util.helper.printAmounts(config);
+
 
     let result = await config.flightSuretyData.isAirlineFunded.call(registeredAirline);
     assert.equal(result, false, "Airline is funded");
@@ -128,8 +136,7 @@ contract('Flight Surety Tests', async (accounts) => {
 
     // ASSERT
     assert.equal(fail, false, "Airline should not be able to register another airline if it hasn't provided funding");
-    await Util.helper.printBalance(config, config.firstAirline);
-    await Util.helper.printAmounts(config);
+
   });
 
   /*
@@ -138,8 +145,7 @@ contract('Flight Surety Tests', async (accounts) => {
 
     // ARRANGE
     let registeredAirline = accounts[2];
-    await Util.helper.printBalance(config, config.firstAirline);
-    await Util.helper.printAmounts(config);
+
 
     let result = await config.flightSuretyData.isAirlineFunded.call(registeredAirline);
     //assert.equal(result, false, "Airline is already funded");
@@ -156,16 +162,14 @@ contract('Flight Surety Tests', async (accounts) => {
 
     // ASSERT
     assert.equal(fail, false, "Airline should not be able to register another airline if it hasn't provided funding");
-    await Util.helper.printBalance(config, config.firstAirline);
-    await Util.helper.printAmounts(config);
+
   });
   */
   it('(airline) Funded airline can do refund', async () => {
 
     // ARRANGE
     let registeredAirline = accounts[2];
-    await Util.helper.printBalance(config, config.firstAirline);
-    await Util.helper.printAmounts(config);
+
 
     let result = await config.flightSuretyData.isAirlineFunded.call(registeredAirline);
     assert.equal(result, true, "Airline is not funded");
@@ -182,8 +186,6 @@ contract('Flight Surety Tests', async (accounts) => {
 
     // ASSERT
     assert.equal(fail, false, "Funded Airline should be able to refund");
-    await Util.helper.printBalance(config, config.firstAirline);
-    await Util.helper.printAmounts(config);
 
     result = await config.flightSuretyData.getAirlineByAddress.call(registeredAirline);
     console.log("getAirlineByAddress", result);

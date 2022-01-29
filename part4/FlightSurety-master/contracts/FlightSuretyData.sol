@@ -732,7 +732,7 @@ contract FlightSuretyData is Ownable {
         uint256 value
     )
         external
-        //payable
+        payable
         requireIsOperational
         requireIsFlightExisting(flightKey) //TODO move everything to app contract
         requireIsPassengerOnFlight(flightKey, passenger)

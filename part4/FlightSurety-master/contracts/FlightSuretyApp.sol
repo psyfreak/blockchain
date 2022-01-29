@@ -47,52 +47,6 @@ contract FlightSuretyApp is Ownable {
     mapping(bytes32 => Flight) private flights;
 
 
-
-
-    /********************************************************************************************/
-    /*                                       FUNCTION MODIFIERS                                 */
-    /********************************************************************************************/
-
-    // Modifiers help avoid duplication of code. They are typically used to validate something
-    // before a function is allowed to be executed.
-
-    /**
-    * @dev Modifier that requires the "operational" boolean variable to be "true"
-    *      This is used on all state changing functions to pause the contract in 
-    *      the event there is an issue that needs to be fixed
-    */
-    modifier requireIsOperational() 
-    {
-         // TODO Modify to call data contract's status
-        require(flightSuretyData.isOperational(), "Contract is currently not operational");
-        _;  // All modifiers require an "_" which indicates where the function body will be added
-    }
-
-    modifier IsFeeSufficientChangeBack (uint _amount) {
-        require(msg.value >= _amount, "Amount is not sufficient");
-        _;
-        if (msg.value > _amount) {
-            payable(msg.sender).transfer(msg.value - _amount);
-        }
-    }
-
-    modifier requireIsAirlineAuthorized(address airline)
-    {
-        require(flightSuretyData.isAirlineFunded(airline), "Airline is not authorized");
-        _;
-    }
-
-    // Define a modifier that verifies the Caller
-    modifier verifyCaller (address _address) {
-        require(msg.sender == _address, "caller is not verified");
-        _;
-    }
-
-    modifier Cap (uint _amount) {
-        require(msg.value <= _amount, "Amount is capped");
-        _;
-    }
-
     /********************************************************************************************/
     /*                                       CONSTRUCTOR                                        */
     /********************************************************************************************/
@@ -112,21 +66,6 @@ contract FlightSuretyApp is Ownable {
         //flightSuretyData.authorizeContract(address(this)); //not working with this address, because this contract did not deploy the datacontract.
         // registerFirstAirline when contract is deployed (TODO which contract, app or data contract, might be better?)
     }
-
-    /********************************************************************************************/
-    /*                                       UTILITY FUNCTIONS                                  */
-    /********************************************************************************************/
-
-    function isOperational() 
-                            public 
-                            pure 
-                            returns(bool) 
-    {
-        return true;  // Modify to call data contract's status
-    }
-
-
-
 
 
     /********************************************************************************************/
@@ -178,34 +117,6 @@ contract FlightSuretyApp is Ownable {
         //return (success, 1); // draft contains this, but statechanging methods cannot have return values
     }
 
-    /********************** helper **********************/
-    function isConfirmed(address newAirline)
-        private
-        view
-        returns (bool)
-    {
-        bool confirmed = false;
-        // less or equal than 4 airlines
-        address[] memory confirmationsForAirline = flightSuretyData.getAirlineBallotsByAirlineAddress(newAirline);
-        uint numOfConfirmations = confirmationsForAirline.length;
-        uint256 numOfFundedAirlines = flightSuretyData.numOfFundedAirlines();
-
-        // below or equal threshold => confirmation ok if the msg.sender is an already confirmed airline
-        if(flightSuretyData.VOTING_THRESHOLD() >= numOfFundedAirlines) {
-            // only one vote by funded airline
-            if(numOfConfirmations > 0) {
-                confirmed = true;
-            }
-        }
-        else { // if more than 4 airlines
-            // 50%
-            if(numOfConfirmations >= numOfFundedAirlines.div(2) ) {
-                // check duplicate
-                confirmed = true;
-            }
-        }
-        return confirmed;
-    }
 
      // TODO is this needed ? one could also
     function fundAirline ( ) external payable {
@@ -235,7 +146,7 @@ contract FlightSuretyApp is Ownable {
     }
 
     /**
-       * @dev Buy insurance for a flight
+       * @dev Buy flight ticket for a flight
        * modifer check if flight is available, insuree is a passanger
        */
 
@@ -255,8 +166,6 @@ contract FlightSuretyApp is Ownable {
         flightSuretyData.registerPassengerForFlight(flightKey, msg.sender);
     }
 
-
-
     function buyFlightInsurance
     (
         address airline,
@@ -270,20 +179,14 @@ contract FlightSuretyApp is Ownable {
     //TODO passenger should
     //must be greater than 0 and less < 150
     {
-
         //flightSuretyData.escrow.deposit(tx.origin) won´t work in our case we not one account
         bytes32 flightKey = Util.getFlightKey(airline, flight, timestamp);
-        /*
-        if(flightInsurances[flightKey].length == 0) {
+        flightSuretyData.createInsuranceForFlight{value: msg.value}(flightKey, msg.sender, msg.value);// we could also call and send it to directly via msg.value
 
-        }
-        */
-
-        flightSuretyData.createInsuranceForFlight(flightKey, msg.sender, msg.value); //payable function vs. transfer afterwards
+        //flightSuretyData.createInsuranceForFlight(flightKey, msg.sender, msg.value); //payable function vs. transfer afterwards
         // msg.value lands here => also balance is updated for this contract
         // we might transfer the data to
         //payable(address(flightSuretyData)).transfer(msg.value);
-        emit OnChangeBalances(address(this).balance, address(flightSuretyData).balance);
     }
 
     // deposit function needed from to actually all payables send ether to AppContract
@@ -395,8 +298,11 @@ contract FlightSuretyApp is Ownable {
 
     }
 
-
+    /********************************************************************************************/
+    /*                                       ORACLE FUNCTIONS                                  */
+    /********************************************************************************************/
 // region ORACLE MANAGEMENT
+    // TODO move to seperate contract
 
     // Incremented to add pseudo-randomness at various points
     uint8 private nonce = 0;
@@ -511,6 +417,93 @@ contract FlightSuretyApp is Ownable {
             processFlightStatus(airline, flight, timestamp, statusCode);
         }
     }
+
+
+
+    /********************************************************************************************/
+    /*                                       FUNCTION MODIFIERS                                 */
+    /********************************************************************************************/
+
+    // Modifiers help avoid duplication of code. They are typically used to validate something
+    // before a function is allowed to be executed.
+
+    /**
+    * @dev Modifier that requires the "operational" boolean variable to be "true"
+    *      This is used on all state changing functions to pause the contract in
+    *      the event there is an issue that needs to be fixed
+    */
+    modifier requireIsOperational()
+    {
+        // TODO Modify to call data contract's status
+        require(flightSuretyData.isOperational(), "Contract is currently not operational");
+        _;  // All modifiers require an "_" which indicates where the function body will be added
+    }
+
+    modifier IsFeeSufficientChangeBack (uint _amount) {
+        require(msg.value >= _amount, "Amount is not sufficient");
+        _;
+        if (msg.value > _amount) {
+            payable(msg.sender).transfer(msg.value - _amount);
+        }
+    }
+
+    modifier requireIsAirlineAuthorized(address airline)
+    {
+        require(flightSuretyData.isAirlineFunded(airline), "Airline is not authorized");
+        _;
+    }
+
+    // Define a modifier that verifies the Caller
+    modifier verifyCaller (address _address) {
+        require(msg.sender == _address, "caller is not verified");
+        _;
+    }
+
+    modifier Cap (uint _amount) {
+        require(msg.value <= _amount, "Amount is capped");
+        _;
+    }
+
+    /********************************************************************************************/
+    /*                                       UTILITY FUNCTIONS                                  */
+    /********************************************************************************************/
+
+    function isOperational()
+    public
+    pure
+    returns(bool)
+    {
+        return true;  // Modify to call data contract's status
+    }
+
+    function isConfirmed(address newAirline)
+    private
+    view
+    returns (bool)
+    {
+        bool confirmed = false;
+        // less or equal than 4 airlines
+        address[] memory confirmationsForAirline = flightSuretyData.getAirlineBallotsByAirlineAddress(newAirline);
+        uint numOfConfirmations = confirmationsForAirline.length;
+        uint256 numOfFundedAirlines = flightSuretyData.numOfFundedAirlines();
+
+        // below or equal threshold => confirmation ok if the msg.sender is an already confirmed airline
+        if(flightSuretyData.VOTING_THRESHOLD() >= numOfFundedAirlines) {
+            // only one vote by funded airline
+            if(numOfConfirmations > 0) {
+                confirmed = true;
+            }
+        }
+        else { // if more than 4 airlines
+            // 50%
+            if(numOfConfirmations >= numOfFundedAirlines.div(2) ) {
+                // check duplicate
+                confirmed = true;
+            }
+        }
+        return confirmed;
+    }
+
 }
 
 
