@@ -7,6 +7,7 @@
 - move setter/getter require
 - setOperational multiparty
 - correct multiparty funded vs. registered
+- check if funds are sufficient for payouts
 
 Question adding:
 - Why no interface when including dataContract in app / old solidity version?

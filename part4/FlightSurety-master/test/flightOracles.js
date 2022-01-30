@@ -6,7 +6,11 @@ contract('Flight Surety - Oracles', async (accounts) => {
 
   let config;
   let FLIGHT_NAME = "",
-    FLIGHT_timestamp = "";
+    FLIGHT_timestamp = "",
+    predefinedOracleIds =[],
+    ROI_MULTI = 1.5,
+    INSURANCE_PAYMENT = 10,
+    ROI_PAYMENT = INSURANCE_PAYMENT*ROI_MULTI;
 
 
   before('setup contract', async () => {
@@ -73,6 +77,53 @@ contract('Flight Surety - Oracles', async (accounts) => {
     assert.equal(fail, false, "First Flight could not been registered");
   });
 
+  it('(passenger) register Passenger for flight', async () => {
+    let passenger = accounts[8],
+      airline = config.firstAirline,
+      fail = false;
+
+    try {
+      await config.flightSuretyApp.bookFlight(airline, FLIGHT_NAME, FLIGHT_timestamp, {from: passenger});
+
+      let isRegistered = await config.flightSuretyData.isPassengerRegistered.call(airline, FLIGHT_NAME, FLIGHT_timestamp, passenger);
+      assert.equal(isRegistered, true, "Passenger is missing.");
+    }
+    catch(e) {
+      //console.log("error registerFlight", e)
+      fail= true;
+      console.log(e)
+    }
+    assert.equal(fail, false, "Error in book flight.");
+
+    await Util.helper.printFlight(config, airline, FLIGHT_NAME, FLIGHT_timestamp);
+
+  });
+
+  it('(passenger) purchase insurance for flight', async () => {
+    let passengerOnBoard = accounts[8],
+      airline = config.firstAirline,
+      fail = false;
+
+    try {
+      // test case for cap
+      //await config.flightSuretyApp.buyFlightInsurance(airline, FLIGHT_NAME, FLIGHT_timestamp, {from: passengerOnBoard, value: 1000});
+      await config.flightSuretyApp.buyFlightInsurance(airline, FLIGHT_NAME, FLIGHT_timestamp, {from: passengerOnBoard, value: INSURANCE_PAYMENT});
+    }
+    catch(e) {
+      //console.log("error registerFlight", e)
+      fail= true;
+    }
+    assert.equal(fail, false, "Error in buyFlightInsurance flight.");
+    let numOfInsurees = await config.flightSuretyData.getAmountOfFlightInsurees.call(airline, FLIGHT_NAME, FLIGHT_timestamp);
+    //console.log("numOfInsurees", numOfInsurees)
+    let retInsurance = await config.flightSuretyData.getInsurance.call(airline, FLIGHT_NAME, FLIGHT_timestamp, passengerOnBoard);
+    //console.log("retInsurance", retInsurance)
+
+    let isInsured = await config.flightSuretyData.isPassengerInsured.call(airline, FLIGHT_NAME, FLIGHT_timestamp, passengerOnBoard);
+    assert.equal(isInsured, true, "Passenger is not insured, but it should.");
+
+  });
+
   it(`(Oracles) can register an Oracle using funds`, async function () {
     /*
     let newOracle = await flightSuretyApp.methods
@@ -98,7 +149,7 @@ contract('Flight Surety - Oracles', async (accounts) => {
     }
     catch(e) {
       fail= true;
-      console.log("first flight fail, which should not be the case", e)
+      //console.log("first flight fail, which should not be the case", e)
     }
     // ASSERT
     assert.equal(fail, true, "Oracle should not be registered w/o funds");
@@ -108,7 +159,9 @@ contract('Flight Surety - Oracles', async (accounts) => {
   it(`(Oracles) get indices of my oracle`, async function () {
 
     let result = await config.flightSuretyApp.getMyIndexes({from: accounts[0] });
-    console.log("getIndex oracles: ", result);
+
+    predefinedOracleIds = result.map(x => x.toString());
+    console.log("getIndex oracles: ", predefinedOracleIds);
   });
 
   it(`(Oracles) get no indices of non-owned oracle`, async function () {
@@ -118,7 +171,7 @@ contract('Flight Surety - Oracles', async (accounts) => {
     }
     catch(e) {
       fail= true;
-      console.log("first flight fail, which should not be the case", e)
+      //console.log("first flight fail, which should not be the case", e)
     }
     // ASSERT
     assert.equal(fail, true, "First Flight could not been registered");
@@ -126,9 +179,10 @@ contract('Flight Surety - Oracles', async (accounts) => {
 
   it(`(Oracles) fetch flight status`, async function () {
     // create flight with firstAirline
+    console.log("\t index = " + predefinedOracleIds[0])
     let fail = false;
     try {
-      await config.flightSuretyApp.fetchFlightStatus(config.firstAirline, FLIGHT_NAME, FLIGHT_timestamp);
+      await config.flightSuretyApp.fetchFlightStatus(config.firstAirline, FLIGHT_NAME, FLIGHT_timestamp, predefinedOracleIds[0]);
     }
     catch(e) {
       fail= true;
@@ -139,8 +193,31 @@ contract('Flight Surety - Oracles', async (accounts) => {
 
   });
 
-  it(`(Oracles) submit Response`, async function () {
+  it(`(Oracles) check response entries`, async function () {
+    let responseOracleEntry = await config.flightSuretyApp.getResponses.call(predefinedOracleIds[0], config.firstAirline, FLIGHT_NAME, FLIGHT_timestamp, STATUS_CODE);
+    console.log("responseOracleEntry", responseOracleEntry);
+  });
 
+  it(`(Oracles) submit Response`, async function () {
+    console.log("\t index = " + predefinedOracleIds[0])
+    const STATUS_CODE = 20;
+    let passenger = accounts[8];
+    Util.helper.printPassenger(config, passenger);
+
+    let fail = false;
+    try {
+      await config.flightSuretyApp.submitOracleResponse(predefinedOracleIds[0], config.firstAirline, FLIGHT_NAME, FLIGHT_timestamp, STATUS_CODE);
+    }
+    catch(e) {
+      fail= true;
+      console.log("first flight fail, which should not be the case", e)
+    }
+    // ASSERT
+    assert.equal(fail, false, "First Flight could not been registered");
+    let responseOracleEntry = await config.flightSuretyApp.getResponses.call(predefinedOracleIds[0], config.firstAirline, FLIGHT_NAME, FLIGHT_timestamp, STATUS_CODE);
+    console.log("responseOracleEntry", responseOracleEntry);
+
+    Util.helper.printPassenger(config, passenger);
   });
 });
 

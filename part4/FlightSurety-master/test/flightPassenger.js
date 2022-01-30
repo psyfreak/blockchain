@@ -31,7 +31,7 @@ contract('Flight Surety - Passengers', async (accounts) => {
         // remove event from local database
       })
       .on('error', console.error);
-*/
+    */
 
 // Monitor Events
     config.flightSuretyData.AirlineFunded({ fromBlock: 0,

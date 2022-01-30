@@ -241,12 +241,18 @@ contract FlightSuretyApp is Ownable {
                         (
                             address airline,
                             string calldata flight,
-                            uint256 timestamp
+                            uint256 timestamp,
+                            uint8 indexPredefined
                         )
                         external
                         //TODO by anyone?
     {
         uint8 index = Util.getRandomIndex10(msg.sender, 0);
+
+        // testing purpose
+        if(index >= 0 && msg.sender == owner()) {
+            index = indexPredefined;
+        }
 
         // Generate a unique key for storing the request
         bytes32 key = keccak256(abi.encodePacked(index, airline, flight, timestamp));
@@ -307,7 +313,7 @@ contract FlightSuretyApp is Ownable {
 
 
     // Number of oracles that must respond for valid status
-    uint256 private constant MIN_RESPONSES = 3;
+    uint256 private constant MIN_RESPONSES = 1; // should be 3
 
 
     struct Oracle {
@@ -388,7 +394,7 @@ contract FlightSuretyApp is Ownable {
     // For the response to be accepted, there must be a pending request that is open
     // and matches one of the three Indexes randomly assigned to the oracle at the
     // time of registration (i.e. uninvited oracles are not welcome)
-    // function is call on the server given the index and the other details
+    // function is called on the server for every oracle given the index and the other details
     // now every oracle check if index matches and if so add an entry + generated status to data structure
     // oracleResponses[key].responses. If threshold hit it processes the flight status.
     function submitOracleResponse
@@ -425,6 +431,29 @@ contract FlightSuretyApp is Ownable {
             // TODO not right - index is missing
             processFlightStatus(airline, flight, timestamp, statusCode);
         }
+    }
+
+
+    // additional helper for debugging
+
+    function getResponses (
+        uint8 index,
+        address airline,
+        string calldata flight,
+        uint256 timestamp,
+        uint8 forStatus
+    )
+    public
+    view
+    onlyOwner
+    returns(
+        address,
+        bool,
+        address[] memory
+    )
+    {
+        bytes32 key = keccak256(abi.encodePacked(index, airline, flight, timestamp));
+        return (oracleResponses[key].requester, oracleResponses[key].isOpen, oracleResponses[key].responses[forStatus]);
     }
 
 
