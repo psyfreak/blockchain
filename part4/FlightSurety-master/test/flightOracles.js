@@ -77,7 +77,6 @@ contract('Flight Surety - Oracles', async (accounts) => {
     assert.equal(fail, false, "First Flight could not been registered");
   });
 
-
   it(`(Oracles) can register an Oracle using funds`, async function () {
     /*
     let newOracle = await flightSuretyApp.methods
@@ -95,6 +94,7 @@ contract('Flight Surety - Oracles', async (accounts) => {
     // ASSERT
     assert.equal(fail, false, "First Flight could not been registered");
   });
+
   it(`(Oracles) block register an Oracle without funds`, async function () {
     let fail = false;
     try {
@@ -108,11 +108,13 @@ contract('Flight Surety - Oracles', async (accounts) => {
     assert.equal(fail, true, "Oracle should not be registered w/o funds");
 
   });
+
   it(`(Oracles) get indices of my oracle`, async function () {
 
     let result = await config.flightSuretyApp.getMyIndexes({from: accounts[0] });
     console.log("getIndex oracles: ", result);
   });
+
   it(`(Oracles) get no indices of non-owned oracle`, async function () {
     let fail = false;
     try {
@@ -140,11 +142,10 @@ contract('Flight Surety - Oracles', async (accounts) => {
     assert.equal(fail, false, "First Flight could not been registered");
 
   });
+
   it(`(Oracles) submit Response`, async function () {
 
-
   });
-
 });
 
 

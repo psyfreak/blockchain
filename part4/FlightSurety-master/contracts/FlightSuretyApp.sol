@@ -388,6 +388,9 @@ contract FlightSuretyApp is Ownable {
     // For the response to be accepted, there must be a pending request that is open
     // and matches one of the three Indexes randomly assigned to the oracle at the
     // time of registration (i.e. uninvited oracles are not welcome)
+    // function is call on the server given the index and the other details
+    // now every oracle check if index matches and if so add an entry + generated status to data structure
+    // oracleResponses[key].responses. If threshold hit it processes the flight status.
     function submitOracleResponse
                         (
                             uint8 index,

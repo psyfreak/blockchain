@@ -293,7 +293,6 @@ contract FlightSuretyData is Ownable {
     function isOperational() 
         public
         view
-        requireIsCallerAuthorized
         returns(bool)
     {
         return operational;
@@ -376,7 +375,7 @@ contract FlightSuretyData is Ownable {
         view
         returns(bool)
     {
-        return (airlines[airline].isRegistered && airlines[airline].investment >= AIRLINE_REGISTRATION_FEE);
+        return (isAirlineRegistered(airline) && airlines[airline].investment >= AIRLINE_REGISTRATION_FEE);
     }
 
     function getAirlineInvestment (address airline)
@@ -576,9 +575,8 @@ contract FlightSuretyData is Ownable {
     function createAirline(address airlineAddr)
         external
         requireIsOperational
-        // TODO can only be called by app contract
+        requireIsCallerAuthorized
         requireIsAirlineNotExisting(airlineAddr) // no hard condition
-        //requireIsCallerAuthorized
     {
         // msg.sender is now address of the calling contract therefore use tx.origin for registeredBy
         // new airline
@@ -630,9 +628,8 @@ contract FlightSuretyData is Ownable {
     function confirmAirline(address airlineAddr, address confirmedBy)
         external
         requireIsOperational
-        // TODO can only be called by app contract
+        requireIsCallerAuthorized
         requireIsAirlineExisting(airlineAddr)
-        //requireIsCallerAuthorized
     {
         ballots[ElectionTopics.AIRLINE_REGISTRATION][airlineAddr].push(confirmedBy);
     }
@@ -660,9 +657,10 @@ contract FlightSuretyData is Ownable {
         public
         payable
         requireIsOperational
+        requireIsCallerAuthorized
+        requireIsAirlineRegistered(airline)
         //IsFeeSufficientChangeBack(AIRLINE_REGISTRATION_FEE)
     {
-        require(airlines[airline].isRegistered, "Airline is not registered yet");
         require(airlines[airline].investment == 0, "Airline has been already funded");
         require(msg.value == AIRLINE_REGISTRATION_FEE, "Airline funding must be exactly 10 ether");
 
@@ -675,13 +673,15 @@ contract FlightSuretyData is Ownable {
         emit AirlineFunded(airline, airlines[airline].id, airlines[airline].isRegistered, airlines[airline].registeredBy, airlines[airline].investment, airlines[airline].timestamp);
     }
 
+    //TODO why this can be called in receive function, although msg.sender should be this contract instead of app contract
     function refundAirline(address airline) // TODO check 1. if it is better to use tx.origin 2. payable function or use receive or fallback one?
-    public
-    payable
-    requireIsOperational
+        public
+        payable
+        requireIsOperational
+        requireIsCallerAuthorized
+        requireIsAirlineRegistered(airline)
         //IsFeeSufficientChangeBack(AIRLINE_REGISTRATION_FEE)
     {
-        require(airlines[airline].isRegistered, "Airline must be registered for refunding");
         require(airlines[airline].investment >= AIRLINE_REGISTRATION_FEE, "Airline must be funded for refunding");
 
         //airlines[airline].balance = msg.value;
@@ -698,6 +698,7 @@ contract FlightSuretyData is Ownable {
     function createFlight(bytes32 flightKey)
         external
         requireIsOperational
+        requireIsCallerAuthorized
         requireIsFlightNotExisting(flightKey)
         // check if existinglkjljk
     {
@@ -723,7 +724,8 @@ contract FlightSuretyData is Ownable {
     )
         external
         requireIsOperational
-        // check if existing
+        requireIsCallerAuthorized
+        // TODO check if existing
     {
         //bytes32 flightKey = Util.getFlightKey(airline, flight, timestamp);
         flights[flightKey].status = newStatus; //STATUS_CODE_UNKNOWN from app contract // TODO better modularization
@@ -742,6 +744,7 @@ contract FlightSuretyData is Ownable {
     )
         external
         requireIsOperational
+        requireIsCallerAuthorized
         requireIsFlightExisting(flightKey)
         requireIsPassengerNotOnFlight(flightKey, passenger)
     {
@@ -762,6 +765,7 @@ contract FlightSuretyData is Ownable {
         external
         payable
         requireIsOperational
+        requireIsCallerAuthorized
         requireIsFlightExisting(flightKey) //TODO move everything to app contract
         requireIsPassengerOnFlight(flightKey, passenger)
     {
@@ -799,6 +803,7 @@ contract FlightSuretyData is Ownable {
     )
         external
         requireIsOperational
+        requireIsCallerAuthorized
     {
         // calculate the credit (1.5 insurance fee)
         // iterate over all passengers for this flight with
@@ -830,8 +835,9 @@ contract FlightSuretyData is Ownable {
     (
         address insuree
     )
-    external
-    requireIsOperational
+        external
+        requireIsOperational
+        requireIsCallerAuthorized
     {
         uint256 currentBalance = address(this).balance;
         uint256 payout = payouts[insuree];
@@ -862,7 +868,11 @@ contract FlightSuretyData is Ownable {
 
 
     // Function to receive Ether. msg.data must be empty
-    receive() external payable {
+    receive()
+        external
+        payable
+        requireIsCallerAuthorized
+    {
         // TODO how to use this.
         refundAirline(tx.origin);
     }

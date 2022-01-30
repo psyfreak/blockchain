@@ -101,19 +101,23 @@ contract('Flight Surety Multiparty', async (accounts) => {
     let status = await config.flightSuretyData.isOperational.call({ from: config.testAddresses[9] });
     assert.equal(status, true, "Incorrect initial operating status value");
   });
-
-  it(`(authentication) can call isOperational() via DataContract from firstAirline`, async function () {
+/*
+// is operational is not restricted by authorized require anymore ...
+  it(`(authentication) block call isOperational() via DataContract from firstAirline`, async function () {
     // Get operating status
-    let status = await config.flightSuretyData.isOperational.call({ from: config.firstAirline });
-    assert.equal(status, true, "Incorrect initial operating status value");
+    // working for synch calls
+    //assert.throws(() => config.flightSuretyData.isOperational.call({ from: config.firstAirline }), Error, "Error thrown");
+
+    await expectThrowsAsync(() => config.flightSuretyData.isOperational.call({ from: config.firstAirline }), "Returned error: VM Exception while processing transaction: revert Caller is not authorized")
+    //assert.equal(status, true, "Incorrect initial operating status value");
   });
 
   it(`(authentication) can call isOperational() via DataContract from unauthorized address`, async function () {
     // Get operating status
-    let status = await config.flightSuretyData.isOperational.call({ from: config.testAddresses[2] });
-    assert.equal(status, true, "Incorrect initial operating status value");
+    await expectThrowsAsync(() => config.flightSuretyData.isOperational.call({ from: config.testAddresses[2] }))
   });
 
+ */
 
   ///////////////////////// multiparty
   it(`(multiparty) has correct initial isOperational() value (DataContract)`, async function () {
@@ -173,3 +177,17 @@ contract('Flight Surety Multiparty', async (accounts) => {
 
 
 });
+
+const expectThrowsAsync = async (method, errorMessage) => {
+  let error = null
+  try {
+    await method()
+  }
+  catch (err) {
+    error = err
+  }
+  expect(error).to.be.an('Error')
+  if (errorMessage) {
+    expect(error.message).to.equal(errorMessage)
+  }
+}
