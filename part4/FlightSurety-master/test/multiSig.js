@@ -1,6 +1,6 @@
-
 const Test = require('../config/testConfig.js'),
-  BigNumber = require('bignumber.js');
+  BigNumber = require('bignumber.js'),
+  Util = require('./util.js');
 
 const SimpleStorage = artifacts.require("SimpleStorage");
 

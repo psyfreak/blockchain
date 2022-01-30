@@ -9,6 +9,8 @@ import "../node_modules/openzeppelin-solidity/contracts/utils/math/SafeMath.sol"
 import "../node_modules/openzeppelin-solidity/contracts/access/Ownable.sol";
 import {Util} from "./base/Util.sol";
 import "./FlightSuretyData.sol";
+//import "./base/MultiSignatureWallet.sol";
+
 
 /************************************************** */
 /* FlightSurety Smart Contract                      */
@@ -58,6 +60,7 @@ contract FlightSuretyApp is Ownable {
     constructor
                                 (
                                     FlightSuretyData dataContract
+                                    //MultiSignatureWallet multiContract
                                 )
     {
         // call the data contract and set this address
@@ -372,7 +375,11 @@ contract FlightSuretyApp is Ownable {
                                         indexes: indexes
                                     });
         oracleCount++;
+
+        //TODO send ether to data contract
+
         emit OracleRegistered(msg.sender, indexes, oracleCount);
+
     }
 
     function getMyIndexes
@@ -512,6 +519,20 @@ contract FlightSuretyApp is Ownable {
     returns(bool)
     {
         return flightSuretyData.isOperational();  // Modify to call data contract's status
+    }
+
+    function requestSetOperation()
+    public
+    view
+    returns(bool)
+    {
+        // check
+        // if transactionId available then use transaction Id otherwise submit and set transaction Id
+        bytes memory encoded = "0x60fe47b10000000000000000000000000000000000000000000000000000000000000005";
+        //await config.multiSignatureWallet.submitTransaction(simpleStorage.address, 0, encoded, {from: config.firstAirline})
+        //// if transactionId available then use transaction Id otherwise submit and set transaction Id
+        //multiSignatureWallet.
+        return true;
     }
 
     function isConfirmed(address newAirline)

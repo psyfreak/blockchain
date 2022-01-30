@@ -8,6 +8,8 @@
 - setOperational multiparty
 - correct multiparty funded vs. registered
 - check if funds are sufficient for payouts
+- send money from oracles to dataContract
+- change constants back / min-responses oracles, wei to ether in all caps and bottoms etc.
 
 Question adding:
 - Why no interface when including dataContract in app / old solidity version?
@@ -48,6 +50,20 @@ Furthermore one needs to transfer the money, when data contract gets updated. I 
   running every time one uses test. It would mean that we deploy the contract twice, which needs more time. Is this right?
   
 - initialization script versus ctor init
+
+- withdraw transfer etc.
+- Intentionally implemented two solutions for the multiparty consensus 
+  - Default solution for registerFlight
+  - Multi Sig solution based on this exercise: https://github.com/ConsenSys-Academy/multisig-wallet-exercise/tree/master/contracts
+
+While the former has the advantage of smaller overhead, I found the extensibility not optimal.
+The second example I like in terms of transactionId and the anonimity..
+
+
+
+  
+
+
 ### Deployment 
 - initialization of airline can be done in deployment script, in contract ctor or via init function.
 The choice you made have different impact on the project.

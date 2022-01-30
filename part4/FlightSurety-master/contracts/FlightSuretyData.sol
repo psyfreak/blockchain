@@ -78,6 +78,7 @@ contract FlightSuretyData is Ownable {
         //address wallet; // money might be store here
     }
     mapping(bytes32 => Flight) flights;
+    uint256 public numOfFlights = 0;
     //bytes32[] allflights;
 
     // insurance
@@ -128,8 +129,6 @@ contract FlightSuretyData is Ownable {
         // authorize caller firs
         // so that we are able to create register and fund an airline via deploy script
         // one could also do it here directly in the data structure
-
-
         numOfAirlines = numOfAirlines.add(1);
         numOfRegisteredAirlines = numOfRegisteredAirlines.add(1);
         numOfFundedAirlines = numOfFundedAirlines.add(1);
@@ -723,6 +722,8 @@ contract FlightSuretyData is Ownable {
         requireIsFlightNotExisting(flightKey)
         // check if existinglkjljk
     {
+        numOfFlights = numOfFlights.add(1);
+        flights[flightKey].id = numOfFlights;
         flights[flightKey].isRegistered = true;
         flights[flightKey].registeredBy = tx.origin; //TODO better as parameter
         flights[flightKey].status = 0; //STATUS_CODE_UNKNOWN from app contract // TODO better modularization
@@ -895,7 +896,7 @@ contract FlightSuretyData is Ownable {
         payable
         requireIsCallerAuthorized
     {
-        // TODO how to use this.
+        // TODO how to use this - check why this is working
         refundAirline(tx.origin);
     }
 
