@@ -54,7 +54,7 @@ contract('Flight Surety - Funding', async (accounts) => {
       }
     });
     */
-    await config.flightSuretyData.authorizeCaller(config.flightSuretyApp.address);
+    //await config.flightSuretyData.authorizeCaller(config.flightSuretyApp.address);
 
 
   });

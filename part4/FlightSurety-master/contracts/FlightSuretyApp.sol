@@ -62,6 +62,9 @@ contract FlightSuretyApp is Ownable {
     {
         // call the data contract and set this address
         flightSuretyData = FlightSuretyData(dataContract);
+        //flightSuretyData.authorizeCaller(address(this)); call is contract, therefore this is not working
+        // add app contract as authorized caller for data contract
+
         // add first airline
         //flightSuretyData.authorizeContract(address(this)); //not working with this address, because this contract did not deploy the datacontract.
         // registerFirstAirline when contract is deployed (TODO which contract, app or data contract, might be better?)
@@ -473,10 +476,10 @@ contract FlightSuretyApp is Ownable {
 
     function isOperational()
     public
-    pure
+    view
     returns(bool)
     {
-        return true;  // Modify to call data contract's status
+        return flightSuretyData.isOperational();  // Modify to call data contract's status
     }
 
     function isConfirmed(address newAirline)

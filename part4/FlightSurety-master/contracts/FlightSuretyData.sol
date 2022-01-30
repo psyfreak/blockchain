@@ -94,6 +94,9 @@ contract FlightSuretyData is Ownable {
     /********************************************************************************************/
     /*                                       EVENT DEFINITIONS                                  */
     /********************************************************************************************/
+    event CallerAuthorized(address caller);
+    event CallerDeauthorized(address caller);
+
     event AirlineNewRegistration(address airline, uint256 id, address registeredBy, uint256 timestamp);
     event AirlineRegistered(address airline, uint256 id, bool isRegistered, address registeredBy, uint256 investment, uint256 timestamp);
     event AirlineFunded(address airline, uint256 id, bool isRegistered, address registeredBy, uint256 investment, uint256 timestamp);
@@ -115,19 +118,17 @@ contract FlightSuretyData is Ownable {
     * @dev Constructor
     *      The deploying account becomes contractOwner
     */
-    constructor
-                                (
-                                 address firstAirline // not needed if init function
-                                )
+    constructor ( address firstAirline) // not needed if init function
         payable // needed if we fund directly via ctor call
     {
         authorizedCallers[owner()] = true;// initialize so that contractOwner can register first airline
+        //authorizedCallers[firstAirline] = true;
         //escrow = new Escrow();
         // authorize caller firs
         // so that we are able to create register and fund an airline via deploy script
         // one could also do it here directly in the data structure
 
-        authorizedCallers[firstAirline] = true;
+
         numOfAirlines = numOfAirlines.add(1);
         numOfRegisteredAirlines = numOfRegisteredAirlines.add(1);
         numOfFundedAirlines = numOfFundedAirlines.add(1);
@@ -211,7 +212,6 @@ contract FlightSuretyData is Ownable {
         _;
     }
 
-
     modifier onlyEOA() {
         require(msg.sender == tx.origin, "Must use EOA");
         _;
@@ -254,7 +254,7 @@ contract FlightSuretyData is Ownable {
 
     modifier requireIsCallerAuthorized()
     {
-        require(authorizedCallers[msg.sender], "Caller is not authorized");
+        require(isCallerAuthorized(msg.sender), "Caller is not authorized");
         _;
     }
 
@@ -293,6 +293,7 @@ contract FlightSuretyData is Ownable {
     function isOperational() 
         public
         view
+        requireIsCallerAuthorized
         returns(bool)
     {
         return operational;
@@ -321,14 +322,22 @@ contract FlightSuretyData is Ownable {
     }
 
 
-    function authorizeCaller (address callee) external {
+    function authorizeCaller (address callee)
+        external
+        onlyOwner
+    {
         // TODO add multisig voting mechanism
         authorizedCallers[callee] = true;
+        emit CallerAuthorized(callee);
     }
 
-    function deauthorizeCaller (address callee) external {
+    function deauthorizeCaller (address callee)
+        external
+        onlyOwner
+    {
         // TODO add multisig voting mechanism
         delete authorizedCallers[callee];
+        emit CallerDeauthorized(callee);
     }
 
     function getAirlineByAddress (address airline)
@@ -590,12 +599,12 @@ contract FlightSuretyData is Ownable {
     function registerAirline(address airlineAddr)
         external
         requireIsOperational
+        requireIsCallerAuthorized
         requireIsAirlineNotRegistered(airlineAddr)
     {
 
         airlines[airlineAddr].isRegistered = true;
         numOfRegisteredAirlines = numOfRegisteredAirlines.add(1);
-
 
         emit AirlineRegistered (
             airlineAddr,

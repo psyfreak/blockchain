@@ -53,7 +53,7 @@ contract('Flight Surety - Airlines', async (accounts) => {
       }
     });
     */
-    await config.flightSuretyData.authorizeCaller(config.flightSuretyApp.address);
+    //await config.flightSuretyData.authorizeCaller(config.flightSuretyApp.address);
 
 
   });

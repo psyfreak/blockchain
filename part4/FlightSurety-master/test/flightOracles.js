@@ -37,7 +37,7 @@ contract('Flight Surety - Oracles', async (accounts) => {
 
   // Monitor Events
 
-    await config.flightSuretyData.authorizeCaller(config.flightSuretyApp.address);
+    //await config.flightSuretyData.authorizeCaller(config.flightSuretyApp.address);
 
     // oracleCount
 

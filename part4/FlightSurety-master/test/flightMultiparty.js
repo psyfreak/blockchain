@@ -53,7 +53,7 @@ contract('Flight Surety Multiparty', async (accounts) => {
       }
     });
     */
-    await config.flightSuretyData.authorizeCaller(config.flightSuretyApp.address);
+    //await config.flightSuretyData.authorizeCaller(config.flightSuretyApp.address);
 
 
   });
@@ -74,10 +74,51 @@ contract('Flight Surety Multiparty', async (accounts) => {
   /****************************************************************************************/
 
   //TODO add consensus tests...
-
-  it(`(multiparty) has correct initial isOperational() value`, async function () {
+  ///////////////////////// authentication
+  it(`(authentication) can call isOperational() via AppContract from owner`, async function () {
     // Get operating status
-    let status = await config.flightSuretyData.isOperational.call();
+    let status = await config.flightSuretyApp.isOperational.call({ from: config.testAddresses[9] });
+    assert.equal(status, true, "Incorrect initial operating status value");
+  });
+  //flightSuretyDataInstance.isCallerAuthorized(flightSuretyAppInstance.address)
+
+  it(`(authentication) can call isOperational() via AppContract from firstAirline`, async function () {
+    // Get operating status
+    let status = await config.flightSuretyApp.isOperational.call({ from: config.firstAirline });
+    assert.equal(status, true, "Incorrect initial operating status value");
+  });
+
+  it(`(authentication) can call isOperational() via AppContract from unauthorized address`, async function () {
+    // Get operating status
+    let status = await config.flightSuretyApp.isOperational.call({ from: config.testAddresses[2] });
+    assert.equal(status, true, "Incorrect initial operating status value");
+  });
+
+  //DATA CONTRACT
+
+  it(`(authentication) can call isOperational() via DataContract from owner`, async function () {
+    // Get operating status
+    let status = await config.flightSuretyData.isOperational.call({ from: config.testAddresses[9] });
+    assert.equal(status, true, "Incorrect initial operating status value");
+  });
+
+  it(`(authentication) can call isOperational() via DataContract from firstAirline`, async function () {
+    // Get operating status
+    let status = await config.flightSuretyData.isOperational.call({ from: config.firstAirline });
+    assert.equal(status, true, "Incorrect initial operating status value");
+  });
+
+  it(`(authentication) can call isOperational() via DataContract from unauthorized address`, async function () {
+    // Get operating status
+    let status = await config.flightSuretyData.isOperational.call({ from: config.testAddresses[2] });
+    assert.equal(status, true, "Incorrect initial operating status value");
+  });
+
+
+  ///////////////////////// multiparty
+  it(`(multiparty) has correct initial isOperational() value (DataContract)`, async function () {
+    // access from firstAirline / currently added as authorized caller in Data contract ctor
+    let status = await config.flightSuretyData.isOperational.call({ from: config.firstAirline });
     assert.equal(status, true, "Incorrect initial operating status value");
   });
 
