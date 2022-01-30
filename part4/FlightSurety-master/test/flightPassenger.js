@@ -1,7 +1,7 @@
 // how to sep https://www.alxolr.com/articles/how-to-separate-mocha-tests-in-multiple-files
-var Test = require('../config/testConfig.js');
-var BigNumber = require('bignumber.js');
-var Util = require('./util.js');
+const Test = require('../config/testConfig.js'),
+  BigNumber = require('bignumber.js'),
+  Util = require('./util.js');
 
 contract('Flight Surety - Passengers', async (accounts) => {
 
@@ -17,10 +17,8 @@ contract('Flight Surety - Passengers', async (accounts) => {
     FLIGHT_NAME = config.flights[0].name;
     FLIGHT_timestamp = config.flights[0].departure;
 
-    console.log(web3.version);
-    console.log("firstAirline", config.firstAirline, "Test flight", FLIGHT_NAME, " departure", FLIGHT_timestamp);
-    console.log("config.flightSuretyApp adr: ", config.flightSuretyApp.address);
-    console.log("config.flightSuretyData adr: ", config.flightSuretyData.address);
+    await Util.helper.printBaseInfo(config);
+
     /*
     (config.flightSuretyData).events.allEvents({
       fromBlock: 0,
@@ -61,13 +59,13 @@ contract('Flight Surety - Passengers', async (accounts) => {
 
   beforeEach('setup contract', async () => {
     config = await Test.Config(accounts);
-    await Util.helper.printBalance(config);
-    await Util.helper.printAmounts(config);
+    await Util.helper.printBalance(config, "before");
+    await Util.helper.printAmounts(config, "before");
   });
   afterEach('setup contract', async () => {
     config = await Test.Config(accounts);
-    await Util.helper.printBalance(config);
-    await Util.helper.printAmounts(config);
+    await Util.helper.printBalance(config, "after");
+    await Util.helper.printAmounts(config, "after");
   });
 
   /****************************************************************************************/
@@ -75,10 +73,10 @@ contract('Flight Surety - Passengers', async (accounts) => {
   /****************************************************************************************/
 
   it(`getAirlineByAddress`, async function () {
-
-     // Get operating status
-    let result = await config.flightSuretyData.getAirlineByAddress.call(config.firstAirline);
-    console.log("getAirlineByAddress", result['3'].toString())
+    // Get operating status
+    //let result = await config.flightSuretyData.getAirlineByAddress.call(config.firstAirline);
+    //console.log("getAirlineByAddress", result['3'].toString())
+    await Util.helper.printAirline(config,config.firstAirline )
     //assert.equal(status, true, "Incorrect initial operating status value");
   });
 
@@ -106,7 +104,7 @@ contract('Flight Surety - Passengers', async (accounts) => {
 
   // preconditions + check
 
-  it('(flight) registerFlight for airline + do it again fail', async () => {
+  it('(flight) registerFlight for airline', async () => {
 
     // ARRANGE
     let airline = config.firstAirline,
@@ -114,7 +112,6 @@ contract('Flight Surety - Passengers', async (accounts) => {
     // ACT
     let isRegistered = await config.flightSuretyData.isAirlineRegistered.call(airline);
     let isFunded = await config.flightSuretyData.isAirlineFunded.call(airline);
-    console.log("airline: " + airline + " isRegistered: " + isRegistered + " isFunded" + isFunded);
 
     try {
       await config.flightSuretyApp.registerFlight(FLIGHT_NAME, FLIGHT_timestamp, {from: airline});
@@ -125,18 +122,6 @@ contract('Flight Surety - Passengers', async (accounts) => {
     }
     // ASSERT
     assert.equal(fail, false, "First Flight could not been registered");
-    // second time
-    fail= false;
-    try {
-      await config.flightSuretyApp.registerFlight(FLIGHT_NAME, FLIGHT_timestamp, {from: airline});
-    }
-    catch(e) {
-      fail= true;
-    }
-
-    // ASSERT
-    assert.equal(fail, true, "Second flight could be registered, but should be not allowed.");
-
   });
 
 
@@ -161,6 +146,8 @@ contract('Flight Surety - Passengers', async (accounts) => {
     }
     assert.equal(fail, false, "Error in book flight.");
 
+    await Util.helper.printFlight(config, airline, FLIGHT_NAME, FLIGHT_timestamp);
+
   });
 
   it('(passenger) purchase insurance for flight', async () => {
@@ -176,13 +163,12 @@ contract('Flight Surety - Passengers', async (accounts) => {
     catch(e) {
       //console.log("error registerFlight", e)
       fail= true;
-      //console.log(e)
     }
     assert.equal(fail, false, "Error in buyFlightInsurance flight.");
     let numOfInsurees = await config.flightSuretyData.getAmountOfFlightInsurees.call(airline, FLIGHT_NAME, FLIGHT_timestamp);
-    console.log("numOfInsurees", numOfInsurees)
+    //console.log("numOfInsurees", numOfInsurees)
     let retInsurance = await config.flightSuretyData.getInsurance.call(airline, FLIGHT_NAME, FLIGHT_timestamp, passengerOnBoard);
-    console.log("retInsurance", retInsurance)
+    //console.log("retInsurance", retInsurance)
 
     let isInsured = await config.flightSuretyData.isPassengerInsured.call(airline, FLIGHT_NAME, FLIGHT_timestamp, passengerOnBoard);
     assert.equal(isInsured, true, "Passenger is not insured, but it should.");
@@ -239,13 +225,11 @@ contract('Flight Surety - Passengers', async (accounts) => {
       airline = config.firstAirline,
       fail = false;
 
-
-    let payout = await config.flightSuretyData.getPayoutForInsuree.call(passengerOnBoard);
-    console.log("passengerOnBoard (balance/payout)", payout);
+    Util.helper.printPassenger(config, passengerOnBoard);
 
     let retInsurance = await config.flightSuretyData.getInsurance.call(airline, FLIGHT_NAME, FLIGHT_timestamp, passengerOnBoard);
     console.log("retInsurance", retInsurance);
-
+    //assert.equal(retInsurance, 0, "Passenger is still insured.");
     let isInsured = await config.flightSuretyData.isPassengerInsured.call(airline, FLIGHT_NAME, FLIGHT_timestamp, passengerOnBoard);
     assert.equal(isInsured, true, "Passenger is not insured.");
 
@@ -262,13 +246,15 @@ contract('Flight Surety - Passengers', async (accounts) => {
     }
     assert.equal(fail, false, "Error in processFlightStatus");
 
-    payout = await config.flightSuretyData.getPayoutForInsuree.call(passengerOnBoard);
-    console.log("passengerOnBoard (balance/payout)", payout);
     retInsurance = await config.flightSuretyData.getInsurance.call(airline, FLIGHT_NAME, FLIGHT_timestamp, passengerOnBoard);
-    console.log("retInsurance", retInsurance)
+    //assert.equal(retInsurance.toString(), 0, "Passenger is still insured.");
+    console.log("getInsurance", retInsurance);
 
     isInsured = await config.flightSuretyData.isPassengerInsured.call(airline, FLIGHT_NAME, FLIGHT_timestamp, passengerOnBoard);
     assert.equal(isInsured, false, "Passenger is still insured.");
+
+    Util.helper.printPassenger(config, passengerOnBoard);
+
   });
 
   it('(passenger) withdraw', async () => {
@@ -278,8 +264,7 @@ contract('Flight Surety - Passengers', async (accounts) => {
 
     let payout = await config.flightSuretyData.getPayoutForInsuree.call(passengerOnBoard);
     assert.equal(payout, ROI_PAYMENT, "Payout should be 1.5x of " + INSURANCE_PAYMENT);
-    console.log("passengerOnBoard (balance/payout)", payout); // 100
-
+    Util.helper.printPassenger(config, passengerOnBoard);
     Util.helper.printBalance(config, passengerOnBoard);
 
     try {

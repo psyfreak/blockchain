@@ -1,7 +1,7 @@
 // how to sep https://www.alxolr.com/articles/how-to-separate-mocha-tests-in-multiple-files
-var Test = require('../config/testConfig.js');
-var BigNumber = require('bignumber.js');
-var Util = require('./util.js');
+const Test = require('../config/testConfig.js'),
+  BigNumber = require('bignumber.js'),
+  Util = require('./util.js');
 
 contract('Flight Surety Multiparty', async (accounts) => {
 
@@ -16,10 +16,7 @@ contract('Flight Surety Multiparty', async (accounts) => {
     FLIGHT_NAME = config.flights[0].name;
     FLIGHT_timestamp = config.flights[0].departure;
 
-    console.log(web3.version);
-    console.log("firstAirline", config.firstAirline, "Test flight", FLIGHT_NAME, " departure", FLIGHT_timestamp);
-    console.log("config.flightSuretyApp adr: ", config.flightSuretyApp.address);
-    console.log("config.flightSuretyData adr: ", config.flightSuretyData.address);
+    await Util.helper.printBaseInfo(config);
     /*
     (config.flightSuretyData).events.allEvents({
       fromBlock: 0,
@@ -60,13 +57,15 @@ contract('Flight Surety Multiparty', async (accounts) => {
 
   beforeEach('setup contract', async () => {
     config = await Test.Config(accounts);
-    await Util.helper.printBalance(config);
-    await Util.helper.printAmounts(config);
+    await Util.helper.printBalance(config, "before");
+    await Util.helper.printAmounts(config, "before");
   });
   afterEach('setup contract', async () => {
+    /*
     config = await Test.Config(accounts);
-    await Util.helper.printBalance(config);
-    await Util.helper.printAmounts(config);
+    await Util.helper.printBalance(config, "after");
+    await Util.helper.printAmounts(config, "after");
+    */
   });
 
   /****************************************************************************************/

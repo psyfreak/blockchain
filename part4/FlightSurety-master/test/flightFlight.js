@@ -1,7 +1,7 @@
 // how to sep https://www.alxolr.com/articles/how-to-separate-mocha-tests-in-multiple-files
-var Test = require('../config/testConfig.js');
-var BigNumber = require('bignumber.js');
-var Util = require('./util.js');
+const Test = require('../config/testConfig.js'),
+  BigNumber = require('bignumber.js'),
+  Util = require('./util.js');
 
 contract('Flight Surety - Flights', async (accounts) => {
 
@@ -16,10 +16,7 @@ contract('Flight Surety - Flights', async (accounts) => {
     FLIGHT_NAME = config.flights[0].name;
     FLIGHT_timestamp = config.flights[0].departure;
 
-    console.log(web3.version);
-    console.log("firstAirline", config.firstAirline, "Test flight", FLIGHT_NAME, " departure", FLIGHT_timestamp);
-    console.log("config.flightSuretyApp adr: ", config.flightSuretyApp.address);
-    console.log("config.flightSuretyData adr: ", config.flightSuretyData.address);
+    await Util.helper.printBaseInfo(config);
     /*
     (config.flightSuretyData).events.allEvents({
       fromBlock: 0,
@@ -60,13 +57,13 @@ contract('Flight Surety - Flights', async (accounts) => {
 
   beforeEach('setup contract', async () => {
     config = await Test.Config(accounts);
-    await Util.helper.printBalance(config);
-    await Util.helper.printAmounts(config);
+    await Util.helper.printBalance(config, "before");
+    await Util.helper.printAmounts(config, "before");
   });
   afterEach('setup contract', async () => {
     config = await Test.Config(accounts);
-    await Util.helper.printBalance(config);
-    await Util.helper.printAmounts(config);
+    await Util.helper.printBalance(config, "after");
+    await Util.helper.printAmounts(config, "after");
   });
 
   /****************************************************************************************/
@@ -74,10 +71,10 @@ contract('Flight Surety - Flights', async (accounts) => {
   /****************************************************************************************/
 
   it(`getAirlineByAddress`, async function () {
-
-     // Get operating status
-    let result = await config.flightSuretyData.getAirlineByAddress.call(config.firstAirline);
-    console.log("getAirlineByAddress", result['3'].toString())
+    // Get operating status
+    //let result = await config.flightSuretyData.getAirlineByAddress.call(config.firstAirline);
+    //console.log("getAirlineByAddress", result['3'].toString())
+    await Util.helper.printAirline(config,config.firstAirline);
     //assert.equal(status, true, "Incorrect initial operating status value");
   });
 
@@ -110,7 +107,9 @@ contract('Flight Surety - Flights', async (accounts) => {
     // ACT
     let isRegistered = await config.flightSuretyData.isAirlineRegistered.call(airline);
     let isFunded = await config.flightSuretyData.isAirlineFunded.call(airline);
-    console.log("airline: " + airline + " isRegistered: " + isRegistered + " isFunded" + isFunded);
+    console.log("\t\tairline: " + airline + " isRegistered: " + isRegistered + " isFunded" + isFunded);
+    assert.equal(isRegistered, true, "Airline should be registered");
+    assert.equal(isFunded, true, "Airline should be funded");
 
     try {
       await config.flightSuretyApp.registerFlight(FLIGHT_NAME, FLIGHT_timestamp, {from: airline});
@@ -121,6 +120,9 @@ contract('Flight Surety - Flights', async (accounts) => {
     }
     // ASSERT
     assert.equal(fail, false, "First Flight could not been registered");
+    let isFlightRegistered = await config.flightSuretyData.isFlightRegistered.call(airline, FLIGHT_NAME, FLIGHT_timestamp);
+    assert.equal(isFlightRegistered, true, "Flight should be registered now");
+
     // second time
     fail= false;
     try {
@@ -132,7 +134,7 @@ contract('Flight Surety - Flights', async (accounts) => {
 
     // ASSERT
     assert.equal(fail, true, "Second flight could be registered, but should be not allowed.");
-
+    await Util.helper.printFlight(config, airline, FLIGHT_NAME, FLIGHT_timestamp);
   });
 
   it('(flight) registerFlight flight for unregistered airline should fail', async () => {

@@ -64,7 +64,7 @@ contract FlightSuretyData is Ownable {
 
     mapping(address => Airline) airlines;
 
-    // passenger
+    // passenger quick detetion if passenger is on flight
     mapping(bytes32 => mapping(address=>bool)) passengers;
 
     // flight
@@ -78,6 +78,7 @@ contract FlightSuretyData is Ownable {
         //address wallet; // money might be store here
     }
     mapping(bytes32 => Flight) flights;
+    //bytes32[] allflights;
 
     // insurance
     struct Insurance {
@@ -386,6 +387,26 @@ contract FlightSuretyData is Ownable {
         return (airlines[airline].investment);
     }
 
+    function getFlight (
+        address airline,
+        string calldata flight,
+        uint256 timestamp
+    )
+    public
+    view
+    returns(
+        uint256 ,
+        bool,
+        uint8,
+        address,
+        address[] memory
+    )
+    {
+        bytes32 flightKey = Util.getFlightKey(airline, flight, timestamp);
+        return (flights[flightKey].id, flights[flightKey].isRegistered, flights[flightKey].status, flights[flightKey].registeredBy, flights[flightKey].passengers);
+    }
+
+    //getInsuree
 
     function isFlightRegisteredByKey (bytes32 flight)
         public
@@ -749,6 +770,7 @@ contract FlightSuretyData is Ownable {
         requireIsPassengerNotOnFlight(flightKey, passenger)
     {
         passengers[flightKey][passenger] = true;
+        flights[flightKey].passengers.push(passenger);
         emit PassengerRegistered(flightKey, msg.sender, passenger);
     }
 
