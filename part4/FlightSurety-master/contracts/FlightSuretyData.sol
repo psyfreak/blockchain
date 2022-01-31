@@ -34,7 +34,7 @@ contract FlightSuretyData is Ownable, Airlines, Flights, Passengers {
     /********************************************************************************************/
     /*                                       DATA VARIABLES                                     */
     /********************************************************************************************/
-    bool public initialized = false; // own initialization function instead of ctor usage
+
 
     //Escrow escrow;
     mapping(address => bool) private authorizedCallers;
@@ -100,6 +100,8 @@ contract FlightSuretyData is Ownable, Airlines, Flights, Passengers {
     }
 
 /*
+    bool public initialized = false; // own initialization function instead of ctor usage
+
     /////////////////// now initialization via payable ctor - funding is done as well
     function initialize
     (

@@ -10,12 +10,12 @@ import "../node_modules/openzeppelin-solidity/contracts/access/Ownable.sol";
 import {Util} from "./base/Util.sol";
 import "./FlightSuretyData.sol";
 import "./base/MultiSignatureWallet.sol";
-
+import "./entities/Oracles.sol";
 
 /************************************************** */
 /* FlightSurety Smart Contract                      */
 /************************************************** */
-contract FlightSuretyApp is Ownable {
+contract FlightSuretyApp is Ownable, Oracles {
     using SafeMath for uint256; // Allow SafeMath functions to be called for all uint256 types (similar to "prototype" in Javascript)
 
     // Fee to be paid when registering oracle
@@ -313,60 +313,15 @@ contract FlightSuretyApp is Ownable {
     /*                                       ORACLE FUNCTIONS                                  */
     /********************************************************************************************/
 // region ORACLE MANAGEMENT
-    // TODO move to seperate contract
-
-    // Incremented to add pseudo-randomness at various points
-    uint8 private nonce = 0;
-
-
-    // Number of oracles that must respond for valid status
-    uint256 private constant MIN_RESPONSES = 1; // should be 3
-
-
-    struct Oracle {
-        bool isRegistered;
-        uint8[3] indexes;        
-    }
-
-    // Track all registered oracles
-    uint8 public oracleCount = 0;
-    mapping(address => Oracle) private oracles;
-
-    // Model for responses from oracles
-    struct ResponseInfo {
-        address requester;                              // Account that requested status
-        bool isOpen;                                    // If open, oracle responses are accepted
-        mapping(uint8 => address[]) responses;          // Mapping key is the status code reported
-                                                        // This lets us group responses and identify
-                                                        // the response that majority of the oracles
-    }
-
-    // Track all oracle responses
-    // Key = hash(index, flight, timestamp)
-    mapping(bytes32 => ResponseInfo) private oracleResponses;
-
-    // Event fired each time an oracle submits a response
-    event FlightStatusInfo(address airline, string flight, uint256 timestamp, uint8 status);
-
-
-    event OracleRegistered(address oracle, uint8[3] indexes, uint8 count);
-
-    event OracleReport(address airline, string flight, uint256 timestamp, uint8 status);
-
-    // Event fired when flight status request is submitted
-    // Oracles track this and if they have a matching index
-    // they fetch data and submit a response
-    event OracleRequest(uint8 index, address airline, string flight, uint256 timestamp);
-
 
     // Register an oracle with the contract
     /// Every oracles response to 3 random generated indices
     function registerOracle
-                            (
-                            )
-                            external
-                            payable
-                            IsFeeSufficientChangeBack(ORACLE_REGISTRATION_FEE)
+    (
+    )
+    external
+    payable
+    IsFeeSufficientChangeBack(ORACLE_REGISTRATION_FEE)
     {
         // check if already registered
         require(!oracles[msg.sender].isRegistered, "Oracle is already registered");
@@ -375,9 +330,9 @@ contract FlightSuretyApp is Ownable {
         uint8[3] memory indexes = Util.generateIndexes(msg.sender);
 
         oracles[msg.sender] = Oracle({
-                                        isRegistered: true,
-                                        indexes: indexes
-                                    });
+        isRegistered: true,
+        indexes: indexes
+        });
         oracleCount++;
 
         //TODO send ether to data contract
@@ -390,22 +345,6 @@ contract FlightSuretyApp is Ownable {
 
 
     }
-
-    function getMyIndexes
-                            (
-                            )
-                            view
-                            external
-                            returns(uint8[3] memory)
-    {
-        require(oracles[msg.sender].isRegistered, "Not registered as an oracle");
-
-        return oracles[msg.sender].indexes;
-    }
-
-
-
-
     // Called by oracle when a response is available to an outstanding request
     // For the response to be accepted, there must be a pending request that is open
     // and matches one of the three Indexes randomly assigned to the oracle at the
@@ -414,24 +353,24 @@ contract FlightSuretyApp is Ownable {
     // now every oracle check if index matches and if so add an entry + generated status to data structure
     // oracleResponses[key].responses. If threshold hit it processes the flight status.
     function submitOracleResponse
-                        (
-                            uint8 index,
-                            address airline,
-                            string calldata flight,
-                            uint256 timestamp,
-                            uint8 statusCode
-                        )
-                        external
+    (
+        uint8 index,
+        address airline,
+        string calldata flight,
+        uint256 timestamp,
+        uint8 statusCode
+    )
+    external
     {
         // check if the assigned index is matched to one requested
         require(
             (oracles[msg.sender].indexes[0] == index) ||
             (oracles[msg.sender].indexes[1] == index) ||
             (oracles[msg.sender].indexes[2] == index),
-                "Index does not match oracle request"
+            "Index does not match oracle request"
         );
         // if index matches, generate key and check if request still open
-        bytes32 key = keccak256(abi.encodePacked(index, airline, flight, timestamp)); 
+        bytes32 key = keccak256(abi.encodePacked(index, airline, flight, timestamp));
         require(oracleResponses[key].isOpen, "Flight or timestamp do not match oracle request");
 
         // push calculated value to responses array (different results have different array with all approvers
