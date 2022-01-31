@@ -28,10 +28,6 @@ contract FlightSuretyApp is Ownable {
     uint8 private constant STATUS_CODE_LATE_WEATHER = 30;
     uint8 private constant STATUS_CODE_LATE_TECHNICAL = 40;
     uint8 private constant STATUS_CODE_LATE_OTHER = 50;
-
-    event OnChangeBalances(uint256 balanceApp, uint256 balanceData);
-
-
     /********************************************************************************************/
     /*                                       DATA VARIABLES                                     */
     /********************************************************************************************/
@@ -83,8 +79,9 @@ contract FlightSuretyApp is Ownable {
   
    /**
     * @dev Add an airline to the registration queue
-    * msg.sender is the airline to be registered
-    * any msg.sender can register / authentication if address is airline is not done here.
+    * msg.sender is the registering airline
+    * newAirline is the airline, who needs to be registered
+    * Only existing authorized airlines can register new ones as well as participating in the voting.
     * if <=4 airlines one vote of any invested airline is sufficient
     * if >4 airlines at least > #airlines/2 roundedUp must be voted for / so one could vote true or false or not at all
 
@@ -127,7 +124,11 @@ contract FlightSuretyApp is Ownable {
 
 
      // TODO is this needed ? one could also
-    function fundAirline ( ) external payable {
+    function fundAirline ( )
+        external
+        payable
+        requireIsAirlineRegistered(msg.sender)
+    {
 
         //a.blah{value: ValueToSend}(2, 3)
         flightSuretyData.fundAirline{value: msg.value}(msg.sender);// we could also call and send it to directly via msg.value
@@ -485,6 +486,12 @@ contract FlightSuretyApp is Ownable {
     *      This is used on all state changing functions to pause the contract in
     *      the event there is an issue that needs to be fixed
     */
+
+    modifier onlyEOA() {
+        require(msg.sender == tx.origin, "Must use EOA");
+        _;
+    }
+
     modifier requireIsOperational()
     {
         // TODO Modify to call data contract's status
@@ -500,6 +507,23 @@ contract FlightSuretyApp is Ownable {
         }
     }
 
+    modifier Fee (uint _amount) {
+        require(msg.value >= _amount, "Amount is not sufficient");
+        _;
+    }
+
+    /**
+    * @dev Modifier that requires the "ContractOwner" account to be the function caller
+    */
+    modifier requireIsAirlineRegistered(address airline)
+    {
+        require(flightSuretyData.isAirlineRegistered(airline), "Airline is not registered yet");
+        _;
+    }
+
+    /**
+      * only authorized airlines (registered + funded)
+    **/
     modifier requireIsAirlineAuthorized(address airline)
     {
         require(flightSuretyData.isAirlineFunded(airline), "Airline is not authorized");
