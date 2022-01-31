@@ -6,9 +6,7 @@
 - change data structures of insurance to avoid for loop
 - move setter/getter require
 - setOperational multiparty
-- correct multiparty funded vs. registered
-- check if funds are sufficient for payouts
-- send money from oracles to dataContract
+- correct multiparty funded vs. registered mechanism / hasConfirmed
 - change constants back / min-responses oracles, wei to ether in all caps and bottoms etc.
 
 Question adding:

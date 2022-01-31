@@ -103,6 +103,7 @@ contract FlightSuretyData is Ownable {
     event AirlineRegistered(address airline, uint256 id, bool isRegistered, address registeredBy, uint256 investment, uint256 timestamp);
     event AirlineFunded(address airline, uint256 id, bool isRegistered, address registeredBy, uint256 investment, uint256 timestamp);
     event AirlineRefunded(address airline, uint256 id, uint256 investment);
+    event ContractFunded(address sender, uint256 investment);
 
     event FlightRegistered(address airline, uint256 id, bool isRegistered, address registeredB, uint256 investment, uint256 timestamp);
     event FlightCreated(bytes32 flightKey, address origin, address airline);
@@ -681,18 +682,23 @@ contract FlightSuretyData is Ownable {
         requireIsAirlineRegistered(airline)
         //IsFeeSufficientChangeBack(AIRLINE_REGISTRATION_FEE)
     {
-        require(airlines[airline].investment == 0, "Airline has been already funded");
-        require(msg.value == AIRLINE_REGISTRATION_FEE, "Airline funding must be exactly 10 ether");
-
-        //airlines[airline].balance = msg.value;
-        airlines[airline].investment = msg.value;
-
-        numOfFundedAirlines = numOfFundedAirlines.add(1);
-
-        //emit
-        emit AirlineFunded(airline, airlines[airline].id, airlines[airline].isRegistered, airlines[airline].registeredBy, airlines[airline].investment, airlines[airline].timestamp);
+        // already funded
+        if(airlines[airline].investment == 0) {
+            require(msg.value == AIRLINE_REGISTRATION_FEE, "Airline funding must be exactly 10 ether");
+            //airlines[airline].balance = msg.value;
+            airlines[airline].investment = msg.value;
+            numOfFundedAirlines = numOfFundedAirlines.add(1);
+            //emit
+            emit AirlineFunded(airline, airlines[airline].id, airlines[airline].isRegistered, airlines[airline].registeredBy, airlines[airline].investment, airlines[airline].timestamp);
+        } else {
+            // refund
+            //require(airlines[airline].investment >= AIRLINE_REGISTRATION_FEE, "Airline must be funded for refunding");
+            airlines[airline].investment = airlines[airline].investment.add(msg.value);
+            //emit
+            emit AirlineRefunded(airline, airlines[airline].id, airlines[airline].investment);
+        }
     }
-
+    /*
     //TODO why this can be called in receive function, although msg.sender should be this contract instead of app contract
     function refundAirline(address airline) // TODO check 1. if it is better to use tx.origin 2. payable function or use receive or fallback one?
         public
@@ -709,6 +715,7 @@ contract FlightSuretyData is Ownable {
         //emit
         emit AirlineRefunded(airline, airlines[airline].id, airlines[airline].investment);
     }
+    */
     /**
      * @dev Register a future flight for insuring.
      * Optional part - UI defines the flights.
@@ -737,7 +744,6 @@ contract FlightSuretyData is Ownable {
         //TODO add emit()
         emit FlightCreated(flightKey, msg.sender, tx.origin);
     }
-
 
     function updateFlightStatus
     (
@@ -864,6 +870,8 @@ contract FlightSuretyData is Ownable {
     {
         uint256 currentBalance = address(this).balance;
         uint256 payout = payouts[insuree];
+        require(currentBalance >= payout, "Funds needed, cannot do payout");
+
         payouts[insuree] = 0;
         payable(insuree).transfer(payout);
         emit InsuranceWithdrawn(msg.sender, payout, currentBalance, address(this).balance);
@@ -889,7 +897,6 @@ contract FlightSuretyData is Ownable {
     }
     */
 
-
     // Function to receive Ether. msg.data must be empty
     receive()
         external
@@ -897,7 +904,8 @@ contract FlightSuretyData is Ownable {
         requireIsCallerAuthorized
     {
         // TODO how to use this - check why this is working
-        refundAirline(tx.origin);
+        // refundAirline(tx.origin);
+        emit ContractFunded(tx.origin, msg.value);
     }
 
 

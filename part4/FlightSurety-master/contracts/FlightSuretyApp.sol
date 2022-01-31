@@ -133,7 +133,6 @@ contract FlightSuretyApp is Ownable {
     }
 
 
-
    /**
     * @dev Register a future flight for insuring.
     * Optional part - UI defines the flights.
@@ -290,6 +289,8 @@ contract FlightSuretyApp is Ownable {
         flightSuretyData.withdrawInsuree(msg.sender);
     }
 
+    //TODO add refund refundAirline and use receive for any transfer such as the ones from oracles
+
     // Function to receive Ether. msg.data must be empty
     receive() external payable {
         // we could also directly call refund such as in fund, but would like to test receive function
@@ -299,7 +300,7 @@ contract FlightSuretyApp is Ownable {
         address payable jo = payable(address(flightSuretyData));
         jo.transfer(msg.value);
         */
-        // this work juhuuu
+        // this works
         (bool sent, bytes memory data) = address(flightSuretyData).call{value: msg.value}("");
         require(sent, "Failed to send Ether");
 
@@ -379,6 +380,11 @@ contract FlightSuretyApp is Ownable {
         //TODO send ether to data contract
 
         emit OracleRegistered(msg.sender, indexes, oracleCount);
+
+        //payable(address(flightSuretyData)).transfer(msg.value);
+        (bool sent, bytes memory data) = address(flightSuretyData).call{value: msg.value}("");
+        require(sent, "Failed to send Ether");
+
 
     }
 

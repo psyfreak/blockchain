@@ -7,7 +7,8 @@ contract('Flight Surety - Funding', async (accounts) => {
   let config;
   let FLIGHT_NAME = "",
     FLIGHT_timestamp = "",
-    REFUND_AIRLINE = 50;
+    REFUND_AIRLINE = 50,
+    FUND_CONTRACT = 20;
 
 
   before('setup contract', async () => {
@@ -220,8 +221,7 @@ contract('Flight Surety - Funding', async (accounts) => {
 
     let fail = false;
     try {
-      //await config.flightSuretyApp.call({from: registeredAirline, value: 20});
-      await web3.eth.sendTransaction({to:config.flightSuretyApp.address, from:registeredAirline, value: REFUND_AIRLINE})
+      await config.flightSuretyApp.fundAirline({from: registeredAirline, value: REFUND_AIRLINE});
     }
     catch(e) {
       console.log("fundAirline error", e)
@@ -233,7 +233,44 @@ contract('Flight Surety - Funding', async (accounts) => {
     await Util.helper.printAirline(config, registeredAirline);
   });
 
-/*
+  it('(funding) Fund contract ' + REFUND_AIRLINE, async () => {
+    // ARRANGE
+    let fundSender = accounts[0];
+    await Util.helper.printBalance(config,"before", fundSender);
+
+    let fail = false;
+    try {
+      //await config.flightSuretyApp.call({from: registeredAirline, value: 20});
+      await web3.eth.sendTransaction({to: config.flightSuretyApp.address, from: fundSender, value: FUND_CONTRACT})
+    }
+    catch(e) {
+      console.log("fundAirline error", e)
+      fail = true;
+    }
+    // ASSERT
+    assert.equal(fail, false, "Funding contract should work");
+    await Util.helper.printBalance(config,"after", fundSender);
+  });
+
+  it(`(Oracles) can register an Oracle using funds`, async function () {
+    /*
+    let newOracle = await flightSuretyApp.methods
+      .registerOracle()
+      .send({from: global.accounts[0], value: 11, gas: 2800707 });
+    */
+    let fail = false;
+    try {
+      await config.flightSuretyApp.registerOracle({from: accounts[1], value: 10, gas: 2800707 });
+    }
+    catch(e) {
+      fail= true;
+      console.log("first flight fail, which should not be the case", e)
+    }
+    // ASSERT
+    assert.equal(fail, false, "First Flight could not been registered");
+  });
+
+  /*
   it('(passenger) purchase insurance for flight', async () => {
     let passengerOnBoard = accounts[8],
       airline = config.firstAirline,
@@ -260,7 +297,6 @@ contract('Flight Surety - Funding', async (accounts) => {
 
   });
 */
-
 });
 
 
