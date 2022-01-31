@@ -17,39 +17,7 @@ contract('Flight Surety - Airlines', async (accounts) => {
     FLIGHT_timestamp = config.flights[0].departure;
 
     await Util.helper.printBaseInfo(config);
-    /*
-    (config.flightSuretyData).events.allEvents({
-      fromBlock: 0,
-      toBlock: 'latest'
-    }, function(error, event){ console.log(event); })
-      .on('data', function(event){
-        console.log(event); // same results as the optional callback above
-      })
-      .on('changed', function(event){
-        // remove event from local database
-      })
-      .on('error', console.error);
-*/
 
-// Monitor Events
-    config.flightSuretyData.AirlineFunded({ fromBlock: 0,
-      //toBlock: 'latest'
-    }, (error, result) => {
-      if(error) console.error(error);
-      //console.log(result)
-     // console.log(`[TESTER] => [message] : ${result.args.message} [status] : ${result.args.status}`);
-    });
-
-    /*
-    events.watch((error, result) => {
-      console.log("event", result)
-      if (result.event === 'OracleRequest') {
-        console.log(`\n\nOracle Requested: index: ${result.args.index.toNumber()}, flight:  ${result.args.flight}, timestamp: ${result.args.timestamp.toNumber()}`);
-      } else {
-        console.log(`\n\nFlight Status Available: flight: ${result.args.flight}, timestamp: ${result.args.timestamp.toNumber()}, status: ${result.args.status.toNumber() == ON_TIME ? 'ON TIME' : 'DELAYED'}, verified: ${result.args.verified ? 'VERIFIED' : 'UNVERIFIED'}`);
-      }
-    });
-    */
     //await config.flightSuretyData.authorizeCaller(config.flightSuretyApp.address);
 
 

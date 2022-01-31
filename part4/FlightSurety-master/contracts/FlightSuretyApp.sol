@@ -9,7 +9,7 @@ import "../node_modules/openzeppelin-solidity/contracts/utils/math/SafeMath.sol"
 import "../node_modules/openzeppelin-solidity/contracts/access/Ownable.sol";
 import {Util} from "./base/Util.sol";
 import "./FlightSuretyData.sol";
-//import "./base/MultiSignatureWallet.sol";
+import "./base/MultiSignatureWallet.sol";
 
 
 /************************************************** */
@@ -37,7 +37,8 @@ contract FlightSuretyApp is Ownable {
     /********************************************************************************************/
 
     FlightSuretyData flightSuretyData;
-    //address flightSuretyData;
+    MultiSignatureWallet flightSuretyMulti;
+
 
     struct Flight {
         bool isRegistered;
@@ -59,12 +60,13 @@ contract FlightSuretyApp is Ownable {
     */
     constructor
                                 (
-                                    FlightSuretyData dataContract
-                                    //MultiSignatureWallet multiContract
+                                    FlightSuretyData dataContract,
+                                    MultiSignatureWallet multiContract
                                 )
     {
         // call the data contract and set this address
         flightSuretyData = FlightSuretyData(dataContract);
+        flightSuretyMulti = MultiSignatureWallet(multiContract);
         //flightSuretyData.authorizeCaller(address(this)); call is contract, therefore this is not working
         // add app contract as authorized caller for data contract
 
@@ -520,25 +522,26 @@ contract FlightSuretyApp is Ownable {
     /********************************************************************************************/
 
     function isOperational()
-    public
+        public
     view
     returns(bool)
     {
         return flightSuretyData.isOperational();  // Modify to call data contract's status
     }
 
-    function requestSetOperation()
-    public
-    view
-    returns(bool)
+    function setOperatingStatus(bool mode)
+        public
     {
+        require(mode != isOperational(), "New mode must be different from existing mode");
+        // MultiSignature should be set authorized for data contract or add function here.
         // check
         // if transactionId available then use transaction Id otherwise submit and set transaction Id
-        bytes memory encoded = "0x60fe47b10000000000000000000000000000000000000000000000000000000000000005";
+        //bytes memory encoded = "0x110466ed0000000000000000000000000000000000000000000000000000000000000000";
+        bytes memory encoded = abi.encodeWithSignature("setOperatingStatus(bool)", mode);
+        flightSuretyMulti.submitTransaction(address(flightSuretyData), 0, encoded);
+        // submit
         //await config.multiSignatureWallet.submitTransaction(simpleStorage.address, 0, encoded, {from: config.firstAirline})
         //// if transactionId available then use transaction Id otherwise submit and set transaction Id
-        //multiSignatureWallet.
-        return true;
     }
 
     function isConfirmed(address newAirline)

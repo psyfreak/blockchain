@@ -307,9 +307,9 @@ contract FlightSuretyData is Ownable {
     */    
     function setOperatingStatus(bool mode)
         external
-        onlyOwner
+        requireIsCallerAuthorized
+        //onlyOwner
     {
-        // TODO add multisig voting mechanism
         operational = mode;
     }
 

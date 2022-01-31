@@ -20,10 +20,13 @@ Above 4 airlines the voting must be over 50% of the amount of airlines
 
 
 **/
-
+import "../../node_modules/openzeppelin-solidity/contracts/utils/math/SafeMath.sol";
+import "../../node_modules/openzeppelin-solidity/contracts/access/Ownable.sol";
 
 /// Provides basic authorization control
-contract MultiSignatureWallet {
+contract MultiSignatureWallet is Ownable {
+    using SafeMath for uint256; // Allow SafeMath functions to be called for all uint256 types (similar to "prototype" in Javascript)
+    using SafeMath for uint; // Allow SafeMath functions to be called for all uint256 types (similar to "prototype" in Javascript)
 
     address[] public owners;
     uint public required;
@@ -32,9 +35,16 @@ contract MultiSignatureWallet {
     uint public transactionCount;
     mapping (uint => Transaction) public transactions;
 
+    mapping (uint => Transaction) public archiveTransactions;
+
     mapping (uint => mapping (address => bool)) public confirmations;
 
     uint256 public constant VOTING_THRESHOLD = 4;
+
+    uint public currentTransactionId = 0; // extension for the code to
+
+    // quick access via destination, value and data so that we can easily find out a running transactionId;
+    mapping (bytes32 => uint) public transactionMapping;
 
     struct Transaction {
         bool executed;
@@ -48,6 +58,7 @@ contract MultiSignatureWallet {
     event Confirmation(address indexed sender, uint indexed transactionId);
     event Execution(uint indexed transactionId, bytes data);
     event ExecutionFailure(uint indexed transactionId, bytes data);
+    event NotYetExecuted(uint indexed transactionId);
 
     /// @dev Fallback function allows to deposit ether.
     fallback()
@@ -59,10 +70,10 @@ contract MultiSignatureWallet {
         }
     }
 
+    /********************************************************************************************/
+    /*                                     SMART CONTRACT FUNCTIONS                             */
+    /********************************************************************************************/
 
-    /*
-     * Public functions
-     */
     /// @dev Contract constructor sets initial owners and required number of confirmations.
     /// flightsurety add with firstAirline as owner + required = 4
     /// @param _owners List of initial owners.
@@ -86,8 +97,14 @@ contract MultiSignatureWallet {
     public
     returns (uint transactionId)
     {
-        require(isOwner[msg.sender]);
-        transactionId = addTransaction(destination, value, data);
+        //require(isOwner[msg.sender], "submitTransaction not owner");
+        require(isOwner[tx.origin], "submitTransaction not owner");
+
+        transactionId = getTransactionId(destination,value, data);
+        if (transactionId == 0) {
+            transactionId = addTransaction(destination, value, data);
+        }
+
         confirmTransaction(transactionId);
         return transactionId;
     }
@@ -97,12 +114,24 @@ contract MultiSignatureWallet {
     //TODO add ownable
     public
     {
+        require(isOwner[tx.origin], "should be owner");
+        require(transactions[transactionId].destination != address(0), "Transaction does not exist");
+        require(confirmations[transactionId][tx.origin] == false, "sender already voted"); // not yet voted
+        confirmations[transactionId][tx.origin] = true;
+        emit Confirmation(tx.origin, transactionId);
+
+        /*
         require(isOwner[msg.sender], "should be owner");
         require(transactions[transactionId].destination != address(0));
         require(confirmations[transactionId][msg.sender] == false); // not yet voted
         confirmations[transactionId][msg.sender] = true;
         emit Confirmation(msg.sender, transactionId);
+        */
+
         executeTransaction(transactionId);
+
+
+
     }
     /// @dev Allows an owner to revoke a confirmation for a transaction.
     /// @param transactionId Transaction ID.
@@ -120,14 +149,31 @@ contract MultiSignatureWallet {
             t.executed = true;
             // delegate call - call function at destination t.destination with t.value and t.data as payload (function + parameter + msg.sender)
             (bool success, bytes memory rdata) = t.destination.call{value: t.value}(t.data);
-            if (success)
+            if (success) {
                 emit Execution(transactionId, rdata);
+                // wanted t
+                archiveTransactions[transactionId] = t;
+                // delete from mapping otherwise
+                bytes32 transactionKey =  getTransactionKey(t.destination, t.value, t.data);
+                delete transactionMapping[transactionKey];
+                delete transactions[transactionId];
+            }
             else {
                 emit ExecutionFailure(transactionId, rdata);
                 t.executed = false;
             }
+        } else {
+            emit NotYetExecuted(transactionId);
         }
 
+    }
+
+    function directExecution(address destination, uint value, bytes memory data)
+        public
+        onlyOwner
+    {
+        (bool success, bytes memory rdata) = destination.call{value: value}(data);
+        require(success, "Failed to execute");
     }
     /*
      * (Possible) Helper Functions
@@ -173,6 +219,8 @@ contract MultiSignatureWallet {
     //TODO add check if transaction already existing
     returns (uint transactionId)
     {
+        transactionCount = transactionCount.add(1);
+
         transactionId = transactionCount;
         transactions[transactionId] = Transaction({
         destination: destination,
@@ -180,24 +228,76 @@ contract MultiSignatureWallet {
         data: data,
         executed: false
         });
-        transactionCount += 1;
+
+        // add to mapping to quickly find a transaction
+        bytes32 transactionKey = getTransactionKey(destination, value, data);
+        transactionMapping[transactionKey] = transactionId;
+
+
         emit Submission(transactionId);
         return transactionId;
     }
 
+
+    /********************************************************************************************/
+    /*                                     GETTER & SETTER                                      */
+    /********************************************************************************************/
+    function isTransactionAvailable(
+        address destination,
+        uint value,
+        bytes memory data
+    )
+        public
+        returns (bool)
+    {
+        bytes32 transactionKey = getTransactionKey(destination, value, data);
+        return transactionMapping[transactionKey] > 0;
+    }
+
     function getTransactionBy(uint transactionId)
-    public
+        public
         //TODO add check if transaction already existing
-    returns (uint, address, uint256, bytes memory, bool)
+        returns (uint, address, uint256, bytes memory, bool)
     {
         Transaction storage trans =  transactions[transactionId];
         return (transactionId, trans.destination, trans.value, trans.data, trans.executed);
     }
 
-    /*****************************************************************
-    Modifier
-    *****************************************************************/
+    function getTransactionId (
+        address destination,
+        uint value,
+        bytes memory data
+    )
+        public
+        returns (uint)
+    {
+        bytes32 transactionKey =  getTransactionKey(destination, value, data);
+        return getTransactionIdByKey(transactionKey);
+    }
+    function getTransactionIdByKey(bytes32 transactionKey)
+        private
+        returns (uint)
+    {
+        uint transactionId =  transactionMapping[transactionKey];
+        return (transactionId);
+    }
 
+    // get key by transaction parameters
+    function getTransactionKey (
+        address destination,
+        uint value,
+        bytes memory data
+    )
+        pure
+        private
+        returns(bytes32)
+    {
+        return keccak256(abi.encodePacked(destination, value, data));
+    }
+
+    /********************************************************************************************/
+    /*                                     MODIFIER                                             */
+    /********************************************************************************************/
     modifier validRequirement(uint ownerCount, uint _required) {
         if (_required > ownerCount || _required == 0 || ownerCount == 0)
             revert();

@@ -5,6 +5,7 @@
 - add https://github.com/adamgruber/mochawesome
 - change data structures of insurance to avoid for loop
 - move setter/getter require
+- improve comments for getter/setter
 - setOperational multiparty
 - correct multiparty funded vs. registered mechanism / hasConfirmed
 - change constants back / min-responses oracles, wei to ether in all caps and bottoms etc.

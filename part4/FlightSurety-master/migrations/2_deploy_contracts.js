@@ -1,6 +1,6 @@
 const FlightSuretyApp = artifacts.require("FlightSuretyApp");
 const FlightSuretyData = artifacts.require("FlightSuretyData");
-//const MultiSignatureWallet = artifacts.require("MultiSignatureWallet");
+const MultiSignatureWallet = artifacts.require("MultiSignatureWallet");
 const fs = require('fs');
 
 module.exports = async function(deployer, network, accounts) {
@@ -8,11 +8,17 @@ module.exports = async function(deployer, network, accounts) {
   await deployer.deploy(FlightSuretyData, firstAirline, {value: 10});
   let flightSuretyDataInstance = await FlightSuretyData.deployed();
 
-    console.log("FlightSuretyData.address ", FlightSuretyData.address);
-  await deployer.deploy(FlightSuretyApp, FlightSuretyData.address); // parameter must set as an address, {value: 10});
+  await deployer.deploy(MultiSignatureWallet, [firstAirline, accounts[8],  accounts[7]], 2);
+  let multiSignatureWalletInstance = await MultiSignatureWallet.deployed();
+
+  console.log("FlightSuretyData.address ", FlightSuretyData.address);
+  //await deployer.deploy(FlightSuretyApp, FlightSuretyData.address); // parameter must set as an address, {value: 10});
+
+  await deployer.deploy(FlightSuretyApp, FlightSuretyData.address, MultiSignatureWallet.address); // parameter must set as an address, {value: 10});
   let flightSuretyAppInstance = await FlightSuretyApp.deployed();
 
-  await flightSuretyDataInstance.authorizeCaller(flightSuretyAppInstance.address);
+  await flightSuretyDataInstance.authorizeCaller(flightSuretyAppInstance.address); // app contract can call functions in data contract
+  await flightSuretyDataInstance.authorizeCaller(multiSignatureWalletInstance.address); // multiSignatureWalletInstance contract can call functions in data contract
 
   let config = {
     localhost: {
