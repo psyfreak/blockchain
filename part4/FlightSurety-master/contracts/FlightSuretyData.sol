@@ -9,8 +9,9 @@ import "./base/Authentication.sol";
 
 // Entities
 import "./entities/Airlines.sol";
-import "./entities/Passengers.sol";
 import "./entities/Flights.sol";
+import "./entities/Passengers.sol";
+import "./entities/Insurances.sol";
 
 //import 'openzeppelin-solidity/contracts/payment/escrow/Escrow.sol';
 /*
@@ -18,7 +19,7 @@ import "./entities/Flights.sol";
  add open zeppelin access
 */
 
-contract FlightSuretyData is Ownable, Airlines, Flights, Passengers {
+contract FlightSuretyData is Ownable, Airlines, Flights, Passengers, Insurances {
     using SafeMath for uint256;
 
     //Result is 2, all integer divison rounds DOWN to the nearest integer
@@ -27,7 +28,6 @@ contract FlightSuretyData is Ownable, Airlines, Flights, Passengers {
     // RoI is 3/2 => 1.5 => solidity cannot calculate with decimals and still rounding is applied.
     uint256 public constant ROI_NOMINATOR = 3;
     uint256 public constant ROI_DENOMINATOR = 2;
-
 
     uint256 public constant MAX_INSURANCE_FEE = 150 wei; //ether;
 
