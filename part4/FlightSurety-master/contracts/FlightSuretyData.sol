@@ -373,7 +373,7 @@ contract FlightSuretyData is Ownable, Mortal, Authentication, Airlines, Flights,
     {
         uint256 currentBalance = address(this).balance;
         uint256 payout = balances[insuree];
-        require(currentBalance >= payout, "Funds needed, cannot do payout");
+        //require(currentBalance >= payout, "Funds needed, cannot do payout"); // check done on app contract
 
         balances[insuree] = 0;
         payable(insuree).transfer(payout);

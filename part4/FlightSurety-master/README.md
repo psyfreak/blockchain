@@ -2,19 +2,26 @@
 ## TODO 
 - add voting to operational
 - correct multiparty funded vs. registered mechanism / hasConfirmed
-- structure contract i.e. modularize 
+- setOperational multiparty
+
+- move setter/getter require
+
 - add https://github.com/adamgruber/mochawesome
 - change data structures of insurance to avoid for loop
-- move setter/getter require
+
 - improve comments for getter/setter
-- setOperational multiparty
-- change constants back / min-responses oracles, wei to ether in all caps and bottoms etc.
+
+- change constants back
+  - min-responses oracles
+  - oracles registration fee wei to ether 
+  - max insurance payment
+  - airline initial funding in all caps and bottoms etc.
 
 - https://jsfiddle.net/Alorel/5h6ztc4r/ console to 
 
 Question adding:
 - Why no interface when including dataContract in app / old solidity version?
-
+- Transfer in data contract
 
 // checked https://github.com/JeromeSolis/dapp-flight-surety/blob/main/contracts/FlightSuretyApp.sol
 https://medium.com/hellogold/ethereum-multi-signature-wallets-77ab926ab63b

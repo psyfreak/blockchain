@@ -19,9 +19,6 @@ import "./entities/Oracles.sol";
 contract FlightSuretyApp is Ownable, Mortal, Oracles {
     using SafeMath for uint256; // Allow SafeMath functions to be called for all uint256 types (similar to "prototype" in Javascript)
 
-    // Fee to be paid when registering oracle
-    uint256 public constant ORACLE_REGISTRATION_FEE = 10 wei; //1 ether;
-
     // Flight status codees
     uint8 private constant STATUS_CODE_UNKNOWN = 0;
     uint8 private constant STATUS_CODE_ON_TIME = 10;
@@ -32,20 +29,13 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
     /********************************************************************************************/
     /*                                       DATA VARIABLES                                     */
     /********************************************************************************************/
-
     FlightSuretyData flightSuretyData;
     MultiSignatureWallet flightSuretyMulti;
 
-
-    struct Flight {
-        bool isRegistered;
-        uint8 statusCode;
-        uint256 updatedTimestamp;        
-        address airline;
-        // might add all insurance bids here via array address + funding
-    }
-    mapping(bytes32 => Flight) private flights;
-
+    /********************************************************************************************/
+    /*                                       EVENT DEFINITIONS                                  */
+    /********************************************************************************************/
+    event UnproccessedFlight(address sender, string flight, uint256 timestamp, uint8 status); //whenever sb. fund via receive (only app now)
 
     /********************************************************************************************/
     /*                                       CONSTRUCTOR                                        */
@@ -55,11 +45,7 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
     * @dev Contract constructor
     *
     */
-    constructor
-                                (
-                                    FlightSuretyData dataContract,
-                                    MultiSignatureWallet multiContract
-                                )
+    constructor(FlightSuretyData dataContract, MultiSignatureWallet multiContract)
     {
         // call the data contract and set this address
         flightSuretyData = FlightSuretyData(dataContract);
@@ -98,14 +84,11 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
 
     * easiest version if other existing airlines just call registerAirline it counts as a voting for such airline
     */   
-    function registerAirline
-                            (
-                                address newAirline
-                            )
-                            external
-                            requireIsAirlineAuthorized(msg.sender)
-                            //TODO can only be called by authoirzedCallers
-                            //one should trigger an event ... returns(bool success, uint256 votes)
+    function registerAirline( address newAirline)
+        external
+        requireIsAirlineAuthorized(msg.sender)
+        //TODO can only be called by authoirzedCallers
+        //one should trigger an event ... returns(bool success, uint256 votes)
     {
         // if not existing create Airlin
         // check if airline is available if not submit
@@ -143,13 +126,9 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
     * Only a fully registered airline can register a flight with a name + timestamp
     * A flight can be only registered by a registered and funded airline.
     */  
-    function registerFlight
-                                (
-                                    string calldata flight,
-                                    uint256 timestamp
-                                )
-                                external
-                                requireIsAirlineAuthorized(msg.sender)
+    function registerFlight( string calldata flight, uint256 timestamp)
+        external
+        requireIsAirlineAuthorized(msg.sender)
     {
         bytes32 flightKey = Util.getFlightKey(msg.sender, flight, timestamp);
         flightSuretyData.createFlight(flightKey);
@@ -160,16 +139,10 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
        * modifer check if flight is available, insuree is a passanger
        */
 
-    function bookFlight
-    (
-        address airline,
-        string calldata flight,
-        uint256 timestamp
-    )
-    external
-    payable
-    requireIsOperational
-    //must be greater than 0 and less < 150
+    function bookFlight(address airline, string calldata flight, uint256 timestamp)
+        external
+        payable
+        requireIsOperational
     {
         bytes32 flightKey = Util.getFlightKey(airline, flight, timestamp);
         // check if flight is existing
@@ -196,7 +169,6 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
 
     // deposit function needed from to actually all payables send ether to AppContract
 
-    
    /**
     * @dev Called after oracle has updated flight status
     * triggered, when oracle gets back.
@@ -205,15 +177,9 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
     * and you can dissolve the insurance mapping for a specific flight.
     *
     */  
-    function processFlightStatus
-                                (
-                                    address airline,
-                                    string calldata flight,
-                                    uint256 timestamp,
-                                    uint8 statusCode
-                                )
-                                //internal
-                               public
+    function processFlightStatus(address airline, string calldata flight, uint256 timestamp, uint8 statusCode)
+        //internal
+        public
     {
 
         bytes32 flightKey = Util.getFlightKey (airline, flight, timestamp);
@@ -230,23 +196,15 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
         }
         else {
             //TODO one must delete existing insurances
+            emit UnproccessedFlight(airline, flight, timestamp, statusCode);
         }
-
-
     }
-
 
     // Generate a request for oracles to fetch flight information
     // Triggered by button click in UI
-    function fetchFlightStatus
-                        (
-                            address airline,
-                            string calldata flight,
-                            uint256 timestamp,
-                            uint8 indexPredefined
-                        )
-                        external
-                        //TODO by anyone?
+    function fetchFlightStatus( address airline, string calldata flight, uint256 timestamp, uint8 indexPredefined)
+        external
+        //TODO by anyone?
     {
         uint8 index = Util.getRandomIndex10(msg.sender, 0);
 
@@ -254,16 +212,15 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
         if(index >= 0 && msg.sender == owner()) {
             index = indexPredefined;
         }
-
         // Generate a unique key for storing the request
         bytes32 key = keccak256(abi.encodePacked(index, airline, flight, timestamp));
 
         /*
         // before solidity 0.7
         oracleResponses[key] = ResponseInfo({
-                                                requester: msg.sender,
-                                                isOpen: true
-                                            });
+            requester: msg.sender,
+            isOpen: true
+        });
         */
         // new
         oracleResponses[key].requester = msg.sender;
@@ -278,12 +235,10 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
      * Potentially move to app contract => withdraw function
      *
     */
-    function withdraw
-    (
-    )
-    external
-    requireIsOperational
-    //TODO add check if money is sufficient to payout
+    function withdraw()
+        external
+        requireIsOperational
+        requireHasSufficientFunds(msg.sender)
     {
         flightSuretyData.withdrawInsuree(msg.sender);
     }
@@ -407,83 +362,14 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
         return (oracleResponses[key].requester, oracleResponses[key].isOpen, oracleResponses[key].responses[forStatus]);
     }
 
-
-
-    /********************************************************************************************/
-    /*                                       FUNCTION MODIFIERS                                 */
-    /********************************************************************************************/
-
-    // Modifiers help avoid duplication of code. They are typically used to validate something
-    // before a function is allowed to be executed.
-
-    /**
-    * @dev Modifier that requires the "operational" boolean variable to be "true"
-    *      This is used on all state changing functions to pause the contract in
-    *      the event there is an issue that needs to be fixed
-    */
-
-    modifier onlyEOA() {
-        require(msg.sender == tx.origin, "Must use EOA");
-        _;
-    }
-
-    modifier requireIsOperational()
-    {
-        // TODO Modify to call data contract's status
-        require(flightSuretyData.isOperational(), "Contract is currently not operational");
-        _;  // All modifiers require an "_" which indicates where the function body will be added
-    }
-
-    modifier IsFeeSufficientChangeBack (uint _amount) {
-        require(msg.value >= _amount, "Amount is not sufficient");
-        _;
-        if (msg.value > _amount) {
-            payable(msg.sender).transfer(msg.value - _amount);
-        }
-    }
-
-    modifier Fee (uint _amount) {
-        require(msg.value >= _amount, "Amount is not sufficient");
-        _;
-    }
-
-    /**
-    * @dev Modifier that requires the "ContractOwner" account to be the function caller
-    */
-    modifier requireIsAirlineRegistered(address airline)
-    {
-        require(flightSuretyData.isAirlineRegistered(airline), "Airline is not registered yet");
-        _;
-    }
-
-    /**
-      * only authorized airlines (registered + funded)
-    **/
-    modifier requireIsAirlineAuthorized(address airline)
-    {
-        require(flightSuretyData.isAirlineFunded(airline), "Airline is not authorized");
-        _;
-    }
-
-    // Define a modifier that verifies the Caller
-    modifier verifyCaller (address _address) {
-        require(msg.sender == _address, "caller is not verified");
-        _;
-    }
-
-    modifier Cap (uint _amount) {
-        require(msg.value <= _amount, "Amount is capped");
-        _;
-    }
-
     /********************************************************************************************/
     /*                                       UTILITY FUNCTIONS                                  */
     /********************************************************************************************/
 
     function isOperational()
         public
-    view
-    returns(bool)
+        view
+        returns(bool)
     {
         return flightSuretyData.isOperational();  // Modify to call data contract's status
     }
@@ -529,6 +415,81 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
             }
         }
         return confirmed;
+    }
+
+
+    /********************************************************************************************/
+    /*                                       FUNCTION MODIFIERS                                 */
+    /********************************************************************************************/
+
+    // Modifiers help avoid duplication of code. They are typically used to validate something
+    // before a function is allowed to be executed.
+
+    /**
+    * @dev Modifier that requires the "operational" boolean variable to be "true"
+    *      This is used on all state changing functions to pause the contract in
+    *      the event there is an issue that needs to be fixed
+    */
+
+    modifier onlyEOA() {
+        require(msg.sender == tx.origin, "Must use EOA");
+        _;
+    }
+
+    modifier requireIsOperational()
+    {
+        // TODO Modify to call data contract's status
+        require(flightSuretyData.isOperational(), "Contract is currently not operational");
+        _;  // All modifiers require an "_" which indicates where the function body will be added
+    }
+
+    modifier IsFeeSufficientChangeBack (uint _amount) {
+        require(msg.value >= _amount, "Amount is not sufficient");
+        _;
+        if (msg.value > _amount) {
+            payable(msg.sender).transfer(msg.value - _amount);
+        }
+    }
+
+    modifier Fee (uint _amount) {
+        require(msg.value >= _amount, "Amount is not sufficient");
+        _;
+    }
+
+    modifier requireHasSufficientFunds (address insuree) {
+        uint256 currentBalance = address(flightSuretyData).balance;
+        uint256 payout = flightSuretyData.getPayoutForInsuree(insuree);
+        require(currentBalance >= payout, "Funds needed, cannot do payout");
+        _;
+    }
+
+    /**
+    * @dev Modifier that requires the "ContractOwner" account to be the function caller
+    */
+    modifier requireIsAirlineRegistered(address airline)
+    {
+        require(flightSuretyData.isAirlineRegistered(airline), "Airline is not registered yet");
+        _;
+    }
+
+    /**
+      * only authorized airlines (registered + funded)
+    **/
+    modifier requireIsAirlineAuthorized(address airline)
+    {
+        require(flightSuretyData.isAirlineFunded(airline), "Airline is not authorized");
+        _;
+    }
+
+    // Define a modifier that verifies the Caller
+    modifier verifyCaller (address _address) {
+        require(msg.sender == _address, "caller is not verified");
+        _;
+    }
+
+    modifier Cap (uint _amount) {
+        require(msg.value <= _amount, "Amount is capped");
+        _;
     }
 
 }
