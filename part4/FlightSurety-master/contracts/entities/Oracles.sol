@@ -64,15 +64,19 @@ contract Oracles  {
     function getMyIndexes()
         view
         external
+        requireIsRegisteredOracle
         returns(uint8[3] memory)
     {
-        require(oracles[msg.sender].isRegistered, "Not registered as an oracle");
-
         return oracles[msg.sender].indexes;
     }
 
     /********************************************************************************************/
     /*                                       FUNCTION MODIFIERS                                 */
     /********************************************************************************************/
+    // Define a modifier that verifies the Caller
+    modifier requireIsRegisteredOracle () {
+        require(oracles[msg.sender].isRegistered, "Not registered as an oracle");
+        _;
+    }
 
 }

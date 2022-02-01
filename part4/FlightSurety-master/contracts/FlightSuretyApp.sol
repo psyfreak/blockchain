@@ -107,8 +107,6 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
         payable
         requireIsAirlineRegistered(msg.sender)
     {
-
-        //a.blah{value: ValueToSend}(2, 3)
         flightSuretyData.fundAirline{value: msg.value}(msg.sender);// we could also call and send it to directly via msg.value
         //payable(address(flightSuretyData)).transfer(msg.value);
     }
@@ -129,10 +127,9 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
     }
 
     /**
-       * @dev Buy flight ticket for a flight
-       * modifer check if flight is available, insuree is a passanger
-       */
-
+    * @dev Buy flight ticket for a flight
+    * modifer check if flight is available, insuree is a passanger
+    */
     function bookFlight(address airline, string calldata flight, uint256 timestamp)
         external
         payable
@@ -143,13 +140,12 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
         flightSuretyData.registerPassengerForFlight(flightKey, msg.sender);
     }
 
+    // current sender = passenger buys flight insurance for a max. insurances fee
     function buyFlightInsurance( address airline, string calldata flight, uint256 timestamp)
         external
         payable
         requireIsOperational
         Cap(flightSuretyData.MAX_INSURANCE_FEE())
-    //TODO passenger should
-    //must be greater than 0 and less < 150
     {
         //flightSuretyData.escrow.deposit(tx.origin) won´t work in our case we not one account
         bytes32 flightKey = Util.getFlightKey(airline, flight, timestamp);
@@ -161,17 +157,10 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
         //payable(address(flightSuretyData)).transfer(msg.value);
     }
 
-    // deposit function needed from to actually all payables send ether to AppContract
-
-
-
-
-
     /**
      *  @dev Transfers eligible payout funds to insuree
      * This is the particular withdraw function, which is called by an insuree to get a full payout of their credit.
      * Potentially move to app contract => withdraw function
-     *
     */
     function withdraw()
         external
@@ -180,8 +169,6 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
     {
         flightSuretyData.withdrawInsuree(msg.sender);
     }
-
-    //TODO add refund refundAirline and use receive for any transfer such as the ones from oracles
 
     // Function to receive Ether. msg.data must be empty
     receive() external payable {
@@ -195,13 +182,11 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
         // this works
         (bool sent, bytes memory data) = address(flightSuretyData).call{value: msg.value}("");
         require(sent, "Failed to send Ether");
-
     }
 
     /********************************************************************************************/
     /*                                       ORACLE FUNCTIONS                                  */
     /********************************************************************************************/
-// region ORACLE MANAGEMENT
 
     // Register an oracle with the contract
     /// Every oracles response to 3 random generated indices
@@ -338,29 +323,6 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
     }
 
 
-
-    // additional helper for debugging
-
-    function getResponses (
-        uint8 index,
-        address airline,
-        string calldata flight,
-        uint256 timestamp,
-        uint8 forStatus
-    )
-    public
-    view
-    onlyOwner
-    returns(
-        address,
-        bool,
-        address[] memory
-    )
-    {
-        bytes32 key = keccak256(abi.encodePacked(index, airline, flight, timestamp));
-        return (oracleResponses[key].requester, oracleResponses[key].isOpen, oracleResponses[key].responses[forStatus]);
-    }
-
     /********************************************************************************************/
     /*                                       UTILITY FUNCTIONS                                  */
     /********************************************************************************************/
@@ -416,6 +378,17 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
         return confirmed;
     }
 
+    // additional helper for debugging
+
+    function getResponses (uint8 index, address airline, string calldata flight, uint256 timestamp, uint8 forStatus)
+        public
+        view
+        onlyOwner
+        returns( address, bool, address[] memory)
+    {
+        bytes32 key = keccak256(abi.encodePacked(index, airline, flight, timestamp));
+        return (oracleResponses[key].requester, oracleResponses[key].isOpen, oracleResponses[key].responses[forStatus]);
+    }
 
     /********************************************************************************************/
     /*                                       FUNCTION MODIFIERS                                 */
