@@ -3,8 +3,9 @@ pragma solidity ^0.8;
 
 import "../node_modules/openzeppelin-solidity/contracts/utils/math/SafeMath.sol";
 import "../node_modules/openzeppelin-solidity/contracts/access/Ownable.sol";
-import {Util} from "./base/Util.sol";
 
+import {Util} from "./base/Util.sol";
+import "./base/Mortal.sol";
 import "./base/Authentication.sol";
 
 // Entities
@@ -19,7 +20,7 @@ import "./entities/Insurances.sol";
  add open zeppelin access
 */
 
-contract FlightSuretyData is Ownable, Airlines, Flights, Passengers, Insurances {
+contract FlightSuretyData is Ownable, Mortal, Authentication, Airlines, Flights, Passengers, Insurances {
     using SafeMath for uint256;
 
     //Result is 2, all integer divison rounds DOWN to the nearest integer
@@ -32,36 +33,17 @@ contract FlightSuretyData is Ownable, Airlines, Flights, Passengers, Insurances 
     /********************************************************************************************/
     /*                                       DATA VARIABLES                                     */
     /********************************************************************************************/
-
-
-    //Escrow escrow;
-    mapping(address => bool) private authorizedCallers;
     bool private operational = true;                                    // Blocks all state changes throughout the contract if false
+    //Escrow escrow;
 
-     // Track all oracle responses
-    // Key = hash(index, flight, timestamp)
-    //mapping(bytes32 => ResponseInfo) private insurancesPaidPerPassenger;
-
-
-    // mapping(registration => struct(mapping(address=>bool), votes voter,
-    /*
-        registration per airline
-    */
-    //votations[airline] = struct(array[airlines])
     // TODO might transfer to modular contract
     enum ElectionTopics { AIRLINE_REGISTRATION, SET_OPERATIONAL }
-
     mapping(ElectionTopics => mapping(address => address[])) public ballots;
 
     /********************************************************************************************/
     /*                                       EVENT DEFINITIONS                                  */
     /********************************************************************************************/
-    event CallerAuthorized(address caller); // triggered whenever new caller gets authorized
-    event CallerDeauthorized(address caller);  // triggered whenever an existing caller gets unauthorized (not used yet)
-
-    // TODO use airlines ctor for initialization
     event ContractFunded(address sender, uint256 investment); //whenever sb. fund via receive (only app now)
-
     event BalanceChanged(uint256 balanceApp, uint256 balanceData);
 
     /**
@@ -97,137 +79,41 @@ contract FlightSuretyData is Ownable, Airlines, Flights, Passengers, Insurances 
         // we could add fundAirline here as well
     }
 
-/*
-    bool public initialized = false; // own initialization function instead of ctor usage
+    /*
+        bool public initialized = false; // own initialization function instead of ctor usage
 
-    /////////////////// now initialization via payable ctor - funding is done as well
-    function initialize
-    (
-        address airlineAddr
-    )
-    external
-    payable
-    requireIsOperational
-    //IsFeeSufficientChangeBack(AIRLINE_REGISTRATION_FEE)
-    {
-        require(!initialized, "Contract has already been initialized");
-        initialized = true;
+        /////////////////// now initialization via payable ctor - funding is done as well
+        function initialize
+        (
+            address airlineAddr
+        )
+        external
+        payable
+        requireIsOperational
+        //IsFeeSufficientChangeBack(AIRLINE_REGISTRATION_FEE)
+        {
+            require(!initialized, "Contract has already been initialized");
+            initialized = true;
 
-        authorizedCallers[airlineAddr] = true;
-        numOfAirlines = numOfAirlines.add(1);
-        numOfRegisteredAirlines = numOfRegisteredAirlines.add(1);
-        //done in funded method which is called in deploy script - numOfFundedAirlines = numOfFundedAirlines.add(1);
+            authorizedCallers[airlineAddr] = true;
+            numOfAirlines = numOfAirlines.add(1);
+            numOfRegisteredAirlines = numOfRegisteredAirlines.add(1);
+            //done in funded method which is called in deploy script - numOfFundedAirlines = numOfFundedAirlines.add(1);
 
-        //Airline memory newAirline =
-        airlines[airlineAddr] = Airline({id:numOfAirlines, isRegistered: true, investment: 0, registeredBy: tx.origin, timestamp: block.timestamp});
-        // fire event newAirline
-        emit AirlineRegistered (
-            airlineAddr,
-            airlines[airlineAddr].id,
-            airlines[airlineAddr].isRegistered,
-            airlines[airlineAddr].registeredBy,
-            airlines[airlineAddr].investment,
-            airlines[airlineAddr].timestamp
-        );
+            //Airline memory newAirline =
+            airlines[airlineAddr] = Airline({id:numOfAirlines, isRegistered: true, investment: 0, registeredBy: tx.origin, timestamp: block.timestamp});
+            // fire event newAirline
+            emit AirlineRegistered (
+                airlineAddr,
+                airlines[airlineAddr].id,
+                airlines[airlineAddr].isRegistered,
+                airlines[airlineAddr].registeredBy,
+                airlines[airlineAddr].investment,
+                airlines[airlineAddr].timestamp
+            );
 
-    }
-*/
-    /********************************************************************************************/
-    /*                                       FUNCTION MODIFIERS                                 */
-    /********************************************************************************************/
-
-    // Modifiers help avoid duplication of code. They are typically used to validate something
-    // before a function is allowed to be executed.
-
-    /**
-    * @dev Modifier that requires the "operational" boolean variable to be "true"
-    *      This is used on all state changing functions to pause the contract in 
-    *      the event there is an issue that needs to be fixed
-    */
-
-    modifier requireIsOperational()
-    {
-        require(operational, "Contract is currently not operational");
-        _;  // All modifiers require an "_" which indicates where the function body will be added
-    }
-
-    modifier GiveChangeBack(uint _amount) {
-        _;
-        if (msg.value > _amount) {
-            payable(msg.sender).transfer(msg.value - _amount);
         }
-    }
-
-
-    modifier requireIsCallerAuthorized()
-    {
-        require(isCallerAuthorized(msg.sender), "Caller is not authorized");
-        _;
-    }
-
-    /********************************************************************************************/
-    /*                                       UTILITY FUNCTIONS                                  */
-    /********************************************************************************************/
-
-    /**
-    * @dev Get operating status of contract
-    *
-    * @return A bool that is the current operating status
-    */      
-    function isOperational() 
-        public
-        view
-        returns(bool)
-    {
-        return operational;
-    }
-
-    /**
-    * @dev Sets contract operations on/off
-    *
-    * When operational mode is disabled, all write transactions except for this one will fail
-    */    
-    function setOperatingStatus(bool mode)
-        external
-        requireIsCallerAuthorized
-        //onlyOwner
-    {
-        operational = mode;
-    }
-
-    function isCallerAuthorized(address caller)
-        public
-        view
-        returns(bool)
-    {
-        return authorizedCallers[caller];
-    }
-
-    function authorizeCaller (address callee)
-        external
-        onlyOwner
-    {
-        // TODO add multisig voting mechanism
-        authorizedCallers[callee] = true;
-        emit CallerAuthorized(callee);
-    }
-
-    function deauthorizeCaller (address callee)
-        external
-        onlyOwner
-    {
-        // TODO add multisig voting mechanism
-        delete authorizedCallers[callee];
-        emit CallerDeauthorized(callee);
-    }
-
-    function getAirlineBallotsByAirlineAddress(address airlineAddr)
-        public
-        view
-        returns (address[] memory)
-    {
-        return ballots[ElectionTopics.AIRLINE_REGISTRATION][airlineAddr];
-    }
+    */
 
     /********************************************************************************************/
     /*                                     SMART CONTRACT FUNCTIONS                             */
@@ -526,7 +412,69 @@ contract FlightSuretyData is Ownable, Airlines, Flights, Passengers, Insurances 
     }
 
 
-    /********************************** additional stubs *************************/
+    /********************************************************************************************/
+    /*                                       UTILITY FUNCTIONS                                  */
+    /********************************************************************************************/
+
+    /**
+    * @dev Get operating status of contract
+    *
+    * @return A bool that is the current operating status
+    */
+    function isOperational()
+    public
+    view
+    returns(bool)
+    {
+        return operational;
+    }
+
+    /**
+    * @dev Sets contract operations on/off
+    *
+    * When operational mode is disabled, all write transactions except for this one will fail
+    */
+    function setOperatingStatus(bool mode)
+    external
+    requireIsCallerAuthorized
+        //onlyOwner
+    {
+        operational = mode;
+    }
+
+    function getAirlineBallotsByAirlineAddress(address airlineAddr)
+    public
+    view
+    returns (address[] memory)
+    {
+        return ballots[ElectionTopics.AIRLINE_REGISTRATION][airlineAddr];
+    }
+
+    /********************************************************************************************/
+    /*                                       FUNCTION MODIFIERS                                 */
+    /********************************************************************************************/
+
+    // Modifiers help avoid duplication of code. They are typically used to validate something
+    // before a function is allowed to be executed.
+
+    /**
+    * @dev Modifier that requires the "operational" boolean variable to be "true"
+    *      This is used on all state changing functions to pause the contract in
+    *      the event there is an issue that needs to be fixed
+    */
+
+    modifier requireIsOperational()
+    {
+        require(operational, "Contract is currently not operational");
+        _;  // All modifiers require an "_" which indicates where the function body will be added
+    }
+
+    modifier GiveChangeBack(uint _amount) {
+        _;
+        if (msg.value > _amount) {
+            payable(msg.sender).transfer(msg.value - _amount);
+        }
+    }
 
 
 

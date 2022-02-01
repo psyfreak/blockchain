@@ -8,6 +8,7 @@ pragma solidity ^0.8;
 import "../node_modules/openzeppelin-solidity/contracts/utils/math/SafeMath.sol";
 import "../node_modules/openzeppelin-solidity/contracts/access/Ownable.sol";
 import {Util} from "./base/Util.sol";
+import "./base/Mortal.sol";
 import "./FlightSuretyData.sol";
 import "./base/MultiSignatureWallet.sol";
 import "./entities/Oracles.sol";
@@ -15,7 +16,7 @@ import "./entities/Oracles.sol";
 /************************************************** */
 /* FlightSurety Smart Contract                      */
 /************************************************** */
-contract FlightSuretyApp is Ownable, Oracles {
+contract FlightSuretyApp is Ownable, Mortal, Oracles {
     using SafeMath for uint256; // Allow SafeMath functions to be called for all uint256 types (similar to "prototype" in Javascript)
 
     // Fee to be paid when registering oracle
@@ -175,16 +176,11 @@ contract FlightSuretyApp is Ownable, Oracles {
         flightSuretyData.registerPassengerForFlight(flightKey, msg.sender);
     }
 
-    function buyFlightInsurance
-    (
-        address airline,
-        string calldata flight,
-        uint256 timestamp
-    )
-    external
-    payable
-    requireIsOperational
-    Cap(flightSuretyData.MAX_INSURANCE_FEE())
+    function buyFlightInsurance( address airline, string calldata flight, uint256 timestamp)
+        external
+        payable
+        requireIsOperational
+        Cap(flightSuretyData.MAX_INSURANCE_FEE())
     //TODO passenger should
     //must be greater than 0 and less < 150
     {

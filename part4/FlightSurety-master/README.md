@@ -1,14 +1,16 @@
 # FlightSurety
 ## TODO 
 - add voting to operational
+- correct multiparty funded vs. registered mechanism / hasConfirmed
 - structure contract i.e. modularize 
 - add https://github.com/adamgruber/mochawesome
 - change data structures of insurance to avoid for loop
 - move setter/getter require
 - improve comments for getter/setter
 - setOperational multiparty
-- correct multiparty funded vs. registered mechanism / hasConfirmed
 - change constants back / min-responses oracles, wei to ether in all caps and bottoms etc.
+
+- https://jsfiddle.net/Alorel/5h6ztc4r/ console to 
 
 Question adding:
 - Why no interface when including dataContract in app / old solidity version?
@@ -59,8 +61,11 @@ While the former has the advantage of smaller overhead, I found the extensibilit
 The second example I like in terms of transactionId and the anonimity..
 
 
-
+- Inheritance in solidity (App is an Oracle)
+  Normally you you would implement an association or static class (but neither a library (no state variables possible) fit or another contract to interact with (too expensive))
   
+  - Issue Authentication inherits from Ownable as well as DataContract (two different instances?)
+  - Diamond issue - want to move all entity related functions e.g. registerAirline to Airline Entity, but it would mean that each entity needs to inherit from authentication 
 
 
 ### Deployment 

@@ -8,6 +8,9 @@ import {Util} from "../base/Util.sol";
 
 contract Insurances  {
 
+    /********************************************************************************************/
+    /*                                       DATA VARIABLES                                     */
+    /********************************************************************************************/
     uint256 public constant MAX_INSURANCE_FEE = 150 wei; //ether;
 
     // insurance

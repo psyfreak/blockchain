@@ -5,6 +5,9 @@ import {Util} from "../base/Util.sol";
 
 contract Passengers  {
 
+    /********************************************************************************************/
+    /*                                       DATA VARIABLES                                     */
+    /********************************************************************************************/
     // balances for passengers with past insurance credits
     mapping(address => uint256) public balances; // after oracle submission payout is aggregated 1.5 times insurance flight value;
 

@@ -5,6 +5,10 @@ import {Util} from "../base/Util.sol";
 
 
 contract Oracles  {
+
+    /********************************************************************************************/
+    /*                                       DATA VARIABLES                                     */
+    /********************************************************************************************/
     // Incremented to add pseudo-randomness at various points
     // no need anymore uint8 private nonce = 0;
 
