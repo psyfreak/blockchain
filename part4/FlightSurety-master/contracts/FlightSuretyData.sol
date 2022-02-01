@@ -29,8 +29,6 @@ contract FlightSuretyData is Ownable, Airlines, Flights, Passengers, Insurances 
     uint256 public constant ROI_NOMINATOR = 3;
     uint256 public constant ROI_DENOMINATOR = 2;
 
-    uint256 public constant MAX_INSURANCE_FEE = 150 wei; //ether;
-
     /********************************************************************************************/
     /*                                       DATA VARIABLES                                     */
     /********************************************************************************************/
@@ -312,7 +310,7 @@ contract FlightSuretyData is Ownable, Airlines, Flights, Passengers, Insurances 
 
     /**
      * @dev Initial funding for the insurance. Unless there are too many delayed flights
-     *      resulting in insurance payouts, the contract should be self-sustaining
+     *      resulting in insurance balances, the contract should be self-sustaining
      * Airlines go through a two step process:
      *   1. register (5th airline and higher via voting) 2. fund
      *   2. if voting applicable and voting accepted
@@ -384,9 +382,9 @@ contract FlightSuretyData is Ownable, Airlines, Flights, Passengers, Insurances 
 
         //TODO add create insurances
         //flights[flightKey].passengers = new address[](0);
-        delete flightInsurances[flightKey];// = new Insurance[](0);
+        delete insurances[flightKey];// = new Insurance[](0);
         //below is not working due to: Copying of type struct FlightSuretyData.Insurance memory[] memory to storage not yet
-        // flightInsurances[flightKey] = new Insurance[](0);
+        // insurances[flightKey] = new Insurance[](0);
         //TODO add emit()
         emit FlightCreated(flightKey, msg.sender, tx.origin);
     }
@@ -446,12 +444,12 @@ contract FlightSuretyData is Ownable, Airlines, Flights, Passengers, Insurances 
     {
         //flightSuretyData.escrow.deposit(tx.origin) won´t work in our case we not one account
         /*
-        if(flightInsurances[flightKey].length == 0) {
+        if(insurances[flightKey].length == 0) {
 
         }
         */
         //TODO check: payable and then use msg.value?!
-        flightInsurances[flightKey].push(Insurance({passenger: passenger, insurance: value}));
+        insurances[flightKey].push(Insurance({passenger: passenger, insurance: value}));
         emit InsurancePurchased(passenger, value);
         emit BalanceChanged(address(msg.sender).balance, address(this).balance);
         //     event PurchasedOrigin(address indexed payee, uint256 weiAmount, uint256 balance);
@@ -487,21 +485,21 @@ contract FlightSuretyData is Ownable, Airlines, Flights, Passengers, Insurances 
 
         /*
         // error memory / storage issue
-        Insurance[] memory insuranceArray =  flightInsurances[flightKey];
+        Insurance[] memory insuranceArray =  insurances[flightKey];
         for(uint c=0; c<insuranceArray.length; c++) {
             uint256 newBalance = insuranceArray[c].insurance * RISK_RETURN;
             address passenger = insuranceArray[c] .passenger;
-            payouts[passenger] += newBalance;
+            balances[passenger] += newBalance;
         }
         */
 
-        for(uint i=0; i<flightInsurances[flightKey].length; i++) {
-            uint256 newBalance = Util.getRoI(flightInsurances[flightKey][i].insurance, ROI_NOMINATOR, ROI_DENOMINATOR);
-            address passenger = flightInsurances[flightKey][i].passenger;
-            payouts[passenger] = payouts[passenger].add(newBalance);
+        for(uint i=0; i<insurances[flightKey].length; i++) {
+            uint256 newBalance = Util.getRoI(insurances[flightKey][i].insurance, ROI_NOMINATOR, ROI_DENOMINATOR);
+            address passenger = insurances[flightKey][i].passenger;
+            balances[passenger] = balances[passenger].add(newBalance);
         }
-        delete flightInsurances[flightKey];
-        //flightInsurances[flightKey].length = 0;// = new Insurance[](0);
+        delete insurances[flightKey];
+        //insurances[flightKey].length = 0;// = new Insurance[](0);
         // emit event to tell how many passenger investment + payout
         //emit InsuranceDeposited(msg.sender, payout);
     }
@@ -515,10 +513,10 @@ contract FlightSuretyData is Ownable, Airlines, Flights, Passengers, Insurances 
         requireIsCallerAuthorized
     {
         uint256 currentBalance = address(this).balance;
-        uint256 payout = payouts[insuree];
+        uint256 payout = balances[insuree];
         require(currentBalance >= payout, "Funds needed, cannot do payout");
 
-        payouts[insuree] = 0;
+        balances[insuree] = 0;
         payable(insuree).transfer(payout);
         emit InsuranceWithdrawn(msg.sender, payout, currentBalance, address(this).balance);
     }

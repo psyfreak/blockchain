@@ -29,7 +29,7 @@ const util = {
    * @returns {Promise<void>}
    */
   printPassenger: async function(config, passengerAddress) {
-    let payout = await config.flightSuretyData.payouts.call(passengerAddress);
+    let payout = await config.flightSuretyData.balances.call(passengerAddress);
     console.log(`\t\tPassenger (payout/): ${payout.toString()} / `)
   },
   printAirline: async function(config, airlineAddress) {
@@ -42,7 +42,7 @@ const util = {
     }
   },
   printFlight: async function(config, airlineAddress, flightName, departure) {
-    let result = await config.flightSuretyData.getFlight.call(airlineAddress, flightName, departure);
+    let result = await config.flightSuretyData.getFlightDetails.call(airlineAddress, flightName, departure);
     console.log(`\t\tFlight (id/isRegistered/registeredBy/status/passengers): ${result['0'].toString()} / ${result['1'].toString()} / ${result['3'].toString()} / ${result['2'].toString()} / ${result['4']} `)
   },
   printAllFlights: async function(config) {
@@ -50,7 +50,7 @@ const util = {
 
     for(let acc of accounts) {
 
-      let result = await config.flightSuretyData.getFlightKey.call(accounts[9], FLIGHT_NAME, FLIGHT_timestamp);
+      let result = await config.flightSuretyData.getFlightDetails.call(accounts[9], FLIGHT_NAME, FLIGHT_timestamp);
       console.log("allAirlines", result);
       //console.log(`\t\tAirlines (id/isRegistered/registeredBy/investment/timestamp): ${result['0'].toString()} / ${result['1'].toString()} / ${result['2'].toString()} / ${result['3'].toString()} / ${new Date(result['4'].toString()*1000)} `)
 
@@ -62,7 +62,7 @@ const util = {
 
     for(let acc of accounts) {
 
-      let result = await config.flightSuretyData.getFlightKey.call(accounts[9], FLIGHT_NAME, FLIGHT_timestamp);
+      let result = await config.flightSuretyData.getFlightDetails.call(accounts[9], FLIGHT_NAME, FLIGHT_timestamp);
       console.log("allAirlines", result);
       //console.log(`\t\tAirlines (id/isRegistered/registeredBy/investment/timestamp): ${result['0'].toString()} / ${result['1'].toString()} / ${result['2'].toString()} / ${result['3'].toString()} / ${new Date(result['4'].toString()*1000)} `)
     }

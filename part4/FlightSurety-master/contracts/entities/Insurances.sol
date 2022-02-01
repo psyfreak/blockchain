@@ -8,13 +8,15 @@ import {Util} from "../base/Util.sol";
 
 contract Insurances  {
 
+    uint256 public constant MAX_INSURANCE_FEE = 150 wei; //ether;
+
     // insurance
     struct Insurance {
         address passenger;
         uint256 insurance;
     }
     // mapping for passengers flight towards insurance balance / a passenger might have multiple insurances for different flights flight 1: 1 ether, flight 2: 0.6 ether etc.
-    mapping(bytes32 => Insurance[]) flightInsurances;// mapping of passenger towards Insurance Info (insurance balanace per flight)
+    mapping(bytes32 => Insurance[]) insurances;// mapping of passenger towards Insurance Info (insurance balanace per flight)
 
     event InsurancePurchased(address indexed payee, uint256 weiAmount);
     event InsuranceDeposited(address indexed payee, uint256 weiAmount);
@@ -35,10 +37,10 @@ contract Insurances  {
     returns(address, uint256)
     {
         //TODO add modifier
-        if (flightInsurances[flightKey].length >0) {
+        if (insurances[flightKey].length >0) {
             return (
-            flightInsurances[flightKey][0].passenger,
-            flightInsurances[flightKey][0].insurance
+            insurances[flightKey][0].passenger,
+            insurances[flightKey][0].insurance
             );
         } else {
             return  (address(0),0);
@@ -70,8 +72,8 @@ contract Insurances  {
         // check first if passenger is on flight at all
 
         bool found = false;
-        Insurance[] storage insuranceOfFlight = flightInsurances[flight];
-        //flightInsurances[flightKey].push(Insurance({passenger: passenger, insurance: msg.value}));
+        Insurance[] storage insuranceOfFlight = insurances[flight];
+        //insurances[flightKey].push(Insurance({passenger: passenger, insurance: msg.value}));
         // https://github.com/ethereum/solidity/issues/4115
 
         for(uint i=0; i<insuranceOfFlight.length; i++) {
@@ -86,12 +88,12 @@ contract Insurances  {
             }
         }
         /*
-        for(uint i=0; i<flightInsurances[flight].length; i++) {
-            emit LogInsuranceIt(i, flightInsurances[flight][i].passenger, flightInsurances[flight][i].insurance);
+        for(uint i=0; i<insurances[flight].length; i++) {
+            emit LogInsuranceIt(i, insurances[flight][i].passenger, insurances[flight][i].insurance);
             // if passenger on the list and insurance is greater than 0
             if(
-                flightInsurances[flight][i].insurance > 0 &&
-                (flightInsurances[flight][i].passenger == passenger)
+                insurances[flight][i].insurance > 0 &&
+                (insurances[flight][i].passenger == passenger)
             ) {
                 found = true;
                 break;
@@ -126,7 +128,7 @@ contract Insurances  {
     returns(Insurance[] calldata)
     {
         bytes32 flightKey = Util.getFlightKey(airline, flight, timestamp);
-        return flightInsurances[flightKey];
+        return insurances[flightKey];
     }
     */
     function getAmountOfFlightInsurees (
@@ -139,7 +141,7 @@ contract Insurances  {
     returns(uint)
     {
         bytes32 flightKey = Util.getFlightKey(airline, flight, timestamp);
-        return flightInsurances[flightKey].length;
+        return insurances[flightKey].length;
     }
 
 

@@ -69,8 +69,8 @@ contract('Flight Surety Multiparty', async (accounts) => {
       .on('error', function(error, receipt) { // If the transaction was rejected by the network with a receipt, the second parameter will be the receipt.
         console.log(error, receipt);
       });
-
-    (config.multiSignatureWallet).event.Execution({
+/*
+    (config.multiSignatureWallet).Execution({
       filter: {
        // myIndexedParam: [20,23], myOtherIndexedParam: '0x123456789...'
       }, // Using an array means OR: e.g. 20 or 23
@@ -89,7 +89,7 @@ contract('Flight Surety Multiparty', async (accounts) => {
       .on('error', function(error, receipt) { // If the transaction was rejected by the network with a receipt, the second parameter will be the receipt.
         console.log(error, receipt);
       });
-    /*
+  */
     // Monitor Events - working
     config.flightSuretyData.AirlineFunded({ fromBlock: 0,
       //toBlock: 'latest'
@@ -98,7 +98,7 @@ contract('Flight Surety Multiparty', async (accounts) => {
       console.log(result)
       // console.log(`[TESTER] => [message] : ${result.args.message} [status] : ${result.args.status}`);
     });
-    */
+
     /*
     config.flightSuretyData.allEvents(()=> {
       console.log("event", result)
