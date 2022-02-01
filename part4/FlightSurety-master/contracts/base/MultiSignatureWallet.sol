@@ -269,6 +269,7 @@ contract MultiSignatureWallet is Ownable {
         bytes memory data
     )
         public
+        view
         returns (uint)
     {
         bytes32 transactionKey =  getTransactionKey(destination, value, data);
@@ -276,6 +277,7 @@ contract MultiSignatureWallet is Ownable {
     }
     function getTransactionIdByKey(bytes32 transactionKey)
         private
+        view
         returns (uint)
     {
         uint transactionId =  transactionMapping[transactionKey];

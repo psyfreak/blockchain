@@ -18,23 +18,24 @@ contract Insurances  {
     // mapping for passengers flight towards insurance balance / a passenger might have multiple insurances for different flights flight 1: 1 ether, flight 2: 0.6 ether etc.
     mapping(bytes32 => Insurance[]) insurances;// mapping of passenger towards Insurance Info (insurance balanace per flight)
 
+    /********************************************************************************************/
+    /*                                       EVENT DEFINITIONS                                  */
+    /********************************************************************************************/
     event InsurancePurchased(address indexed payee, uint256 weiAmount);
     event InsuranceDeposited(address indexed payee, uint256 weiAmount);
     event InsuranceWithdrawn(address indexed payee, uint256 weiAmount, uint256 weiBalanceDataContractBefore, uint256 weiBalanceDataContractAfter);
 
-    event LogInsuranceIt(uint counter, address passenger, uint256 balance);
-
-
+    //event LogInsuranceIt(uint counter, address passenger, uint256 balance);
 
     /********************************************************************************************/
     /*                                       UTILITY FUNCTIONS                                  */
     /********************************************************************************************/
     // TODO
     function getInsuranceByKey (bytes32 flightKey, address passenger)
-    public
-    view
+        public
+        view
         //requireIsPassengerOnFlight(flight, passenger)
-    returns(address, uint256)
+        returns(address, uint256)
     {
         //TODO add modifier
         if (insurances[flightKey].length >0) {
@@ -47,12 +48,7 @@ contract Insurances  {
         }
     }
 
-    function getInsurance (
-        address airline,
-        string calldata flight,
-        uint256 timestamp,
-        address passenger
-    )
+    function getInsurance (address airline, string calldata flight, uint256 timestamp, address passenger)
     public
     view
     returns(address, uint256)
@@ -62,10 +58,10 @@ contract Insurances  {
     }
 
     function isPassengerInsuredByKey (bytes32 flight, address passenger)
-    public
-        //view
+        public
+        view
         //requireIsPassengerOnFlight(flight, passenger)
-    returns(bool)
+        returns(bool)
     {
         // for loop  I need the possibility to iterate over all insured passenger for a flight therefore an array
         // TODO better we could also add insurance to passenger list to have direct access and only safe the address in the passenger array
@@ -77,7 +73,7 @@ contract Insurances  {
         // https://github.com/ethereum/solidity/issues/4115
 
         for(uint i=0; i<insuranceOfFlight.length; i++) {
-            emit LogInsuranceIt(i, insuranceOfFlight[i].passenger,insuranceOfFlight[i].insurance);
+            //emit LogInsuranceIt(i, insuranceOfFlight[i].passenger,insuranceOfFlight[i].insurance);
             // if passenger on the list and insurance is greater than 0
             if(
             //insuranceOfFlight[i].insurance > 0 &&
@@ -103,15 +99,10 @@ contract Insurances  {
         return found;
     }
 
-    function isPassengerInsured (
-        address airline,
-        string calldata flight,
-        uint256 timestamp,
-        address passenger
-    )
-    public
-        //view
-    returns(bool)
+    function isPassengerInsured (address airline, string calldata flight, uint256 timestamp, address passenger)
+        public
+        view
+        returns(bool)
     {
         bytes32 flightKey = Util.getFlightKey(airline, flight, timestamp);
         return isPassengerInsuredByKey(flightKey, passenger);
@@ -131,19 +122,14 @@ contract Insurances  {
         return insurances[flightKey];
     }
     */
-    function getAmountOfFlightInsurees (
-        address airline,
-        string calldata flight,
-        uint256 timestamp
-    )
-    public
-    view
-    returns(uint)
+    function getAmountOfFlightInsurees (address airline, string calldata flight, uint256 timestamp)
+        public
+        view
+        returns(uint)
     {
         bytes32 flightKey = Util.getFlightKey(airline, flight, timestamp);
         return insurances[flightKey].length;
     }
-
 
     /********************************************************************************************/
     /*                                       FUNCTION MODIFIERS                                 */

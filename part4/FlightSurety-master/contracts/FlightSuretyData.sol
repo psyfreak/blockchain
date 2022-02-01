@@ -56,11 +56,11 @@ contract FlightSuretyData is Ownable, Airlines, Flights, Passengers, Insurances 
     /********************************************************************************************/
     /*                                       EVENT DEFINITIONS                                  */
     /********************************************************************************************/
-    event CallerAuthorized(address caller);
-    event CallerDeauthorized(address caller);
+    event CallerAuthorized(address caller); // triggered whenever new caller gets authorized
+    event CallerDeauthorized(address caller);  // triggered whenever an existing caller gets unauthorized (not used yet)
 
     // TODO use airlines ctor for initialization
-    event ContractFunded(address sender, uint256 investment);
+    event ContractFunded(address sender, uint256 investment); //whenever sb. fund via receive (only app now)
 
     event BalanceChanged(uint256 balanceApp, uint256 balanceData);
 
@@ -203,7 +203,6 @@ contract FlightSuretyData is Ownable, Airlines, Flights, Passengers, Insurances 
         return authorizedCallers[caller];
     }
 
-
     function authorizeCaller (address callee)
         external
         onlyOwner
@@ -222,11 +221,10 @@ contract FlightSuretyData is Ownable, Airlines, Flights, Passengers, Insurances 
         emit CallerDeauthorized(callee);
     }
 
-    ////////////////////////// Airline
     function getAirlineBallotsByAirlineAddress(address airlineAddr)
-    public
-    view
-    returns (address[] memory)
+        public
+        view
+        returns (address[] memory)
     {
         return ballots[ElectionTopics.AIRLINE_REGISTRATION][airlineAddr];
     }
@@ -243,10 +241,10 @@ contract FlightSuretyData is Ownable, Airlines, Flights, Passengers, Insurances 
      *
      */
     function createAirline(address airlineAddr)
-    external
-    requireIsOperational
-    requireIsCallerAuthorized
-    requireIsAirlineNotExisting(airlineAddr) // no hard condition
+        external
+        requireIsOperational
+        requireIsCallerAuthorized
+        requireIsAirlineNotExisting(airlineAddr) // no hard condition
     {
         // msg.sender is now address of the calling contract therefore use tx.origin for registeredBy
         // new airline
@@ -265,12 +263,11 @@ contract FlightSuretyData is Ownable, Airlines, Flights, Passengers, Insurances 
      *
      */
     function registerAirline(address airlineAddr)
-    external
-    requireIsOperational
-    requireIsCallerAuthorized
-    requireIsAirlineNotRegistered(airlineAddr)
+        external
+        requireIsOperational
+        requireIsCallerAuthorized
+        requireIsAirlineNotRegistered(airlineAddr)
     {
-
         airlines[airlineAddr].isRegistered = true;
         numOfRegisteredAirlines = numOfRegisteredAirlines.add(1);
 
@@ -293,19 +290,15 @@ contract FlightSuretyData is Ownable, Airlines, Flights, Passengers, Insurances 
             registerAirline
     */
 
-    ///
     // confirmedBy could be substituted with tx.origin
     function confirmAirline(address airlineAddr, address confirmedBy)
-    external
-    requireIsOperational
-    requireIsCallerAuthorized
-    requireIsAirlineExisting(airlineAddr)
+        external
+        requireIsOperational
+        requireIsCallerAuthorized
+        requireIsAirlineExisting(airlineAddr)
     {
         ballots[ElectionTopics.AIRLINE_REGISTRATION][airlineAddr].push(confirmedBy);
     }
-
-
-
     // fundAirline
 
     /**
@@ -389,11 +382,7 @@ contract FlightSuretyData is Ownable, Airlines, Flights, Passengers, Insurances 
         emit FlightCreated(flightKey, msg.sender, tx.origin);
     }
 
-    function updateFlightStatus
-    (
-        bytes32 flightKey,
-        uint8 newStatus
-    )
+    function updateFlightStatus( bytes32 flightKey, uint8 newStatus)
         external
         requireIsOperational
         requireIsCallerAuthorized
@@ -409,11 +398,7 @@ contract FlightSuretyData is Ownable, Airlines, Flights, Passengers, Insurances 
      * Optional part - UI defines the flights.
      * Only a fully registered airline can register a flight with a name + timestamp
      */
-    function registerPassengerForFlight
-    (
-        bytes32 flightKey,
-        address passenger
-    )
+    function registerPassengerForFlight( bytes32 flightKey, address passenger)
         external
         requireIsOperational
         requireIsCallerAuthorized
@@ -429,12 +414,7 @@ contract FlightSuretyData is Ownable, Airlines, Flights, Passengers, Insurances 
     * @dev Buy insurance for a flight
     *
     */   
-    function createInsuranceForFlight
-    (
-        bytes32 flightKey,
-        address passenger,
-        uint256 value
-    )
+    function createInsuranceForFlight( bytes32 flightKey, address passenger, uint256 value)
         external
         payable
         requireIsOperational
@@ -461,7 +441,6 @@ contract FlightSuretyData is Ownable, Airlines, Flights, Passengers, Insurances 
         // alternative
         // flight key => [struct(address, investment)]
         // credit iterate over array for a flight key after landing and calc
-
     }
 
     /**
@@ -470,10 +449,7 @@ contract FlightSuretyData is Ownable, Airlines, Flights, Passengers, Insurances 
      * based on insurances mapping transfer balance to payouts
      *
     */
-    function creditInsurees
-    (
-        bytes32 flightKey
-    )
+    function creditInsurees( bytes32 flightKey)
         external
         requireIsOperational
         requireIsCallerAuthorized
@@ -504,10 +480,7 @@ contract FlightSuretyData is Ownable, Airlines, Flights, Passengers, Insurances 
         //emit InsuranceDeposited(msg.sender, payout);
     }
 
-    function withdrawInsuree
-    (
-        address insuree
-    )
+    function withdrawInsuree(address insuree)
         external
         requireIsOperational
         requireIsCallerAuthorized

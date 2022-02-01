@@ -1,10 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8;
-/*
-import "../../node_modules/openzeppelin-solidity/contracts/utils/math/SafeMath.sol";
-*/
-import {Util} from "../base/Util.sol";
 
+import {Util} from "../base/Util.sol";
 
 contract Flights  {
 
@@ -20,9 +17,10 @@ contract Flights  {
     }
     mapping(bytes32 => Flight) flights;
     uint256 public numOfFlights = 0;
-    //bytes32[] allflights;
 
-
+    /********************************************************************************************/
+    /*                                       EVENT DEFINITIONS                                  */
+    /********************************************************************************************/
     event FlightRegistered(address airline, uint256 id, bool isRegistered, address registeredB, uint256 investment, uint256 timestamp);
     event FlightCreated(bytes32 flightKey, address origin, address airline);
     event FlightUpdated(bytes32 flightKey, uint8 newStatus);
@@ -31,22 +29,16 @@ contract Flights  {
     /*                                       UTILITY FUNCTIONS                                  */
     /********************************************************************************************/
 
-    ////////////////////////// Flight
-
-    function getFlightDetails (
-        address airline,
-        string calldata flight,
-        uint256 timestamp
-    )
-    public
-    view
-    returns(
-        uint256 ,
-        bool,
-        uint8,
-        address,
-        address[] memory
-    )
+    function getFlight (address airline, string calldata flight, uint256 timestamp)
+        public
+        view
+        returns(
+            uint256 ,
+            bool,
+            uint8,
+            address,
+            address[] memory
+        )
     {
         bytes32 flightKey = Util.getFlightKey(airline, flight, timestamp);
         return (flights[flightKey].id, flights[flightKey].isRegistered, flights[flightKey].status, flights[flightKey].registeredBy, flights[flightKey].passengers);
@@ -55,21 +47,17 @@ contract Flights  {
     //getInsuree
 
     function isFlightRegisteredByKey (bytes32 flight)
-    public
-    view
-    returns(bool)
+        public
+        view
+        returns(bool)
     {
         return (flights[flight].isRegistered);
     }
 
-    function isFlightRegistered (
-        address airline,
-        string calldata flight,
-        uint256 timestamp
-    )
-    public
-    view
-    returns(bool)
+    function isFlightRegistered ( address airline, string calldata flight, uint256 timestamp)
+        public
+        view
+        returns(bool)
     {
         bytes32 flightKey = Util.getFlightKey(airline, flight, timestamp);
         return isFlightRegisteredByKey(flightKey);
@@ -89,5 +77,4 @@ contract Flights  {
         require(!isFlightRegisteredByKey(flightKey), "Flight is existing, though it should not.");
         _;
     }
-
 }
