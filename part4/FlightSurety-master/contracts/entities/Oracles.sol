@@ -11,6 +11,13 @@ contract Oracles  {
     /********************************************************************************************/
     // Incremented to add pseudo-randomness at various points
     // no need anymore uint8 private nonce = 0;
+    // Flight status codees
+    uint8 internal constant STATUS_CODE_UNKNOWN = 0;
+    uint8 internal constant STATUS_CODE_ON_TIME = 10;
+    uint8 internal constant STATUS_CODE_LATE_AIRLINE = 20; // => payment process gets triggered
+    uint8 internal constant STATUS_CODE_LATE_WEATHER = 30;
+    uint8 internal constant STATUS_CODE_LATE_TECHNICAL = 40;
+    uint8 internal constant STATUS_CODE_LATE_OTHER = 50;
 
     // Fee to be paid when registering oracle
     uint256 public constant ORACLE_REGISTRATION_FEE = 10 wei; //1 ether;

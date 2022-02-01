@@ -19,13 +19,7 @@ import "./entities/Oracles.sol";
 contract FlightSuretyApp is Ownable, Mortal, Oracles {
     using SafeMath for uint256; // Allow SafeMath functions to be called for all uint256 types (similar to "prototype" in Javascript)
 
-    // Flight status codees
-    uint8 private constant STATUS_CODE_UNKNOWN = 0;
-    uint8 private constant STATUS_CODE_ON_TIME = 10;
-    uint8 private constant STATUS_CODE_LATE_AIRLINE = 20; // => payment process gets triggered
-    uint8 private constant STATUS_CODE_LATE_WEATHER = 30;
-    uint8 private constant STATUS_CODE_LATE_TECHNICAL = 40;
-    uint8 private constant STATUS_CODE_LATE_OTHER = 50;
+
     /********************************************************************************************/
     /*                                       DATA VARIABLES                                     */
     /********************************************************************************************/
@@ -169,65 +163,9 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
 
     // deposit function needed from to actually all payables send ether to AppContract
 
-   /**
-    * @dev Called after oracle has updated flight status
-    * triggered, when oracle gets back.
-    * if not status != 20 - there is money, which can be allocated and not for example.
-    * If the the status != 20 meaning that the investment by insurance purchases goes into the pool again.
-    * and you can dissolve the insurance mapping for a specific flight.
-    *
-    */  
-    function processFlightStatus(address airline, string calldata flight, uint256 timestamp, uint8 statusCode)
-        //internal
-        public
-    {
 
-        bytes32 flightKey = Util.getFlightKey (airline, flight, timestamp);
-        //oracleResponses[flightKey].isOpen = false; // wrong!!!
-        // CODE EXERCISE 3: Announce to the world that verified flight status information is available
 
-        // Save the flight information for posterity
 
-        //flights[flightKey] = FlightStatus(true, statusId);
-
-        // add payout etc. in the case statusCode is delay
-        if(statusCode == STATUS_CODE_LATE_AIRLINE) {
-            flightSuretyData.creditInsurees(flightKey);
-        }
-        else {
-            //TODO one must delete existing insurances
-            emit UnproccessedFlight(airline, flight, timestamp, statusCode);
-        }
-    }
-
-    // Generate a request for oracles to fetch flight information
-    // Triggered by button click in UI
-    function fetchFlightStatus( address airline, string calldata flight, uint256 timestamp, uint8 indexPredefined)
-        external
-        //TODO by anyone?
-    {
-        uint8 index = Util.getRandomIndex10(msg.sender, 0);
-
-        // testing purpose
-        if(index >= 0 && msg.sender == owner()) {
-            index = indexPredefined;
-        }
-        // Generate a unique key for storing the request
-        bytes32 key = keccak256(abi.encodePacked(index, airline, flight, timestamp));
-
-        /*
-        // before solidity 0.7
-        oracleResponses[key] = ResponseInfo({
-            requester: msg.sender,
-            isOpen: true
-        });
-        */
-        // new
-        oracleResponses[key].requester = msg.sender;
-        oracleResponses[key].isOpen = true;
-
-        emit OracleRequest(index, airline, flight, timestamp);
-    }
 
     /**
      *  @dev Transfers eligible payout funds to insuree
@@ -338,6 +276,67 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
             processFlightStatus(airline, flight, timestamp, statusCode);
         }
     }
+
+    // Generate a request for oracles to fetch flight information
+    // Triggered by button click in UI
+    function fetchFlightStatus( address airline, string calldata flight, uint256 timestamp, uint8 indexPredefined)
+        external
+        //TODO by anyone?
+    {
+        uint8 index = Util.getRandomIndex10(msg.sender, 0);
+
+        // testing purpose
+        if(index >= 0 && msg.sender == owner()) {
+            index = indexPredefined;
+        }
+        // Generate a unique key for storing the request
+        bytes32 key = keccak256(abi.encodePacked(index, airline, flight, timestamp));
+
+        /*
+        // before solidity 0.7
+        oracleResponses[key] = ResponseInfo({
+            requester: msg.sender,
+            isOpen: true
+        });
+        */
+        // new
+        oracleResponses[key].requester = msg.sender;
+        oracleResponses[key].isOpen = true;
+
+        emit OracleRequest(index, airline, flight, timestamp);
+    }
+
+    /**
+    * @dev Called after oracle has updated flight status
+    * triggered, when oracle gets back.
+    * if not status != 20 - there is money, which can be allocated and not for example.
+    * If the the status != 20 meaning that the investment by insurance purchases goes into the pool again.
+    * and you can dissolve the insurance mapping for a specific flight.
+    *
+    */
+    function processFlightStatus(address airline, string calldata flight, uint256 timestamp, uint8 statusCode)
+        //internal
+        public
+    {
+
+        bytes32 flightKey = Util.getFlightKey (airline, flight, timestamp);
+        //oracleResponses[flightKey].isOpen = false; // wrong!!!
+        // CODE EXERCISE 3: Announce to the world that verified flight status information is available
+
+        // Save the flight information for posterity
+
+        //flights[flightKey] = FlightStatus(true, statusId);
+
+        // add payout etc. in the case statusCode is delay
+        if(statusCode == STATUS_CODE_LATE_AIRLINE) {
+            flightSuretyData.creditInsurees(flightKey);
+        }
+        else {
+            //TODO one must delete existing insurances
+            emit UnproccessedFlight(airline, flight, timestamp, statusCode);
+        }
+    }
+
 
 
     // additional helper for debugging
