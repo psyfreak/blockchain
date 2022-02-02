@@ -10,7 +10,7 @@ import "../node_modules/openzeppelin-solidity/contracts/access/Ownable.sol";
 import {Util} from "./base/Util.sol";
 import "./base/Mortal.sol";
 import "./FlightSuretyData.sol";
-import "./base/MultiSignatureWallet.sol";
+import "./MultiSignatureWallet.sol";
 import "./entities/Oracles.sol";
 
 /************************************************** */

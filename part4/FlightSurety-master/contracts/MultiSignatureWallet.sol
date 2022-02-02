@@ -20,9 +20,9 @@ Above 4 airlines the voting must be over 50% of the amount of airlines
 
 
 **/
-import "../../node_modules/openzeppelin-solidity/contracts/utils/math/SafeMath.sol";
-import "../../node_modules/openzeppelin-solidity/contracts/access/Ownable.sol";
-import "./Authentication.sol";
+import "../node_modules/openzeppelin-solidity/contracts/utils/math/SafeMath.sol";
+import "../node_modules/openzeppelin-solidity/contracts/access/Ownable.sol";
+import "./base/Authentication.sol";
 /// Provides basic authorization control
 contract MultiSignatureWallet is Ownable, Authentication {
     using SafeMath for uint256; // Allow SafeMath functions to be called for all uint256 types (similar to "prototype" in Javascript)

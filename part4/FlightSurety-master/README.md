@@ -1,14 +1,9 @@
 # FlightSurety
 ## TODO 
 - use deposit event such as in MultiSignature + get rid of function in Multi
-- add voting to operational
-- setOperational multiparty
 
 https://ethereum.stackexchange.com/questions/12920/what-does-the-keyword-super-in-solidity-do
 https://ethereum.stackexchange.com/questions/93701/security-implementation-of-a-function-in-solidity
-
-- setOperation can only done by voting of funded airlines instead of only registered ones => because they earn/loose money
-- maybe do both votings with MultiSignatureVoting (provide mechanism so voting in MultiSignatureWallet has all data to vote)
 
 - move setter/getter require
 
