@@ -4,11 +4,11 @@ const MultiSignatureWallet = artifacts.require("MultiSignatureWallet");
 const fs = require('fs');
 
 module.exports = async function(deployer, network, accounts) {
-  let firstAirline = accounts[9];
+  let firstAirline = accounts[1];
   await deployer.deploy(FlightSuretyData, firstAirline, {value: 10});
   let flightSuretyDataInstance = await FlightSuretyData.deployed();
 
-  await deployer.deploy(MultiSignatureWallet, [firstAirline, accounts[8],  accounts[7]], 2);
+  await deployer.deploy(MultiSignatureWallet, [firstAirline], 1);
   let multiSignatureWalletInstance = await MultiSignatureWallet.deployed();
 
   console.log("FlightSuretyData.address ", FlightSuretyData.address);
@@ -19,6 +19,7 @@ module.exports = async function(deployer, network, accounts) {
 
   await flightSuretyDataInstance.authorizeCaller(flightSuretyAppInstance.address); // app contract can call functions in data contract
   await flightSuretyDataInstance.authorizeCaller(multiSignatureWalletInstance.address); // multiSignatureWalletInstance contract can call functions in data contract
+  await multiSignatureWalletInstance.authorizeCaller(flightSuretyAppInstance.address); // app contract contract can call functions in multiSignatureWallet contract
 
   let config = {
     localhost: {

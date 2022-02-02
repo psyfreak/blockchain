@@ -39,7 +39,7 @@ var Config = async function(accounts) {
 
 
     let owner = accounts[0];
-    let firstAirline = accounts[9]; // see deployment script atm. firstAirline acc9
+    let firstAirline = accounts[1]; // see deployment script atm. firstAirline acc9
 
     //let flightSuretyData = await FlightSuretyData.new(firstAirline, {from: owner, value: 10});
     //let flightSuretyApp = await FlightSuretyApp.new(flightSuretyData.address, {from: owner});

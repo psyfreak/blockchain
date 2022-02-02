@@ -131,6 +131,7 @@ contract('Flight Surety Multiparty', async (accounts) => {
   /* Operations and Settings                                                              */
   /****************************************************************************************/
 
+
   //TODO add consensus tests...
   ///////////////////////// authentication
   it(`(authentication) can call isOperational() via AppContract from owner`, async function () {
@@ -159,6 +160,9 @@ contract('Flight Surety Multiparty', async (accounts) => {
     let status = await config.flightSuretyData.isOperational.call({ from: config.testAddresses[9] });
     assert.equal(status, true, "Incorrect initial operating status value");
   });
+
+
+
 /*
 // is operational is not restricted by authorized require anymore ...
   it(`(authentication) block call isOperational() via DataContract from firstAirline`, async function () {
@@ -249,64 +253,52 @@ contract('Flight Surety Multiparty', async (accounts) => {
     }
     assert.equal(accessDenied, false, "Access not restricted to owners of multisig");
 
-    status = await config.flightSuretyApp.isOperational.call({ from: config.firstAirline });
-    assert.equal(status, true, "Incorrect operating status value");
-
-    let getTransactionBy = await config.multiSignatureWallet.getTransactionBy.call(1, { from: config.firstAirline });
-    console.log("getTransactionBy", getTransactionBy);
-
-  });
-
-  it(`(multiparty) can allow access to setOperatingStatus() for repeat Contract Owner account`, async function () {
-
-    let status = await config.flightSuretyApp.isOperational.call({ from: config.firstAirline });
-    assert.equal(status, true, "Incorrect operating status value");
-    // Ensure that access is allowed for Contract Owner account
-    let accessDenied = false;
-    try
-    {
-      //await config.flightSuretyData.setOperatingStatus(false);
-      await config.flightSuretyApp.setOperatingStatus(false, { from:  config.firstAirline });
-    }
-    catch(e) {
-      console.log("error", e);
-      accessDenied = true;
-    }
-    assert.equal(accessDenied, true, "Access not restricted to owners of multisig");
-
-    status = await config.flightSuretyApp.isOperational.call({ from: config.firstAirline });
-    assert.equal(status, true, "Incorrect operating status value");
-
-  });
-
-  it(`(multiparty) can allow access to setOperatingStatus() for 2nd Contract Owner account`, async function () {
-
-    let status = await config.flightSuretyApp.isOperational.call({ from: config.firstAirline });
-    assert.equal(status, true, "Incorrect operating status value");
-    // Ensure that access is allowed for Contract Owner account
-    let accessDenied = false;
-    try
-    {
-      //await config.flightSuretyData.setOperatingStatus(false);
-      await config.flightSuretyApp.setOperatingStatus(false, { from:  accounts[8] });
-    }
-    catch(e) {
-      console.log("error", e);
-      accessDenied = true;
-    }
-    assert.equal(accessDenied, false, "Access not restricted to owners of multisig");
-
-    let getTransactionBy = await config.multiSignatureWallet.getTransactionBy.call(1, { from: config.firstAirline });
-    console.log("getTransactionBy", getTransactionBy);
 
     status = await config.flightSuretyApp.isOperational.call({ from: config.firstAirline });
     assert.equal(status, false, "Incorrect operating status value");
 
+    let getTransactionBy = await config.multiSignatureWallet.getTransactionBy.call(1, { from: config.firstAirline });
+    console.log("getTransactionBy", getTransactionBy);
   });
 
+  it(`(multiparty) block access to setOperatingStatus() to the current operating value`, async function () {
 
+    let status = await config.flightSuretyApp.isOperational.call({ from: config.firstAirline });
+    assert.equal(status, false, "Incorrect operating status value");
 
-  it(`(multiparty)  directExecution of setOperational`, async function () {
+    // Ensure that access is allowed for Contract Owner account
+    let accessDenied = false;
+    try
+    {
+      //await config.flightSuretyData.setOperatingStatus(false);
+      await config.flightSuretyApp.setOperatingStatus(false, { from: config.firstAirline });
+    }
+    catch(e) {
+      //console.log("error", e);
+      accessDenied = true;
+    }
+    assert.equal(accessDenied, true, "Access is not restricted to owners of multisig");
+  });
+
+  it(`(multiparty) can block access to functions using requireIsOperational when operating status is false`, async function () {
+
+    await config.flightSuretyData.setOperatingStatus(false);
+
+    let status = await config.flightSuretyApp.isOperational.call({ from: config.firstAirline });
+    assert.equal(status, false, "Incorrect operating status value");
+
+    let reverted = false;
+    try
+    {
+      await config.flightSuretyApp.registerAirline(accounts[2], {from: accounts[1]});
+    }
+    catch(e) {
+      reverted = true;
+    }
+    assert.equal(reverted, true, "Access is not blocked for requireIsOperational");
+  });
+
+  it(`(multiparty) directExecution of setOperational`, async function () {
     let status = await config.flightSuretyApp.isOperational.call({ from: config.firstAirline });
     assert.equal(status, false, "Incorrect operating status value");
 
@@ -332,25 +324,89 @@ contract('Flight Surety Multiparty', async (accounts) => {
   });
 
 
-  it(`(multiparty) can block access to functions using requireIsOperational when operating status is false`, async function () {
 
-      await config.flightSuretyData.setOperatingStatus(false);
+  it(`(multiparty) can allow access to setOperatingStatus() for repeat Contract Owner account`, async function () {
 
-      let reverted = false;
-      try 
-      {
-          await config.flightSurety.setTestingMode(true);
-      }
-      catch(e) {
-          reverted = true;
-      }
-      assert.equal(reverted, true, "Access not blocked for requireIsOperational");      
+    let status = await config.flightSuretyApp.isOperational.call({ from: config.firstAirline });
+    assert.equal(status, true, "Incorrect operating status value");
 
-      // Set it back for other tests to work
-      await config.flightSuretyData.setOperatingStatus(true);
+    // two further airlines
 
+    let reverted = false;
+    try
+    {
+      await config.flightSuretyApp.registerAirline(accounts[2], {from: accounts[1]});
+      await config.flightSuretyApp.registerAirline(accounts[3], {from: accounts[1]});
+      //await config.flightSuretyApp.registerAirline(accounts[4], {from: accounts[1]});
+    }
+    catch(e) {
+      reverted = true;
+    }
+    assert.equal(reverted, false, "registerAirline could not be executed");
+
+
+    // Ensure that access is allowed for Contract Owner account
+    let accessDenied = false;
+    try
+    {
+      //await config.flightSuretyData.setOperatingStatus(false);
+      await config.flightSuretyApp.setOperatingStatus(false, { from:  config.firstAirline });
+    }
+    catch(e) {
+      console.log("error", e);
+      accessDenied = true;
+    }
+    assert.equal(accessDenied, false, "Access is restricted to owners of multisig");
+
+    // still true
+    status = await config.flightSuretyApp.isOperational.call({ from: config.firstAirline });
+    assert.equal(status, true, "Incorrect operating status value");
   });
 
+
+  it(`(multiparty) no voting by already existing voter`, async function () {
+
+    // still true
+    let status = await config.flightSuretyApp.isOperational.call({ from: config.firstAirline });
+    assert.equal(status, true, "Incorrect operating status value");
+    // Ensure that access is allowed for Contract Owner account
+    let accessDenied = false;
+    try
+    {
+      //await config.flightSuretyData.setOperatingStatus(false);
+      await config.flightSuretyApp.setOperatingStatus(false, { from:  config.firstAirline });
+    }
+    catch(e) {
+      accessDenied = true;
+    }
+    assert.equal(accessDenied, true, "sender already voted");
+
+    // still true
+    status = await config.flightSuretyApp.isOperational.call({ from: config.firstAirline });
+    assert.equal(status, true, "Incorrect operating status value");
+  });
+
+  it(`(multiparty) can allow access to setOperatingStatus() for a new Contract Owner account`, async function () {
+
+    let status = await config.flightSuretyApp.isOperational.call({ from: config.firstAirline });
+    assert.equal(status, true, "Incorrect operating status value");
+
+    // two further airlines
+   let accessDenied = false;
+    try
+    {
+      //await config.flightSuretyData.setOperatingStatus(false);
+      await config.flightSuretyApp.setOperatingStatus(false, { from:  accounts[2] });
+    }
+    catch(e) {
+      console.log("error", e);
+      accessDenied = true;
+    }
+    assert.equal(accessDenied, false, "Access is restricted to owners of multisig");
+
+    status = await config.flightSuretyApp.isOperational.call({ from: config.firstAirline });
+    assert.equal(status, false, "Incorrect operating status value");
+  });
 
 });
 

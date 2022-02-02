@@ -22,14 +22,14 @@ Above 4 airlines the voting must be over 50% of the amount of airlines
 **/
 import "../../node_modules/openzeppelin-solidity/contracts/utils/math/SafeMath.sol";
 import "../../node_modules/openzeppelin-solidity/contracts/access/Ownable.sol";
-
+import "./Authentication.sol";
 /// Provides basic authorization control
-contract MultiSignatureWallet is Ownable {
+contract MultiSignatureWallet is Ownable, Authentication {
     using SafeMath for uint256; // Allow SafeMath functions to be called for all uint256 types (similar to "prototype" in Javascript)
     using SafeMath for uint; // Allow SafeMath functions to be called for all uint256 types (similar to "prototype" in Javascript)
 
     address[] public owners;
-    uint public required;
+    uint public required; // this is the threshold
     mapping (address => bool) public isOwner;
 
     uint public transactionCount;
@@ -38,8 +38,6 @@ contract MultiSignatureWallet is Ownable {
     mapping (uint => Transaction) public archiveTransactions;
 
     mapping (uint => mapping (address => bool)) public confirmations;
-
-    uint256 public constant VOTING_THRESHOLD = 4;
 
     uint public currentTransactionId = 0; // extension for the code to
 
@@ -52,14 +50,15 @@ contract MultiSignatureWallet is Ownable {
         uint value;
         bytes data;
     }
-
     event Deposit(address indexed sender, uint value);
+
     event Submission(uint indexed transactionId);
     event Confirmation(address indexed sender, uint indexed transactionId);
     event Execution(uint indexed transactionId, bytes data);
     event ExecutionFailure(uint indexed transactionId, bytes data);
     event NotYetExecuted(uint indexed transactionId);
 
+    event OwnershipChanged(address indexed sender, uint required, uint numOfOwners);
     /// @dev Fallback function allows to deposit ether.
     fallback()
     external
@@ -104,7 +103,6 @@ contract MultiSignatureWallet is Ownable {
         if (transactionId == 0) {
             transactionId = addTransaction(destination, value, data);
         }
-
         confirmTransaction(transactionId);
         return transactionId;
     }
@@ -129,9 +127,6 @@ contract MultiSignatureWallet is Ownable {
         */
 
         executeTransaction(transactionId);
-
-
-
     }
     /// @dev Allows an owner to revoke a confirmation for a transaction.
     /// @param transactionId Transaction ID.
@@ -297,11 +292,30 @@ contract MultiSignatureWallet is Ownable {
         return keccak256(abi.encodePacked(destination, value, data));
     }
 
+    // function is called
+    function addOwner (address newOwner)
+        external
+        requireIsCallerAuthorized // function can only be called by app contract
+    // only available via app contract
+    {
+        // add to mapping
+        isOwner[newOwner] = true;
+        owners.push(newOwner);//check for duplicates
+        uint numOfOwner = owners.length;
+        required = numOfOwner.div(2);
+        if (numOfOwner%2 != 0) {
+            required = required.add(1);
+        }
+
+        // modulo
+        emit OwnershipChanged(newOwner, required, owners.length);
+
+    }
     /********************************************************************************************/
     /*                                     MODIFIER                                             */
     /********************************************************************************************/
     modifier validRequirement(uint ownerCount, uint _required) {
-        if (_required > ownerCount || _required == 0 || ownerCount == 0)
+        if (ownerCount < _required || _required <= 0 || ownerCount == 0)
             revert();
         _;
     }

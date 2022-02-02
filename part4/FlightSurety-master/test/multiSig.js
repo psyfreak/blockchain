@@ -42,7 +42,7 @@ contract('MultiSig Voting', async (accounts) => {
   it(`check balance`, async function () {
 
     let balanceApp = await web3.eth.getBalance(config.multiSignatureWallet.address);
-    let balanceAcc9 = await web3.eth.getBalance(accounts[9]);
+    let balanceAcc9 = await web3.eth.getBalance(accounts[1]);
     console.log("\t\tmultiSignatureWallet balance:", balanceApp)
     console.log("\t\tacc9 balance:", balanceAcc9);
   });

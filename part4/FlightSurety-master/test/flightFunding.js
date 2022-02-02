@@ -236,7 +236,7 @@ contract('Flight Surety - Funding', async (accounts) => {
     */
     let fail = false;
     try {
-      await config.flightSuretyApp.registerOracle({from: accounts[1], value: 10, gas: 2800707 });
+      await config.flightSuretyApp.registerOracle({from: accounts[10], value: 10, gas: 2800707 });
     }
     catch(e) {
       fail= true;

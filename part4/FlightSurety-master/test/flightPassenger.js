@@ -98,7 +98,7 @@ contract('Flight Surety - Passengers', async (accounts) => {
     assert.equal(result, true, "Airline should be registered");
   });
   it(`isNotRegisteredAirline`, async function () {
-    let isRegistered = await config.flightSuretyData.isAirlineRegistered.call(accounts[1]);
+    let isRegistered = await config.flightSuretyData.isAirlineRegistered.call(accounts[2]);
     assert.equal(isRegistered, false, "Airline should not be registered")
   });
 

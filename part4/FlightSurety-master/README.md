@@ -1,8 +1,14 @@
 # FlightSurety
 ## TODO 
+- use deposit event such as in MultiSignature + get rid of function in Multi
 - add voting to operational
-- correct multiparty funded vs. registered mechanism / hasConfirmed
 - setOperational multiparty
+
+https://ethereum.stackexchange.com/questions/12920/what-does-the-keyword-super-in-solidity-do
+https://ethereum.stackexchange.com/questions/93701/security-implementation-of-a-function-in-solidity
+
+- setOperation can only done by voting of funded airlines instead of only registered ones => because they earn/loose money
+- maybe do both votings with MultiSignatureVoting (provide mechanism so voting in MultiSignatureWallet has all data to vote)
 
 - move setter/getter require
 
@@ -44,6 +50,14 @@ https://medium.com/quillhash/how-to-write-upgradable-smart-contracts-in-solidity
  
 ## Remarks + Questions
 ### Remarks
+
+* Which contract should hold the money. Data contract is permanent (i.e. with immortal key-value store), but additional transfers etc. more gas costs
+  Similar to data contract split in general I assume.
+
+* Registered airlines means only registerd = true but not neccessarily funded.
+  Only registered airlines can register other airlines.
+  Only funded airlines though can either register flights and therefore play in the in insurance game.
+* also implemented refund etc.
 * I transferred randomization and key to Util library i.e. I got rid of nonce as state var
 * All money is hold within the data contract, which is sth. I am not sure about i.e. about increasing gas costs.
 Furthermore one needs to transfer the money, when data contract gets updated. I think it might be better to hold the ether in the app contract.
@@ -58,7 +72,7 @@ Furthermore one needs to transfer the money, when data contract gets updated. I 
   running every time one uses test. It would mean that we deploy the contract twice, which needs more time. Is this right?
   
 - initialization script versus ctor init
-
+- withdraw function in dataContract???!
 - withdraw transfer etc.
 - Intentionally implemented two solutions for the multiparty consensus 
   - Default solution for registerFlight
@@ -74,6 +88,9 @@ The second example I like in terms of transactionId and the anonimity..
   - Issue Authentication inherits from Ownable as well as DataContract (two different instances?)
   - Diamond issue - want to move all entity related functions e.g. registerAirline to Airline Entity, but it would mean that each entity needs to inherit from authentication 
 
+- Msg.sender change Contract A call Contract B (in contract b msg.sender is contract A and tx.origin is the original msg.sender of contract A, 
+  but what happens if the function in contract B calls another function in contract B (I assume the msg.sender remains (=contract A)))
+  Am I right?
 
 ### Deployment 
 - initialization of airline can be done in deployment script, in contract ctor or via init function.

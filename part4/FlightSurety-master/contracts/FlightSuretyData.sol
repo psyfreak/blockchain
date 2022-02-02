@@ -183,7 +183,19 @@ contract FlightSuretyData is Ownable, Mortal, Authentication, Airlines, Flights,
         requireIsCallerAuthorized
         requireIsAirlineExisting(airlineAddr)
     {
-        ballots[ElectionTopics.AIRLINE_REGISTRATION][airlineAddr].push(confirmedBy);
+        // no duplicate check
+        //ballots[ElectionTopics.AIRLINE_REGISTRATION][airlineAddr].push(confirmedBy);
+        address[] storage bal = ballots[ElectionTopics.AIRLINE_REGISTRATION][airlineAddr];
+
+        bool isDuplicate = false;
+        for(uint c=0; c<bal.length; c++) {
+            if (bal[c] == confirmedBy) {
+                isDuplicate = true;
+                break;
+            }
+        }
+        require(!isDuplicate, "Caller has already called this function.");
+        bal.push(confirmedBy);
     }
     // fundAirline
 
@@ -197,11 +209,10 @@ contract FlightSuretyData is Ownable, Mortal, Authentication, Airlines, Flights,
      *
      */
     function fundAirline(address airline) // TODO check 1. if it is better to use tx.origin 2. payable function or use receive or fallback one?
-    public
-    payable
-    requireIsOperational
-    requireIsCallerAuthorized
-        //IsFeeSufficientChangeBack(AIRLINE_REGISTRATION_FEE)
+        public
+        payable
+        requireIsOperational
+        requireIsCallerAuthorized
     {
         // already funded
         if(airlines[airline].investment == 0) {
@@ -407,7 +418,9 @@ contract FlightSuretyData is Ownable, Mortal, Authentication, Airlines, Flights,
         requireIsCallerAuthorized
     {
         // TODO how to use this - check why this is working
-        // refundAirline(tx.origin);
+        // (refund uses requireIsCallerAuthorized and authorizedCallers are only owner/creator of contract + AppContract(deploy script)
+        // in this case msg.sender is in this function the app contract which is fine, but after calling refundAirline it is the DataContract itself isn´t it?
+        // refundAirline(tx.origin); //
         emit ContractFunded(tx.origin, msg.value);
     }
 

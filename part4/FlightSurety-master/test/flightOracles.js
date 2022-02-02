@@ -196,7 +196,7 @@ contract('Flight Surety - Oracles', async (accounts) => {
   it(`(Oracles) block register an Oracle without funds`, async function () {
     let fail = false;
     try {
-      await config.flightSuretyApp.registerOracle({from: accounts[1], value: 0 });
+      await config.flightSuretyApp.registerOracle({from: accounts[10], value: 0 });
     }
     catch(e) {
       fail= true;
@@ -218,7 +218,7 @@ contract('Flight Surety - Oracles', async (accounts) => {
   it(`(Oracles) get no indices of non-owned oracle`, async function () {
     let fail = false;
     try {
-      await config.flightSuretyApp.getMyIndexes({from: accounts[1] });
+      await config.flightSuretyApp.getMyIndexes({from: accounts[10] });
     }
     catch(e) {
       fail= true;

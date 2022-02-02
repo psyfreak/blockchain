@@ -30,7 +30,7 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
     /*                                       EVENT DEFINITIONS                                  */
     /********************************************************************************************/
     event UnproccessedFlight(address sender, string flight, uint256 timestamp, uint8 status); //whenever sb. fund via receive (only app now)
-
+    event Deposit(address indexed sender, uint value);
     /********************************************************************************************/
     /*                                       CONSTRUCTOR                                        */
     /********************************************************************************************/
@@ -80,11 +80,12 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
     */   
     function registerAirline( address newAirline)
         external
-        requireIsAirlineAuthorized(msg.sender)
+        //requireIsAirlineAuthorized(msg.sender)
+        requireIsAirlineRegistered(msg.sender)
         //TODO can only be called by authoirzedCallers
         //one should trigger an event ... returns(bool success, uint256 votes)
     {
-        // if not existing create Airlin
+        // if not existing create Airline
         // check if airline is available if not submit
 
         if(!flightSuretyData.isAirlineExisting(newAirline)) {
@@ -96,16 +97,32 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
         if(isConfirmed(newAirline)) {
             // if election fine then register Airline
             flightSuretyData.registerAirline(newAirline);
+            // TODO add newAirline as owner to MultiSignatureWallet => setOperatingStatus
+            // if initial funding for multi party consensus and special case setOperatingStatus
+            flightSuretyMulti.addOwner(newAirline);
         }
         //return (success, 1); // draft contains this, but statechanging methods cannot have return values
     }
 
+    /*
+    function registerAirline2 (address newAirline) {
 
-     // TODO is this needed ? one could also
+        // if transactionId available then use transaction Id otherwise submit and set transaction Id
+        //bytes memory encoded = "0x110466ed0000000000000000000000000000000000000000000000000000000000000000";
+        bytes memory encoded = abi.encodeWithSignature("setOperatingStatus(bool)", mode);
+        flightSuretyMulti.submitTransaction(address(flightSuretyData), 0, encoded);
+    }
+    */
+
+    /**
+        Function is used to initially fund the airline + refund airline
+        // TODO normally it should be distinquished here or two different function, but thought one function is better
+    **/
     function fundAirline ( )
         external
         payable
         requireIsAirlineRegistered(msg.sender)
+        //IsFeeSufficientChangeBack(AIRLINE_REGISTRATION_FEE) =>
     {
         flightSuretyData.fundAirline{value: msg.value}(msg.sender);// we could also call and send it to directly via msg.value
         //payable(address(flightSuretyData)).transfer(msg.value);
@@ -180,8 +197,12 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
         jo.transfer(msg.value);
         */
         // this works
-        (bool sent, bytes memory data) = address(flightSuretyData).call{value: msg.value}("");
-        require(sent, "Failed to send Ether");
+
+        if (msg.value > 0) {
+            emit Deposit(msg.sender, msg.value);
+            (bool sent, bytes memory data) = address(flightSuretyData).call{value: msg.value}("");
+            require(sent, "Failed to send Ether");
+        }
     }
 
     /********************************************************************************************/
@@ -350,27 +371,37 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
         //// if transactionId available then use transaction Id otherwise submit and set transaction Id
     }
 
+    /**
+    * Check is airline is confirmed with the following rule:
+    * if #registeredAirlines <= 4 (=VOTING_THRESHOLD) => #confirmations by one existing registered airline = 1
+    * else => #confirmations by more or equal of 50% of all registered airlines
+    **/
     function isConfirmed(address newAirline)
-    private
-    view
-    returns (bool)
+        private
+        view
+        returns (bool)
     {
         bool confirmed = false;
         // less or equal than 4 airlines
         address[] memory confirmationsForAirline = flightSuretyData.getAirlineBallotsByAirlineAddress(newAirline);
         uint numOfConfirmations = confirmationsForAirline.length;
-        uint256 numOfFundedAirlines = flightSuretyData.numOfFundedAirlines();
+        uint256 numOfRegisteredAirlines = flightSuretyData.numOfRegisteredAirlines();
 
         // below or equal threshold => confirmation ok if the msg.sender is an already confirmed airline
-        if(flightSuretyData.VOTING_THRESHOLD() >= numOfFundedAirlines) {
+        if(flightSuretyData.VOTING_THRESHOLD() >= numOfRegisteredAirlines + 1 ) {
             // only one vote by funded airline
             if(numOfConfirmations > 0) {
                 confirmed = true;
             }
         }
         else { // if more than 4 airlines
-            // 50%
-            if(numOfConfirmations >= numOfFundedAirlines.div(2) ) {
+            // >=50%
+            uint required = numOfRegisteredAirlines.div(2);
+            if (numOfRegisteredAirlines%2 != 0) {
+                required = required.add(1);
+            }
+
+            if (numOfConfirmations >= required ) {
                 // check duplicate
                 confirmed = true;
             }
