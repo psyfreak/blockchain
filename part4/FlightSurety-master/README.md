@@ -5,6 +5,9 @@
 https://ethereum.stackexchange.com/questions/12920/what-does-the-keyword-super-in-solidity-do
 https://ethereum.stackexchange.com/questions/93701/security-implementation-of-a-function-in-solidity
 
+
+  1. Truffle migrate —network development
+    2. Truffle test ./test/oracles.js —network development
 - move setter/getter require
 
 - add https://github.com/adamgruber/mochawesome

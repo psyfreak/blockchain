@@ -21,6 +21,8 @@ router.get("/register", async (req, res)=> {
 });
 
 router.get("/:airlineAddress",(req, res)=> {
+  const accIndex = req.params['airlineAddress'];
+  const oracleAddress = global.accounts[accIndex];
 
 });
 

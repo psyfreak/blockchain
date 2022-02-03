@@ -66,6 +66,13 @@ contract Flights  {
         return isFlightRegisteredByKey(flightKey);
     }
 
+    function hasFlightStatus (bytes32 flightKey)
+        public
+        view
+        returns(bool)
+    {
+        return (flights[flightKey].status > 0);
+    }
     /********************************************************************************************/
     /*                                       FUNCTION MODIFIERS                                 */
     /********************************************************************************************/

@@ -248,29 +248,30 @@ contract('Flight Surety - Oracles', async (accounts) => {
     let responseOracleEntry = await config.flightSuretyApp.getResponses.call(predefinedOracleIds[0], config.firstAirline, FLIGHT_NAME, FLIGHT_timestamp, STATUS_CODE);
     console.log("\t\tresponseOracleEntry", responseOracleEntry);
   });
-
+  // beware while the server is running it listens to the fetch events, therefore this will be already executed.
   it(`(Oracles) submit Response`, async function () {
     console.log("\t index = " + predefinedOracleIds[0])
     const STATUS_CODE = 20;
     let passenger1 = accounts[8],
       passenger2 = accounts[7];
-    Util.helper.printPassenger(config, passenger1);
-    Util.helper.printPassenger(config, passenger2);
+    await Util.helper.printPassenger(config, passenger1);
+    await Util.helper.printPassenger(config, passenger2);
     let fail = false;
+
     try {
       await config.flightSuretyApp.submitOracleResponse(predefinedOracleIds[0], config.firstAirline, FLIGHT_NAME, FLIGHT_timestamp, STATUS_CODE);
     }
     catch(e) {
       fail= true;
-      console.log("first flight fail, which should not be the case", e)
+      console.log("Submit oracle response could not execute", e)
     }
     // ASSERT
     assert.equal(fail, false, "First Flight could not been registered");
     let responseOracleEntry = await config.flightSuretyApp.getResponses.call(predefinedOracleIds[0], config.firstAirline, FLIGHT_NAME, FLIGHT_timestamp, STATUS_CODE);
     console.log("responseOracleEntry", responseOracleEntry);
 
-    Util.helper.printPassenger(config, passenger1);
-    Util.helper.printPassenger(config, passenger2);
+    await Util.helper.printPassenger(config, passenger1);
+    await Util.helper.printPassenger(config, passenger2);
   });
 });
 

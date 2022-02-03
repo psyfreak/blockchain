@@ -24,6 +24,7 @@ module.exports = async function(deployer, network, accounts) {
   let config = {
     localhost: {
       url: 'http://localhost:7545',
+      url2: "ws://localhost:7545",
       dataAddress: FlightSuretyData.address,
       appAddress: FlightSuretyApp.address
     },

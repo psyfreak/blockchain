@@ -237,8 +237,6 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
         //payable(address(flightSuretyData)).transfer(msg.value);
         (bool sent, bytes memory data) = address(flightSuretyData).call{value: msg.value}("");
         require(sent, "Failed to send Ether");
-
-
     }
     // Called by oracle when a response is available to an outstanding request
     // For the response to be accepted, there must be a pending request that is open
@@ -257,6 +255,8 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
     )
     external
     {
+        require(flightSuretyData.isFlightRegistered(airline, flight, timestamp), "Flight is not registered yet");
+
         // check if the assigned index is matched to one requested
         require(
             (oracles[msg.sender].indexes[0] == index) ||
@@ -289,6 +289,8 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
         external
         //TODO by anyone?
     {
+        require(flightSuretyData.isFlightRegistered(airline, flight, timestamp), "Flight is not registered yet");
+        //TODO check if flight is available
         uint8 index = Util.getRandomIndex10(msg.sender, 0);
 
         // testing purpose
@@ -308,7 +310,6 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
         // new
         oracleResponses[key].requester = msg.sender;
         oracleResponses[key].isOpen = true;
-
         emit OracleRequest(index, airline, flight, timestamp);
     }
 
@@ -324,11 +325,14 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
         //internal
         public
     {
-
         bytes32 flightKey = Util.getFlightKey (airline, flight, timestamp);
+        require(flightSuretyData.isFlightRegisteredByKey(flightKey), "Flight is not registered yet");
+
+        require(!flightSuretyData.hasFlightStatus(flightKey), "Flight not processed because it it is already landed and has status ");
+
         //oracleResponses[flightKey].isOpen = false; // wrong!!!
         // CODE EXERCISE 3: Announce to the world that verified flight status information is available
-
+        flightSuretyData.updateFlightStatus(flightKey, statusCode);
         // Save the flight information for posterity
 
         //flights[flightKey] = FlightStatus(true, statusId);
@@ -494,7 +498,4 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
         require(msg.value <= _amount, "Amount is capped");
         _;
     }
-
 }
-
-

@@ -367,14 +367,15 @@ contract FlightSuretyData is Ownable, Mortal, Authentication, Airlines, Flights,
         */
 
         for(uint i=0; i<insurances[flightKey].length; i++) {
-            uint256 newBalance = Util.getRoI(insurances[flightKey][i].insurance, ROI_NOMINATOR, ROI_DENOMINATOR);
+            uint256 payout = Util.getRoI(insurances[flightKey][i].insurance, ROI_NOMINATOR, ROI_DENOMINATOR);
             address passenger = insurances[flightKey][i].passenger;
-            balances[passenger] = balances[passenger].add(newBalance);
+            balances[passenger] = balances[passenger].add(payout);
+            emit InsuranceDeposited(passenger, payout, balances[passenger]);
         }
         delete insurances[flightKey];
         //insurances[flightKey].length = 0;// = new Insurance[](0);
         // emit event to tell how many passenger investment + payout
-        //emit InsuranceDeposited(msg.sender, payout);
+
     }
 
     function withdrawInsuree(address insuree)

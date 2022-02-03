@@ -11,22 +11,90 @@
 
 <body>
 
-    <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-        <a class="navbar-brand" href="#">FlightSurety</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault"
+<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+    <a class="navbar-brand" href="#">FlightSurety</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault"
+            aria-controls="navbarsExampleDefault"
             aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-    </nav>
+        <span class="navbar-toggler-icon"></span>
+    </button>
+</nav>
 
-    <main class="container">
+<main class="container">
+    1. Register Airline
+    2. Register Oracle
+    3. Register Flight
+    4. Register Passenger
+    5. Purchase Insurance
+    6. Fetch Flight-Status of selected flight
+    7. Show balances
 
-        <div id="display-wrapper" class="top-20">
+    <h4>Tests + Checks</h4>
+    initializeTestSetup
+    <div class="row top-20">
+        <div class="btn-group" role="group" aria-label="Basic example">
+            <button id="submit-initTestsetup" type="button" class="btn btn-secondary" title="Register flight and book passenger + insurance for this flight">Init Testsetup</button>
+            <button id="submit-registerAllOracles" type="button" class="btn btn-secondary">Register oracles</button>
+            <button id="submit-fetchAllAirlines" type="button" class="btn btn-secondary">Fetch Airlines</button>
+            <button id="submit-getFlight" type="button" class="btn btn-secondary">Fetch first flight</button>
+            <button id="submit-getPassenger" type="button" class="btn btn-secondary">Fetch first passenger</button>
         </div>
-        <div class="row top-20">
-            <label class="form">Flight</label> <input type="text" id="flight-number"> <btn class="btn btn-primary" id="submit-oracle">Submit to Oracles</btn>
+
+    </div>
+
+    <h4>Airlines</h4>
+    <div class="row top-20">
+        <div class="col-sm-12 col-md-6">
+            <label class="form">Airline</label> <input type="text" id="airline-index">
+            <btn class="btn btn-primary" id="submit-registerAirline">Register Airline</btn>
         </div>
-    </main>
+        <div class="col-sm-12 col-md-6">
+            <label class="form">Fetch Airline</label>
+            <select id="airline-ind2" class="form-control">
+                <option>Default select</option>
+            </select>
+
+            <input type="text" id="airline-ind">
+            <btn class="btn btn-primary" id="submit-getAirline">getAirline</btn>
+        </div>
+
+    </div>
+
+    <h4>Flight</h4>
+    <div class="row top-20">
+        <div class="col-sm-12 col-md-6">
+            <label class="form">Flight</label>
+            <input type="text" id="flight">
+            <btn class="btn btn-primary" id="submit-oracle">Register passenger for flight</btn>
+        </div>
+    </div>
+
+    <h4>Oracles</h4>
+    <div class="row top-20">
+        <div class="col-sm-12 col-md-6">
+            <label class="form">Oracle</label> <input type="text" id="oracle-number">
+            <btn class="btn btn-primary" id="submit-oracle">Register Oracle</btn>
+        </div>
+        <div class="col-sm-12 col-md-6">
+            <label class="form">Flight</label> <input type="text" id="flight-number">
+            <btn class="btn btn-primary" id="submit-fetchFlight">Fetch flight</btn>
+        </div>
+    </div>
+
+
+
+    <div id="display-wrapper" class="top-20">
+
+    </div>
+
+    <div class="row top-20">
+        <div class="col-sm-12">
+           <div id="console">
+           </div>
+        </div>
+    </div>
+
+</main>
 
 </body>
 

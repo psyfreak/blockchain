@@ -12,6 +12,20 @@ module.exports = {
       websockets: true
       // gas cost per default 0
     },
+    /*
+    development: {
+      // host: "127.0.0.1",     // Localhost (default: none)
+      // port: 7545,            // Standard Ethereum port (default: none)
+      provider: function() {
+        return new Web3.providers.WebsocketProvider("ws://127.0.0.1:7545/");
+      },
+      gas: 6666666,
+      network_id: "*",       // Any network (default: none)
+      websockets: true
+    }
+     */
+
+
     devHd: {
       host: "127.0.0.1",     // Localhost (default: none)
       port: 7545,

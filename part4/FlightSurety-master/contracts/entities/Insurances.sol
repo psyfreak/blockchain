@@ -25,7 +25,7 @@ contract Insurances  {
     /*                                       EVENT DEFINITIONS                                  */
     /********************************************************************************************/
     event InsurancePurchased(address indexed payee, uint256 weiAmount);
-    event InsuranceDeposited(address indexed payee, uint256 weiAmount);
+    event InsuranceDeposited(address indexed payee, uint256 weiAmount, uint256 balance);
     event InsuranceWithdrawn(address indexed payee, uint256 weiAmount, uint256 weiBalanceDataContractBefore, uint256 weiBalanceDataContractAfter);
 
     //event LogInsuranceIt(uint counter, address passenger, uint256 balance);
