@@ -12,7 +12,9 @@ body {
     padding: 40px;
 }
 
+
 #display-wrapper {
+    position: relative;
     border: 2px solid white;
     padding: 5px;
     height: 400px;
@@ -21,6 +23,7 @@ body {
     overflow-y: scroll;
     overflow-x: auto;
 }
+
 
 .top-20 {
     margin-top: 20px;

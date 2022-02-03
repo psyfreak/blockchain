@@ -1,6 +1,12 @@
 # FlightSurety
 ## TODO 
-- use deposit event such as in MultiSignature + get rid of function in Multi
+- add airline name
+- UI
+    3) Passengers can choose from a fixed list of flight numbers and departures that are defined in the Dapp client
+    Your UI implementation should include:
+        Fields for Airline Address and Airline Name
+        Amount of funds to send/which airline to send to
+        Ability to purchase flight insurance for no more than 1 ether
 
 https://ethereum.stackexchange.com/questions/12920/what-does-the-keyword-super-in-solidity-do
 https://ethereum.stackexchange.com/questions/93701/security-implementation-of-a-function-in-solidity
@@ -48,6 +54,9 @@ https://medium.com/quillhash/how-to-write-upgradable-smart-contracts-in-solidity
  
 ## Remarks + Questions
 ### Remarks
+- Changed Dapp
+- Provide server routes to register orcales + get Indices (dev)
+- Identification of a flight
 
 * Which contract should hold the money. Data contract is permanent (i.e. with immortal key-value store), but additional transfers etc. more gas costs
   Similar to data contract split in general I assume.

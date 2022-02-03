@@ -25,7 +25,7 @@ router.get('/test', /*async*/ (req, res) => {
   });
 
   res.send({
-    message: 'An API for use with your Dapp!' + global.test + " " + defAccount
+    message: 'An API for use with your Dapp!' + global.config + " " + defAccount
   })
 })
 

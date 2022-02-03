@@ -28,23 +28,70 @@ module.exports = async function(deployer, network, accounts) {
       dataAddress: FlightSuretyData.address,
       appAddress: FlightSuretyApp.address
     },
-    flights: [
+    oracles: {
+      count: 20
+    },
+    fees: {
+      registrationOracle: 10,
+      registrationAirline: 10,
+      capInsurance: 15
+    },
+    statusCodes: {
+      STATUS_CODE_UNKNOWN: 0,
+      STATUS_CODE_ON_TIME: 10,
+      STATUS_CODE_LATE_AIRLINE: 20, // => payment process gets triggered
+      STATUS_CODE_LATE_WEATHER: 30,
+      STATUS_CODE_LATE_TECHNICAL: 40,
+      STATUS_CODE_LATE_OTHER: 50
+    },
+    airlines: [
       {
-        name: "test1",
-        departure: ""
+        airline: firstAirline,
+        name: "Lufthansa"
       },
       {
-        name: "test2",
-        departure: ""
+        airline:  accounts[2],
+        name: "IrishAir"
       },
       {
-        name: "test3",
-        departure: ""
+        airline:  accounts[3],
+        name: "RyanAir"
+      },
+      {
+        airline:  accounts[4],
+        name: "TeslaAir"
+      },
+      {
+        airline:  accounts[5],
+        name: "NikeAir"
+      },
+      {
+        airline:  accounts[6],
+        name: "AustraliaAir"
+      },
+      {
+        airline:  accounts[7],
+        name: "Airsoft"
       }
     ],
-    airlines: [
+    flights: [
+      {
+        airline: firstAirline,
+        name: "F-001",
+        departure: 1643869458
+      },
+      {
+        airline: accounts[2],
+        name: "F-002",
+        departure: 1643869458
+      },
+      {
+        airline:  firstAirline,
+        name: "F-003",
+        departure: 1643869458
+      }
+    ],
 
-    ]
   };
   fs.writeFileSync(__dirname + '/../src/dapp/config.json',JSON.stringify(config, null, '\t'), 'utf-8');
   fs.writeFileSync(__dirname + '/../src/server/config.json',JSON.stringify(config, null, '\t'), 'utf-8');

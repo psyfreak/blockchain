@@ -78,13 +78,13 @@ contract Flights  {
     /********************************************************************************************/
     modifier requireIsFlightExisting(bytes32 flightKey)
     {
-        require(isFlightRegisteredByKey(flightKey), "Flight is not existing, though it should .");
+        require(isFlightRegisteredByKey(flightKey), "Flight is not existing.");
         _;
     }
 
     modifier requireIsFlightNotExisting(bytes32 flightKey)
     {
-        require(!isFlightRegisteredByKey(flightKey), "Flight is existing, though it should not.");
+        require(!isFlightRegisteredByKey(flightKey), "Flight is already existing.");
         _;
     }
 }

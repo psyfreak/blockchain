@@ -21,70 +21,94 @@
 </nav>
 
 <main class="container">
-    1. Register Airline
+<!--    1. Register Airline
     2. Register Oracle
     3. Register Flight
     4. Register Passenger
     5. Purchase Insurance
     6. Fetch Flight-Status of selected flight
     7. Show balances
-
+-->
     <h4>Tests + Checks</h4>
     initializeTestSetup
-    <div class="row top-20">
-        <div class="btn-group" role="group" aria-label="Basic example">
-            <button id="submit-initTestsetup" type="button" class="btn btn-secondary" title="Register flight and book passenger + insurance for this flight">Init Testsetup</button>
-            <button id="submit-registerAllOracles" type="button" class="btn btn-secondary">Register oracles</button>
-            <button id="submit-fetchAllAirlines" type="button" class="btn btn-secondary">Fetch Airlines</button>
-            <button id="submit-getFlight" type="button" class="btn btn-secondary">Fetch first flight</button>
-            <button id="submit-getPassenger" type="button" class="btn btn-secondary">Fetch first passenger</button>
-        </div>
+    <div class="row top-20 mb-4">
+        <div class="col-sm-12">
 
+            <div class="btn-group" role="group" aria-label="Basic example">
+               <!--
+                <button id="submit-initTestsetup" type="button" class="btn btn-secondary" title="Register flight and book passenger + insurance for this flight">Init Testsetup</button>
+                -->
+                <div class="btn-group" role="group" aria-label="Basic example">
+                    <btn class="btn btn-secondary" id="submit-fetchAllAirlines">getAllAirlines</btn>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <h4>Airlines</h4>
-    <div class="row top-20">
+    <h4>Oracles + Airlines</h4>
+    <div class="row top-20 mb-4">
         <div class="col-sm-12 col-md-6">
-            <label class="form">Airline</label> <input type="text" id="airline-index">
-            <btn class="btn btn-primary" id="submit-registerAirline">Register Airline</btn>
-        </div>
-        <div class="col-sm-12 col-md-6">
-            <label class="form">Fetch Airline</label>
-            <select id="airline-ind2" class="form-control">
-                <option>Default select</option>
+
+            <label class="form">Oracles</label>
+            <select id="oracles-selector" class="form-control">
+                <option disabled>Select oracle</option>
             </select>
+            <div class="btn-group" role="group" aria-label="Basic example">
+                <btn class="btn btn-primary" id="submit-registerAllOracles">Register all oracles</btn>
+                <btn class="btn btn-primary disabled" id="submit-oracle">Register Oracle</btn>
+                <btn class="btn btn-primary disabled" id="submit-getOracle">Get Oracle</btn>
+            </div>
+            <!--
+            <input type="text" id="oracle-number">
+            -->
+        </div>
+        <div class="col-sm-12 col-md-6">
+            <label class="form">Airlines</label>
+            <select id="airlines-selector" class="form-control">
+                <option disabled>Select airline</option>
+            </select>
+            <div class="btn-group" role="group" aria-label="Basic example">
+                <btn class="btn btn-primary" id="submit-registerAirline">Register</btn>
+                <btn class="btn btn-primary" id="submit-fundAirline">Fund</btn>
+                <btn class="btn btn-primary" id="submit-getAirline">getAirline</btn>
+            </div>
 
-            <input type="text" id="airline-ind">
-            <btn class="btn btn-primary" id="submit-getAirline">getAirline</btn>
         </div>
 
     </div>
-
-    <h4>Flight</h4>
-    <div class="row top-20">
+    <h4>Flight + Passenger</h4>
+    <div class="row top-20 mb-4">
         <div class="col-sm-12 col-md-6">
-            <label class="form">Flight</label>
-            <input type="text" id="flight">
-            <btn class="btn btn-primary" id="submit-oracle">Register passenger for flight</btn>
+            <label class="form">Flights</label>
+            <select id="flights-selector" class="form-control">
+                <option disabled>Select flight</option>
+            </select>
+            <div class="btn-group" role="group" aria-label="Basic example">
+                <btn class="btn btn-primary" id="submit-registerFlight">registerFlight</btn>
+                <btn class="btn btn-primary" id="submit-getFlight">getFlight</btn>
+                <btn class="btn btn-primary" id="submit-fetchFlightStatus">fetchFlightStatus</btn>
+            </div>
+
+        </div>
+        <div class="col-sm-12 col-md-6">
+            <label class="form">Passengers</label>
+            <select id="passengers-selector" class="form-control">
+                <option disabled>Select passenger</option>
+            </select>
+            <div class="btn-group" role="group" aria-label="Basic example">
+                <btn class="btn btn-primary" id="submit-getPassenger">getPassenger</btn>
+                <btn class="btn btn-primary" id="submit-bookFlight">bookFlight</btn>
+                <btn class="btn btn-primary" id="submit-purchaseInsurance">purchaseInsurance</btn>
+                <!--
+                <btn class="btn btn-primary" id="submit-getInsurance">getInsurance</btn>
+                -->
+            </div>
+
         </div>
     </div>
 
-    <h4>Oracles</h4>
-    <div class="row top-20">
-        <div class="col-sm-12 col-md-6">
-            <label class="form">Oracle</label> <input type="text" id="oracle-number">
-            <btn class="btn btn-primary" id="submit-oracle">Register Oracle</btn>
-        </div>
-        <div class="col-sm-12 col-md-6">
-            <label class="form">Flight</label> <input type="text" id="flight-number">
-            <btn class="btn btn-primary" id="submit-fetchFlight">Fetch flight</btn>
-        </div>
-    </div>
-
-
-
+    <button id="clear-log" class="btn-secondary text-right mt-4">clear log</button>
     <div id="display-wrapper" class="top-20">
-
     </div>
 
     <div class="row top-20">

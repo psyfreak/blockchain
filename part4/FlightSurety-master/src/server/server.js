@@ -1,4 +1,5 @@
 import FlightSuretyApp from '../../build/contracts/FlightSuretyApp.json';
+import FlightSuretyData from '../../build/contracts/FlightSuretyData.json'; // for dev purpose
 import Config from './config.json';
 import Web3 from 'web3';
 import express from 'express';
@@ -6,14 +7,13 @@ const cors = require('cors')
 //import {flight, timestamp} from "./oracles";//ljj
 const morgan = require("morgan");
 
-
 console.log("\t\tWeb3 version: " + Web3.version);
 
-let config = Config['localhost'];
+let configLocalhost = Config['localhost'];
 // we could also add these globals to the request object
 global.test = "jo";
-global.ORACLES_TO_REGISTER = 10;
-global.web3 = new Web3(new Web3.providers.WebsocketProvider(config.url.replace('http', 'ws')));
+global.config = Config;
+global.web3 = new Web3(new Web3.providers.WebsocketProvider(configLocalhost.url.replace('http', 'ws')));
 web3.eth.defaultAccount = web3.eth.accounts[0];
 
 web3.eth.getAccounts().then(accounts => {
@@ -29,25 +29,35 @@ web3.eth.getAccounts().then(accounts => {
     console.log(result)
   });
  */
-})
+});
+console.log(global.Config)
 
-
-global.flightSuretyApp = new web3.eth.Contract(FlightSuretyApp.abi, config.appAddress);
+global.flightSuretyApp = new web3.eth.Contract(FlightSuretyApp.abi, configLocalhost.appAddress);
+global.flightSuretyData = new web3.eth.Contract(FlightSuretyData.abi, configLocalhost.dataAddress);
+function getRandomInt(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+const statusCodeArray = [
+  config.statusCodes.STATUS_CODE_UNKNOWN,
+  config.statusCodes.STATUS_CODE_ON_TIME,
+  config.statusCodes.STATUS_CODE_LATE_AIRLINE,
+  config.statusCodes.STATUS_CODE_LATE_WEATHER,
+  config.statusCodes.STATUS_CODE_LATE_TECHNICAL,
+  config.statusCodes.STATUS_CODE_LATE_OTHER
+];
 
 flightSuretyApp.events.OracleRequest({
   fromBlock: 0
 }, async function (error, event) {
   if (error) console.log(error)
   console.log("event", event)
-  console.log("event.returnValues", event.returnValues)
-  // hack to
-  console.log("type", typeof event.returnValues)
-
+  //console.log("event.returnValues", event.returnValues)
   let retString = JSON.stringify(event.returnValues);
   //console.log("retString", retString)
   let parsesd = retString.replace("Result ", "");
   let parsedJson = JSON.parse(parsesd);
-  console.log("parsedJson", parsedJson)
 
   let oracleResponses = [],
     newOracleResponse = null,
@@ -57,15 +67,16 @@ flightSuretyApp.events.OracleRequest({
     airline: parsedJson.airline,
     name: parsedJson.flight,
     timestamp: parsedJson.timestamp,
-    status: 20 // TODO ADD randomization
+    status: statusCodeArray[getRandomInt(0,statusCodeArray.length - 1)]//config. // TODO ADD randomization
   };
+  console.log("request", request);
 /*
   let flight = await flightSuretyApp.methods.getFlight(request.airline, request.name, request.timestamp).call({from:  global.accounts[0] });
   console.log("flight", flight);
 */
   // iterate over all registered oracles and
   for (let i = 0, len = global.accounts.length; i < len; i++ ) {
-    if(i == ORACLES_TO_REGISTER) {
+    if(i == 5) {
       break;
     }
     try {
@@ -83,6 +94,30 @@ flightSuretyApp.events.OracleRequest({
   console.log("newOracleResponses", oracleResponses.length, oracleResponses);
 
 });
+
+
+const app = express();
+app.set('json spaces', 2);
+app.use(cors());
+/*
+app.use((req, res, next) => {
+
+  //res.append('Access-Control-Allow-Origin', ['*']);
+  res.append('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+  res.append('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Content-Type', 'application/json');
+  next();
+});
+*/
+app.use(morgan("dev"));
+app.use("/api/tests", require("./routes/tests.route"));
+app.use("/api/oracles", require("./routes/oracles.route"));
+app.use("/api/flights", require("./routes/flights.route"));
+app.use("/api/airlines", require("./routes/airlines.route"));
+
+
+export default app;
+
 
 // event triggered by UI. Button push causes request to be generated for the oracles to fetchData for a specific flight.
 // => fetchFlightStatus
@@ -139,32 +174,3 @@ flightSuretyApp.getPastEvents({
   //flightSuretyApp.submitOracleResponse()
 });
 */
-
-// server should register oracles maybe in initialization phase + payment
-// add testAccount to config, so that we can use this config
-
-
-
-const app = express();
-app.set('json spaces', 2);
-app.use(cors());
-app.use((req, res, next) => {
-
-  //res.append('Access-Control-Allow-Origin', ['*']);
-  /*
-  res.append('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-  res.append('Access-Control-Allow-Headers', 'Content-Type');
-  */
-  res.setHeader('Content-Type', 'application/json');
-  next();
-});
-app.use(morgan("dev"));
-app.use("/api/tests", require("./routes/tests.route"));
-app.use("/api/oracles", require("./routes/oracles.route"));
-app.use("/api/flights", require("./routes/flights.route"));
-app.use("/api/airlines", require("./routes/airlines.route"));
-
-
-export default app;
-
-

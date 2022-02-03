@@ -23,7 +23,9 @@ export default class DOM {
     static elid(id) { 
       return document.getElementById(id);
     }
-  
+    static elcs(cs) {
+      return document.getElementsByClassName(cs);
+    }
     static appendText(el, text) {
       const textNode = document.createTextNode(text);
       el.appendChild(textNode);

@@ -3,6 +3,7 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = {
   entry: ['babel-polyfill', path.join(__dirname, "src/dapp")],
+  mode: 'development',
   output: {
     path: path.join(__dirname, "prod/dapp"),
     filename: "bundle.js"
@@ -33,14 +34,18 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({ 
-      template: path.join(__dirname, "src/dapp/index.html")
+      template: path.join(__dirname, "src/dapp/index.html"),
+      title: 'My App',
+      //filename: 'assets/admin.html'
     })
   ],
   resolve: {
     extensions: [".js"]
   },
   devServer: {
-
+    //contentBase: path.join(__dirname, 'dist'),
+    open: true,
+    hot: true,
     port: 8000,
     static: {
       directory:path.join(__dirname, "dapp"),

@@ -41,7 +41,7 @@ contract Insurances  {
         returns(address, uint256)
     {
         //TODO add modifier
-        if (insurances[flightKey].length >0) {
+        if (insurances[flightKey].length > 0) {
             return (
             insurances[flightKey][0].passenger,
             insurances[flightKey][0].insurance

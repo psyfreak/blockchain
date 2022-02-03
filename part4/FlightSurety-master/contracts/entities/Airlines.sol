@@ -11,6 +11,7 @@ contract Airlines  {
     // airlines
     struct Airline {
         uint256 id; // incrementing no.
+        // TODO add string name;
         bool isRegistered; // registration went through
         address registeredBy;
         uint256 investment; // has invested
@@ -40,7 +41,7 @@ contract Airlines  {
         public
         view
         returns(
-            uint256 ,
+            uint256,
             bool,
             address,
             uint256,

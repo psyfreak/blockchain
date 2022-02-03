@@ -425,6 +425,14 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
         return (oracleResponses[key].requester, oracleResponses[key].isOpen, oracleResponses[key].responses[forStatus]);
     }
 
+    function getInsurance (address airline, string calldata flight, uint256 timestamp)
+        public
+        view
+        returns(address, uint256)
+    {
+        return flightSuretyData.getInsurance (airline, flight, timestamp, msg.sender);
+    }
+
     /********************************************************************************************/
     /*                                       FUNCTION MODIFIERS                                 */
     /********************************************************************************************/

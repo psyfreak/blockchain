@@ -3,58 +3,39 @@ const express = require("express"),
 
 // TODO move tagtog routes to own model + route
 
-const ORACLE_REG_FEE = 10;
 
-//TODO normally no get, but for testing purpose
-router.get("/register", async (req, res)=> {
-
-
-  /*
-  for(let acc of global.accounts) {
-    newOracle = await flightSuretyApp.methods
-      .registerOracle()
-      .send({from: acc, value: ORACLE_REG_FEE, gas: 2800707 });
-    registeredOracles.push(newOracle);
-    if(counter == ORACLES_TO_REGISTER) {
-      break;
-    }
-  }
-  */
-
-
-
-/*
-
-  let newOracle = await flightSuretyApp.methods
-    .registerOracle()
-    .send({from: global.accounts[0], value: 11, gas: 2800707 });
-  registeredOracles.push(newOracle);
-*/
-  // console.log("result to save", result);
-  // TODO clarify this had no effect if consensus: false gets dropped...
+router.get("/status", async (req, res)=> {
+  console.log("jo")
   try {
-    //register all oracles here
-    let registeredOracles = [],
-      newOracle = null;
-    for (let i = 0, len = global.accounts.length; i < len; i++ ) {
-      if(i == ORACLES_TO_REGISTER) {
-        break;
-      }
-      newOracle = await flightSuretyApp.methods
-        .registerOracle()
-        .send({from: global.accounts[i], value: ORACLE_REG_FEE, gas: 2800707 });
-      registeredOracles.push(newOracle);
-    }
-    res.send({
-      message: "Register oracles",
-      count: registeredOracles.length,
-      data: registeredOracles
-    });
+
+    let regFee = await flightSuretyApp.methods.ORACLE_REGISTRATION_FEE().call({from: global.accounts[0] });
+    console.log(regFee)
+/*
+    let minResponses = await flightSuretyApp.methods.MIN_RESPONSES().call({from: global.accounts[0] });
+    console.log(minResponses)
+*/
+    let oracleCount = await flightSuretyApp.methods.oracleCount().call({from: global.accounts[0] });
+    console.log(oracleCount)
+    res.send(
+      {
+        message: "Request indices of oracle (only for development purpose - these indices should never go public)",
+        requestedAccountId: global.accounts[0],
+        data: {
+          count: oracleCount,
+          //minResponses,
+          regFee: regFee
+        }
+      });
   }
   catch(error) {
+    // TODO devMode/debugMode appreciated...
+    // react on duplicate => {"driver":true,"name":"MongoError","index":0,"code":11000,"errmsg":"E11000 duplicate key error collection: fcch.results index: user_1_result_1_source_1 dup key: { : { id: ObjectId('5e4a7e2291023e2af4e44625'), name: \"bill4\" }, : { fcc: \"aluminum\", fca: \"packaging\", fcm_main: \"PET\", fcm_focus: \"Adhesive\", experiment: \"Migration into Food\", detected: \"yes\" }, : { id: ObjectId('5e70eb8f3c2a222be0defadd'), articleId: 218, title: \"Mineral elements in canned Spanish liver pat�\" } }"}
     return res.status(400).send(error);
+    //return res.status(400).send("Save result failed.");
   }
+
 });
+
 
 router.get("/:accountIndex",  async(req, res)=> {
   const accIndex = req.params['accountIndex'];
@@ -76,29 +57,37 @@ router.get("/:accountIndex",  async(req, res)=> {
     return res.status(400).send(error);
     //return res.status(400).send("Save result failed.");
   }
-
 });
 
-//TODO add projectId here...
-router.get("/", (req, res)=> {
-  res.send({message: "jo"});
-});
+// register specific oracle
+router.post("/register/:oracleId", async (req, res)=> {
+  // not implemented yet
+  /*
 
+    let newOracle = await flightSuretyApp.methods
+      .registerOracle()
+      .send({from: global.accounts[0], value: 11, gas: 2800707 });
+    registeredOracles.push(newOracle);
+  */
+});
 // Register Oracle
-router.post("/", async (req, res)=> {
+router.post("/:countOracles", async (req, res)=> {
   // console.log("result to save", result);
-
+  let numOfOraclesToRegister = req.params['countOracles'];
+  if(numOfOraclesToRegister <= 0 || Number.isNaN(numOfOraclesToRegister)) {
+    numOfOraclesToRegister =config.oracles.count
+  }
   // TODO clarify this had no effect if consensus: false gets dropped...
   try {
     let registeredOracles = [],
       newOracle = null;
     for(let i = 0, len = global.accounts.length; i < len; i++ ) {
-      if(i == ORACLES_TO_REGISTER) {
+      if(i == numOfOraclesToRegister) {
         break;
       }
       newOracle = await flightSuretyApp.methods
         .registerOracle()
-        .send({from: global.accounts[i], value: ORACLE_REG_FEE, gas: 2800707 });
+        .send({from: global.accounts[i], value: config.fees.registrationOracle, gas: 2800707 });
       registeredOracles.push(newOracle);
     }
 
@@ -112,6 +101,34 @@ router.post("/", async (req, res)=> {
   catch(error) {
     return res.status(400).send(error);
   }
+
+
+  // console.log("result to save", result);
+  // TODO clarify this had no effect if consensus: false gets dropped...
+  try {
+    //register all oracles here
+    let registeredOracles = [],
+      newOracle = null;
+    for (let i = 0, len = global.accounts.length; i < len; i++ ) {
+      if(i == config.oracles.count) {
+        break;
+      }
+      newOracle = await flightSuretyApp.methods
+        .registerOracle()
+        .send({from: global.accounts[i], value: config.fees.registrationOracle, gas: 2800707 });
+      registeredOracles.push(newOracle);
+    }
+    res.send({
+      message: "Register oracles",
+      count: registeredOracles.length,
+      data: registeredOracles
+    });
+  }
+  catch(error) {
+    return res.status(400).send(error);
+  }
+
+
 
 });
 
