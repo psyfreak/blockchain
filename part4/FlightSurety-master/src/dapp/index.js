@@ -134,7 +134,6 @@ import Config from './config.json';
             });
         });
 
-
         DOM.elid('submit-purchaseInsurance').addEventListener('click', () => {
             let flightObj = getFlightObj();
             let passenger = DOM.elid('passengers-selector').value;

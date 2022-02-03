@@ -1,6 +1,9 @@
 # FlightSurety
 ## TODO 
 - add airline name
+- passenger info i.e. insurances + payment open or not
+- getBalances
+- getOracleInfo (server)
 - UI
     3) Passengers can choose from a fixed list of flight numbers and departures that are defined in the Dapp client
     Your UI implementation should include:

@@ -248,7 +248,9 @@ contract('Flight Surety - Oracles', async (accounts) => {
     let responseOracleEntry = await config.flightSuretyApp.getResponses.call(predefinedOracleIds[0], config.firstAirline, FLIGHT_NAME, FLIGHT_timestamp, STATUS_CODE);
     console.log("\t\tresponseOracleEntry", responseOracleEntry);
   });
-  // beware while the server is running it listens to the fetch events, therefore this will be already executed.
+
+  ///////////////////// IMPORTANT beware while the server is running it listens to the fetch events,
+  //////////////////// therefore this will be already executed resulting in an error!
   it(`(Oracles) submit Response`, async function () {
     console.log("\t index = " + predefinedOracleIds[0])
     const STATUS_CODE = 20;
@@ -262,7 +264,7 @@ contract('Flight Surety - Oracles', async (accounts) => {
       await config.flightSuretyApp.submitOracleResponse(predefinedOracleIds[0], config.firstAirline, FLIGHT_NAME, FLIGHT_timestamp, STATUS_CODE);
     }
     catch(e) {
-      fail= true;
+      fail= true; //Flight or timestamp do not match oracle request
       console.log("Submit oracle response could not execute", e)
     }
     // ASSERT
