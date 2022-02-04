@@ -1,0 +1,19 @@
+{
+  "name": "lesson8",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "run": "node app.js",
+    "createTX": "node tx.js",
+    "createTXTestnet": "node tx-testnet.js",
+    "localGanache": "node local-ganache.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ethereumjs-tx": "^2.1.2",
+    "web3": "^1.4.0"
+  }
+}

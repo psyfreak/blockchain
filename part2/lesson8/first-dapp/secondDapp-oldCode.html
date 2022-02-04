@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Deploy a Remix Contract</title>
+
+    <link rel="stylesheet" type="text/css" href="main.css">
+
+    <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
+</head>
+
+<body>
+<div>
+    <h1>Ethereum Secret Messenger</h1>
+    <hr>
+
+    <label for="userInput">This site writes a secret message to the Ethereum
+        blockchain!</label>
+    <input id="userInput" type="text">
+
+    <button id="setMessageButton">Set secret message</button>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+
+<script>
+/*
+  // Connect a the web3 provider
+  if (typeof web3 !== 'undefined') {
+    console.log("web3.currentProvider", web3.currentProvider)
+    web3 = new Web3(web3.currentProvider);
+  } else {
+    web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:7545"));
+  }
+  */
+  //web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:7545"));
+
+    console.log("Web3.givenProvider",Web3.givenProvider)
+    web3 = new Web3(Web3.givenProvider || "http://localhost:7545");
+
+  console.log("web3.eth.accounts", web3.eth.accounts, web3.eth.accounts[0])
+  // Set a default account
+  web3.eth.defaultAccount = web3.eth.accounts[0];
+
+  // Get the contract address
+  let abi = [
+      {
+        "constant": false,
+        "inputs": [
+          {
+            "name": "x",
+            "type": "string"
+          }
+        ],
+        "name": "setMessage",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "constant": true,
+        "inputs": [],
+        "name": "getMessage",
+        "outputs": [
+          {
+            "name": "",
+            "type": "string"
+          }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ],
+    contractAddress = '0x0C17738b4Efc521f00BcfC6862b22dc4C33421b8';
+  /*
+  // old web3 version
+  var RemixContract = new web3.eth.Contract(abi);
+  var myMessage = RemixContract.at(contractAddress);
+  console.log(myMessage);
+  */
+
+
+  // Get the contract abi
+  var contract = new web3.eth.Contract(abi, contractAddress);
+    web3.eth.defaultAccount = '0x0b26c8a3f3C4a210D719Ebc8f142fEB1f81db290';
+  console.log("contract", contract, web3.eth.Contract.defaultAccount);
+
+
+  console.log(contract);
+  // https://bitsofco.de/calling-smart-contract-functions-using-web3-js-call-vs-send/
+  $("#setMessageButton").click(function () {
+    let sendOptions = {from: web3.eth.Contract.defaultAccount};
+    console.log("sendOptions", sendOptions, web3.eth.accounts[0])
+    contract.methods.setMessage($("#userInput").val()).send(sendOptions);
+    console.log($("#userInput").val())
+  });
+
+    async function setMessageFunction() {
+      message = $("#userInput").val();
+      const account = await getCurrentAccount();
+      await window.contract.methods.setMessage(message).send();
+    }
+    async function loadWeb3() {
+      if (window.ethereum) {
+        window.web3 = new Web3(window.ethereum);
+        window.ethereum.enable();
+      }
+    }
+
+
+</script>
+</body>
+
+</html>
+
+</body>
+
+</html>
