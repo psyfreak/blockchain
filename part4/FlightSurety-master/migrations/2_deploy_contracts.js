@@ -90,9 +90,10 @@ module.exports = async function(deployer, network, accounts) {
         name: "F-003",
         departure: 1643869458
       }
-    ],
-
+    ]
   };
+
+
   fs.writeFileSync(__dirname + '/../src/dapp/config.json',JSON.stringify(config, null, '\t'), 'utf-8');
   fs.writeFileSync(__dirname + '/../src/server/config.json',JSON.stringify(config, null, '\t'), 'utf-8');
 

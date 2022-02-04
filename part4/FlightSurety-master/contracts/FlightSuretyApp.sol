@@ -78,7 +78,7 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
 
     * easiest version if other existing airlines just call registerAirline it counts as a voting for such airline
     */   
-    function registerAirline( address newAirline)
+    function registerAirline(address newAirline, string calldata name)
         external
         //requireIsAirlineAuthorized(msg.sender)
         requireIsAirlineRegistered(msg.sender)
@@ -89,7 +89,7 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
         // check if airline is available if not submit
 
         if(!flightSuretyData.isAirlineExisting(newAirline)) {
-            flightSuretyData.createAirline(newAirline);
+            flightSuretyData.createAirline(newAirline, name);
         }
 
         //see require airline must be authorized therefore registered + invested if(flightSuretyData.isAirlineFunded(msg.sender)) { }
@@ -430,7 +430,7 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
         view
         returns(address, uint256)
     {
-        return flightSuretyData.getInsurance (airline, flight, timestamp, msg.sender);
+        return flightSuretyData.getInsurance(airline, flight, timestamp, msg.sender);
     }
 
     /********************************************************************************************/

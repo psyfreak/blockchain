@@ -119,7 +119,7 @@ contract('Flight Surety - Funding', async (accounts) => {
 
     let fail = false;
     try {
-      await config.flightSuretyApp.registerAirline(newAirline, {from: registeredAirline});
+      await config.flightSuretyApp.registerAirline(newAirline, config.airlines[2].name,{from: registeredAirline});
     }
     catch(e) {
       console.log("registerAirline error", e)

@@ -50,7 +50,7 @@ contract FlightSuretyData is Ownable, Mortal, Authentication, Airlines, Flights,
     * @dev Constructor
     *      The deploying account becomes contractOwner
     */
-    constructor ( address firstAirline) // not needed if init function
+    constructor (address firstAirline) // not needed if init function
         payable // needed if we fund directly via ctor call
     {
         authorizedCallers[owner()] = true;// initialize so that contractOwner can register first airline
@@ -65,11 +65,13 @@ contract FlightSuretyData is Ownable, Mortal, Authentication, Airlines, Flights,
         //done in funded method which is called in deploy script - numOfFundedAirlines = numOfFundedAirlines.add(1);
 
         //Airline memory newAirline = // also different here due to payable fct.
-        airlines[firstAirline] = Airline({id:numOfAirlines, isRegistered: true, investment: msg.value, registeredBy: owner(), timestamp: block.timestamp});
+        //TODO add name of airline as ctor argument and read from config in deployscript
+        airlines[firstAirline] = Airline({id:numOfAirlines, name: "Lufthansa", isRegistered: true, investment: msg.value, registeredBy: owner(), timestamp: block.timestamp});
         // fire event newAirline
         emit AirlineRegistered (
             firstAirline,
             airlines[firstAirline].id,
+            airlines[firstAirline].name,
             airlines[firstAirline].isRegistered,
             airlines[firstAirline].registeredBy,
             airlines[firstAirline].investment,
@@ -126,7 +128,7 @@ contract FlightSuretyData is Ownable, Mortal, Authentication, Airlines, Flights,
      * else by voting of existing airlines
      *
      */
-    function createAirline(address airlineAddr)
+    function createAirline(address airlineAddr, string calldata name)
         external
         requireIsOperational
         requireIsCallerAuthorized
@@ -135,10 +137,10 @@ contract FlightSuretyData is Ownable, Mortal, Authentication, Airlines, Flights,
         // msg.sender is now address of the calling contract therefore use tx.origin for registeredBy
         // new airline
         numOfAirlines = numOfAirlines.add(1);
-        Airline memory newAirline = Airline({id:numOfAirlines, isRegistered: false, investment: 0, registeredBy: tx.origin, timestamp: block.timestamp});
+        Airline memory newAirline = Airline({id: numOfAirlines, name: name, isRegistered: false, investment: 0, registeredBy: tx.origin, timestamp: block.timestamp});
         airlines[airlineAddr] = newAirline;
         // fire event newAirline
-        emit AirlineNewRegistration(airlineAddr, newAirline.id, newAirline.registeredBy, newAirline.timestamp);
+        emit AirlineNewRegistration(airlineAddr, newAirline.id, newAirline.name, newAirline.registeredBy, newAirline.timestamp);
     }
 
     /**
@@ -160,6 +162,7 @@ contract FlightSuretyData is Ownable, Mortal, Authentication, Airlines, Flights,
         emit AirlineRegistered (
             airlineAddr,
             airlines[airlineAddr].id,
+            airlines[airlineAddr].name,
             airlines[airlineAddr].isRegistered,
             airlines[airlineAddr].registeredBy,
             airlines[airlineAddr].investment,
@@ -221,13 +224,13 @@ contract FlightSuretyData is Ownable, Mortal, Authentication, Airlines, Flights,
             airlines[airline].investment = msg.value;
             numOfFundedAirlines = numOfFundedAirlines.add(1);
             //emit
-            emit AirlineFunded(airline, airlines[airline].id, airlines[airline].isRegistered, airlines[airline].registeredBy, airlines[airline].investment, airlines[airline].timestamp);
+            emit AirlineFunded(airline, airlines[airline].id, airlines[airline].name, airlines[airline].isRegistered, airlines[airline].registeredBy, airlines[airline].investment, airlines[airline].timestamp);
         } else {
             // refund
             //require(airlines[airline].investment >= AIRLINE_REGISTRATION_FEE, "Airline must be funded for refunding");
             airlines[airline].investment = airlines[airline].investment.add(msg.value);
             //emit
-            emit AirlineRefunded(airline, airlines[airline].id, airlines[airline].investment);
+            emit AirlineRefunded(airline, airlines[airline].id, airlines[airline].name, airlines[airline].investment);
         }
     }
     /*
@@ -295,7 +298,7 @@ contract FlightSuretyData is Ownable, Mortal, Authentication, Airlines, Flights,
      * Optional part - UI defines the flights.
      * Only a fully registered airline can register a flight with a name + timestamp
      */
-    function registerPassengerForFlight( bytes32 flightKey, address passenger)
+    function registerPassengerForFlight(bytes32 flightKey, address passenger)
         external
         requireIsOperational
         requireIsCallerAuthorized

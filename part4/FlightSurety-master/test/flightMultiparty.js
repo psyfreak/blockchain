@@ -290,7 +290,7 @@ contract('Flight Surety Multiparty', async (accounts) => {
     let reverted = false;
     try
     {
-      await config.flightSuretyApp.registerAirline(accounts[2], {from: accounts[1]});
+      await config.flightSuretyApp.registerAirline(accounts[2], config.airlines[2].name,{from: accounts[1]});
     }
     catch(e) {
       reverted = true;
@@ -335,8 +335,8 @@ contract('Flight Surety Multiparty', async (accounts) => {
     let reverted = false;
     try
     {
-      await config.flightSuretyApp.registerAirline(accounts[2], {from: accounts[1]});
-      await config.flightSuretyApp.registerAirline(accounts[3], {from: accounts[1]});
+      await config.flightSuretyApp.registerAirline(accounts[2], config.airlines[2].name,{from: accounts[1]});
+      await config.flightSuretyApp.registerAirline(accounts[3], config.airlines[2].name,{from: accounts[1]});
       //await config.flightSuretyApp.registerAirline(accounts[4], {from: accounts[1]});
     }
     catch(e) {

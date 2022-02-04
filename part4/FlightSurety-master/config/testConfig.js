@@ -41,6 +41,38 @@ var Config = async function(accounts) {
     let owner = accounts[0];
     let firstAirline = accounts[1]; // see deployment script atm. firstAirline acc9
 
+    const airlines = [
+        {
+            airline: firstAirline,
+            name: "Lufthansa"
+        },
+        {
+            airline:  accounts[2],
+            name: "IrishAir"
+        },
+        {
+            airline:  accounts[3],
+            name: "RyanAir"
+        },
+        {
+            airline:  accounts[4],
+            name: "TeslaAir"
+        },
+        {
+            airline:  accounts[5],
+            name: "NikeAir"
+        },
+        {
+            airline:  accounts[6],
+            name: "AustraliaAir"
+        },
+        {
+            airline:  accounts[7],
+            name: "Airsoft"
+        }
+    ];
+
+
     //let flightSuretyData = await FlightSuretyData.new(firstAirline, {from: owner, value: 10});
     //let flightSuretyApp = await FlightSuretyApp.new(flightSuretyData.address, {from: owner});
 
@@ -52,13 +84,14 @@ var Config = async function(accounts) {
     return {
         owner: owner,
         firstAirline: firstAirline,
+        airlines: airlines,
         flights: flights,
         weiMultiple: (new BigNumber(10)).pow(18),
         testAddresses: testAddresses,
         flightSuretyData: flightSuretyData,
         flightSuretyApp: flightSuretyApp,
         multiSignatureWallet: multiSignatureWallet
-    }
+    };
 }
 
 module.exports = {

@@ -7,12 +7,15 @@ contract('Flight Surety - Airlines', async (accounts) => {
 
   let config;
   let FLIGHT_NAME = "",
+    FLIGHT_AIRLINE = "",
+    FLIGHT_AIRLINE2 = "",
     FLIGHT_timestamp = "",
     INSURANCE_PAYMENT = 100,
     ROI_PAYMENT = 150;
 
   before('setup contract', async () => {
     config = await Test.Config(accounts);
+    FLIGHT_AIRLINE = config.airlines[1].name;
     FLIGHT_NAME = config.flights[0].name;
     FLIGHT_timestamp = config.flights[0].departure;
 
@@ -85,7 +88,7 @@ contract('Flight Surety - Airlines', async (accounts) => {
 
     let fail = false;
     try {
-      await config.flightSuretyApp.registerAirline(newAirline, {from: unregisteredAirline});
+      await config.flightSuretyApp.registerAirline(newAirline, config.airlines[2].name, {from: unregisteredAirline});
     }
     catch(e) {
       //console.log("registerAirline error", e)
@@ -103,15 +106,13 @@ contract('Flight Surety - Airlines', async (accounts) => {
     let registeredAirline = config.firstAirline,
       newAirline = accounts[2];
 
-
     let result = await config.flightSuretyData.isAirlineRegistered.call(newAirline);
     assert.equal(result, false, "Airline is registered");
     // ACT
 
-
     let fail = false;
     try {
-      await config.flightSuretyApp.registerAirline(newAirline, {from: registeredAirline});
+      await config.flightSuretyApp.registerAirline(newAirline, config.airlines[2].name,{from: registeredAirline});
     }
     catch(e) {
       console.log("registerAirline error", e)
@@ -121,7 +122,6 @@ contract('Flight Surety - Airlines', async (accounts) => {
     assert.equal(result, true, "Airline is not registered");
     await Util.helper.printAirline(config, newAirline);
     //console.log("getAirlineByAddress", result)
-
     // ASSERT
     //assert.equal(fail, true, "Airline should not be able to register another airline if it hasn't provided funding");
 
@@ -147,7 +147,7 @@ contract('Flight Surety - Airlines', async (accounts) => {
     // ACT
     let fail = false;
     try {
-      await config.flightSuretyApp.registerAirline(newAirline, {from: registeredAirline});
+      await config.flightSuretyApp.registerAirline(newAirline, config.airlines[3].name, {from: registeredAirline});
     }
     catch(e) {
       console.log("registerAirline error", e)
@@ -203,7 +203,7 @@ contract('Flight Surety - Airlines', async (accounts) => {
 
     let fail = false;
     try {
-      await config.flightSuretyApp.registerAirline(newAirline4, {from: registeredAirline});
+      await config.flightSuretyApp.registerAirline(newAirline4, config.airlines[4].name, {from: registeredAirline});
     }
     catch(e) {
       console.log("registerAirline error", e)
@@ -230,7 +230,7 @@ contract('Flight Surety - Airlines', async (accounts) => {
     let fail = false;
 
     try {
-      await config.flightSuretyApp.registerAirline(unregisteredAirline, {from: registeredAirline});
+      await config.flightSuretyApp.registerAirline(unregisteredAirline, config.airlines[5].name,{from: registeredAirline});
     }
     catch(e) {
       console.log("registerAirline error", e)
@@ -256,7 +256,7 @@ contract('Flight Surety - Airlines', async (accounts) => {
     let fail = false;
 
     try {
-      await config.flightSuretyApp.registerAirline(unregisteredAirline, {from: registeredAirline});
+      await config.flightSuretyApp.registerAirline(unregisteredAirline, config.airlines[5].name,{from: registeredAirline});
     }
     catch(e) {
       //console.log("registerAirline error", e)
@@ -291,7 +291,7 @@ contract('Flight Surety - Airlines', async (accounts) => {
 
     let fail = false;
     try {
-      await config.flightSuretyApp.registerAirline(unregisteredAirline, {from: registeredAirline2}); // different than before
+      await config.flightSuretyApp.registerAirline(unregisteredAirline, config.airlines[5].name,{from: registeredAirline2}); // different than before
       // await config.flightSuretyApp.registerAirline(unregisteredAirline, {from: fundedAirline3});
     }
     catch(e) {

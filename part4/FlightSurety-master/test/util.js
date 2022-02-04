@@ -34,7 +34,7 @@ const util = {
   },
   printAirline: async function(config, airlineAddress) {
     let result = await config.flightSuretyData.getAirlineByAddress.call(airlineAddress);
-    console.log(`\t\tAirlines (id/isRegistered/registeredBy/investment/timestamp): ${result['0'].toString()} / ${result['1'].toString()} / ${result['2'].toString()} / ${result['3'].toString()} / ${new Date(result['4'].toString()*1000)} `)
+    console.log(`\t\tAirlines (id/name/isRegistered/registeredBy/investment/timestamp): ${result['0'].toString()} / ${result['1'].toString()} / ${result['2'].toString()} / ${result['3'].toString()} /  ${result['4'].toString()} / ${new Date(result['5'].toString()*1000)} `)
   },
   printAllAirlines: async function(config, accounts) {
     for(let acc of accounts) {

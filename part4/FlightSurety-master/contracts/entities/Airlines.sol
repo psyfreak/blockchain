@@ -11,7 +11,7 @@ contract Airlines  {
     // airlines
     struct Airline {
         uint256 id; // incrementing no.
-        // TODO add string name;
+        string name;
         bool isRegistered; // registration went through
         address registeredBy;
         uint256 investment; // has invested
@@ -29,10 +29,10 @@ contract Airlines  {
     /********************************************************************************************/
     /*                                       EVENT DEFINITIONS                                  */
     /********************************************************************************************/
-    event AirlineNewRegistration(address airline, uint256 id, address registeredBy, uint256 timestamp);
-    event AirlineRegistered(address airline, uint256 id, bool isRegistered, address registeredBy, uint256 investment, uint256 timestamp);
-    event AirlineFunded(address airline, uint256 id, bool isRegistered, address registeredBy, uint256 investment, uint256 timestamp);
-    event AirlineRefunded(address airline, uint256 id, uint256 investment);
+    event AirlineNewRegistration(address airline, uint256 id, string name, address registeredBy, uint256 timestamp);
+    event AirlineRegistered(address airline, uint256 id, string name, bool isRegistered, address registeredBy, uint256 investment, uint256 timestamp);
+    event AirlineFunded(address airline, uint256 id, string name, bool isRegistered, address registeredBy, uint256 investment, uint256 timestamp);
+    event AirlineRefunded(address airline, uint256 id, string name, uint256 investment);
 
     /********************************************************************************************/
     /*                                       UTILITY FUNCTIONS                                  */
@@ -42,13 +42,14 @@ contract Airlines  {
         view
         returns(
             uint256,
+            string memory name,
             bool,
             address,
             uint256,
             uint256
         )
     {
-        return (airlines[airline].id, airlines[airline].isRegistered, airlines[airline].registeredBy, airlines[airline].investment, airlines[airline].timestamp);
+        return (airlines[airline].id, airlines[airline].name, airlines[airline].isRegistered, airlines[airline].registeredBy, airlines[airline].investment, airlines[airline].timestamp);
     }
 
     function isAirlineExisting (address airline)
