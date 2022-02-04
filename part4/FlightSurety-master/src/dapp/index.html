@@ -53,24 +53,33 @@
         <div class="col-sm-12 col-md-6">
 
             <label class="form">Oracles</label>
-            <select id="oracles-selector" class="form-control">
+            <select id="oracles-selector" class="form-control disabled">
                 <option disabled>Select oracle</option>
             </select>
             <div class="btn-group" role="group" aria-label="Basic example">
                 <btn class="btn btn-primary" id="submit-registerAllOracles">Register all oracles</btn>
                 <btn class="btn btn-primary disabled" id="submit-oracle">Register Oracle</btn>
                 <btn class="btn btn-primary disabled" id="submit-getOracle">Get Oracle</btn>
+                <btn class="btn btn-primary" id="submit-getOracleCount">getOracleCount</btn>
+
             </div>
-            <!--
-            <input type="text" id="oracle-number">
-            -->
         </div>
         <div class="col-sm-12 col-md-6">
-            <label class="form">Airlines</label>
-            <select id="airlines-selector" class="form-control">
-                <option disabled>Select airline</option>
-            </select>
-            <div class="btn-group" role="group" aria-label="Basic example">
+
+            <div>
+                <label for="airlines-selector" class="form">Airlines</label>
+                <select id="airlines-selector" class="form-control">
+                    <option disabled>Select airline</option>
+                </select>
+            </div>
+            <div>
+                <label for="airlines-selector-from" class="form">Registered from Airline (only for register)</label>
+                <select id="airlines-selector-from" class="form-control">
+                    <option disabled>Select airline</option>
+                </select>
+            </div>
+
+            <div class="btn-group" role="group" aria-label="AirlineGroup">
                 <btn class="btn btn-primary" id="submit-registerAirline">Register</btn>
                 <btn class="btn btn-primary" id="submit-fundAirline">Fund</btn>
                 <btn class="btn btn-primary" id="submit-getAirline">getAirline</btn>
@@ -102,24 +111,22 @@
                 <btn class="btn btn-primary" id="submit-getPassenger">getPassenger</btn>
                 <btn class="btn btn-primary" id="submit-bookFlight">bookFlight</btn>
                 <btn class="btn btn-primary" id="submit-purchaseInsurance">purchaseInsurance</btn>
-                <!--
                 <btn class="btn btn-primary" id="submit-getInsurance">getInsurance</btn>
-                -->
+                <btn class="btn btn-primary" id="submit-getInfo">getInfo</btn>
             </div>
 
         </div>
     </div>
 
+    <table align = "center"
+           id="table" border="1">
+    </table>
+
     <button id="clear-log" class="btn-secondary text-right mt-4">clear log</button>
     <div id="display-wrapper" class="top-20">
     </div>
 
-    <div class="row top-20">
-        <div class="col-sm-12">
-           <div id="console">
-           </div>
-        </div>
-    </div>
+
 
 </main>
 

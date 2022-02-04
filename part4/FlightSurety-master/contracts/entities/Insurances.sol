@@ -21,6 +21,11 @@ contract Insurances  {
     // mapping for passengers flight towards insurance balance / a passenger might have multiple insurances for different flights flight 1: 1 ether, flight 2: 0.6 ether etc.
     mapping(bytes32 => Insurance[]) insurances;// mapping of passenger towards Insurance Info (insurance balanace per flight)
 
+    //mapping (address => PasInfo
+    /*
+     passenger{payout, insurances: flightKey => insurance
+    */
+
     /********************************************************************************************/
     /*                                       EVENT DEFINITIONS                                  */
     /********************************************************************************************/
@@ -40,15 +45,21 @@ contract Insurances  {
         //requireIsPassengerOnFlight(flight, passenger)
         returns(address, uint256)
     {
+        uint len = insurances[flightKey].length;
         //TODO add modifier
-        if (insurances[flightKey].length > 0) {
-            return (
-            insurances[flightKey][0].passenger,
-            insurances[flightKey][0].insurance
-            );
-        } else {
-            return  (address(0),0);
+        if (len > 0) {
+            for(uint i=0; i<len; i++) {
+                //emit LogInsuranceIt(i, insuranceOfFlight[i].passenger,insuranceOfFlight[i].insurance);
+                // if passenger on the list and insurance is greater than 0
+                if(insurances[flightKey][i].passenger == passenger) {
+                    return (
+                        insurances[flightKey][i].passenger,
+                        insurances[flightKey][i].insurance
+                    );
+                }
+            }
         }
+        return  (address(0),0);
     }
 
     function getInsurance (address airline, string calldata flight, uint256 timestamp, address passenger)
@@ -59,6 +70,8 @@ contract Insurances  {
         bytes32 flightKey = Util.getFlightKey(airline, flight, timestamp);
         return getInsuranceByKey(flightKey, passenger);
     }
+
+
 
     function isPassengerInsuredByKey (bytes32 flight, address passenger)
         public
@@ -137,6 +150,5 @@ contract Insurances  {
     /********************************************************************************************/
     /*                                       FUNCTION MODIFIERS                                 */
     /********************************************************************************************/
-
 
 }

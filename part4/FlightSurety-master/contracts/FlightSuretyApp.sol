@@ -162,6 +162,7 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
         external
         payable
         requireIsOperational
+        requireIsPassengerNotInsured(airline, flight, timestamp, msg.sender)
         Cap(flightSuretyData.MAX_INSURANCE_FEE())
     {
         //flightSuretyData.escrow.deposit(tx.origin) won´t work in our case we not one account
@@ -266,6 +267,7 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
         );
         // if index matches, generate key and check if request still open
         bytes32 key = keccak256(abi.encodePacked(index, airline, flight, timestamp));
+        //either flight was already submitted and is closed or there is not flight entry yet
         require(oracleResponses[key].isOpen, "Flight or timestamp do not match oracle request");
 
         // push calculated value to responses array (different results have different array with all approvers
@@ -505,5 +507,11 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
     modifier Cap (uint _amount) {
         require(msg.value <= _amount, "Amount is capped");
         _;
+    }
+
+    modifier requireIsPassengerNotInsured(address airline, string calldata flight, uint256 timestamp, address passenger)
+    {
+        require(!flightSuretyData.isPassengerInsured(airline, flight, timestamp, passenger), "Passenger is already insured");
+        _;  // All modifiers require an "_" which indicates where the function body will be added
     }
 }

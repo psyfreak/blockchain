@@ -1,5 +1,7 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const webpack = require("webpack");
+const jquery = require("jquery");
 
 module.exports = {
   entry: ['babel-polyfill', path.join(__dirname, "src/dapp")],
@@ -37,10 +39,15 @@ module.exports = {
       template: path.join(__dirname, "src/dapp/index.html"),
       title: 'My App',
       //filename: 'assets/admin.html'
+    }),
+    new webpack.ProvidePlugin({
+      $: "jquery",
+      jQuery: "jquery"
     })
   ],
   resolve: {
     extensions: [".js"]
+
   },
   devServer: {
     //contentBase: path.join(__dirname, 'dist'),

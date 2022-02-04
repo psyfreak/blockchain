@@ -40,7 +40,7 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 const statusCodeArray = [
-  config.statusCodes.STATUS_CODE_UNKNOWN,
+  config.statusCodes.STATUS_CODE_UNKNOWN, // default set
   config.statusCodes.STATUS_CODE_ON_TIME,
   config.statusCodes.STATUS_CODE_LATE_AIRLINE,
   config.statusCodes.STATUS_CODE_LATE_WEATHER,
@@ -67,7 +67,8 @@ flightSuretyApp.events.OracleRequest({
     airline: parsedJson.airline,
     name: parsedJson.flight,
     timestamp: parsedJson.timestamp,
-    status: statusCodeArray[getRandomInt(0,statusCodeArray.length - 1)]//config. // TODO ADD randomization
+    //status: config.statusCodes.STATUS_CODE_LATE_AIRLINE // for development to test postprocessing and insurance repay
+    status: statusCodeArray[getRandomInt(1,statusCodeArray.length - 1)]
   };
   console.log("request", request);
 /*
@@ -75,8 +76,9 @@ flightSuretyApp.events.OracleRequest({
   console.log("flight", flight);
 */
   // iterate over all registered oracles and
+  console.log("oracles (o / all)", config.oracles.count, global.accounts.length)
   for (let i = 0, len = global.accounts.length; i < len; i++ ) {
-    if(i == 5) {
+    if (i == config.oracles.count) {
       break;
     }
     try {
@@ -84,7 +86,6 @@ flightSuretyApp.events.OracleRequest({
         .submitOracleResponse(request.index, request.airline, request.name, request.timestamp, request.status)
         .send({from: global.accounts[i], gas: 2800707 });
       console.log("newOracleResponse", newOracleResponse)
-
     } catch(e) {
       console.log(e.message + " " + request.airline + " " + request.name + " " + request.timestamp);
       continue;

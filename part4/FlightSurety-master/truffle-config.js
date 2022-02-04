@@ -1,7 +1,7 @@
 var HDWalletProvider = require("truffle-hdwallet-provider"),
   mnemonic = "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat",
   infuraRinkeby = "https://rinkeby.infura.io/v3/supersecret";
-
+//const Web3 =require('web3');
 // Be sure to match this mnemonic with that in Ganache!
 module.exports = {
   networks: {
@@ -9,7 +9,12 @@ module.exports = {
       host: "127.0.0.1",     // Localhost (default: none)
       port: 7545,
       network_id: '*',
-      websockets: true
+      websockets: true,
+      /*
+      provider: function() {
+        return new Web3.providers.WebsocketProvider("ws://127.0.0.1:7545/");
+      },
+      */
       // gas cost per default 0
     },
     /*

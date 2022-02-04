@@ -81,19 +81,35 @@ router.post("/:countOracles", async (req, res)=> {
   try {
     let registeredOracles = [],
       newOracle = null;
+
+    let beforeOracleCount = await flightSuretyApp.methods
+      .oracleCount()
+      .call({from: global.accounts[0]});
+
+    beforeOracleCount = parseInt(beforeOracleCount);
+
+    console.log("beforeOracleCount", beforeOracleCount)
+
     for(let i = 0, len = global.accounts.length; i < len; i++ ) {
       if(i == numOfOraclesToRegister) {
         break;
       }
       newOracle = await flightSuretyApp.methods
         .registerOracle()
-        .send({from: global.accounts[i], value: config.fees.registrationOracle, gas: 2800707 });
+        .send({from: global.accounts[i + beforeOracleCount], value: config.fees.registrationOracle, gas: 2800707 });
       registeredOracles.push(newOracle);
     }
+    let afterOracleCount = await flightSuretyApp.methods
+      .oracleCount()
+      .call({from: global.accounts[0]});
+
+    afterOracleCount = parseInt(afterOracleCount);
+    console.log("afterOracleCount", afterOracleCount)
 
     let result = {
       "messages": "Oracles registered",
-      "count": registeredOracles.length,
+      "countbefore": beforeOracleCount,
+      "count": afterOracleCount,
       "data": registeredOracles
     }
     res.send(result);
@@ -102,7 +118,7 @@ router.post("/:countOracles", async (req, res)=> {
     return res.status(400).send(error);
   }
 
-
+  let error = null;
   // console.log("result to save", result);
   // TODO clarify this had no effect if consensus: false gets dropped...
   try {
@@ -118,18 +134,18 @@ router.post("/:countOracles", async (req, res)=> {
         .send({from: global.accounts[i], value: config.fees.registrationOracle, gas: 2800707 });
       registeredOracles.push(newOracle);
     }
-    res.send({
+     res.send({
       message: "Register oracles",
       count: registeredOracles.length,
       data: registeredOracles
     });
   }
-  catch(error) {
+  catch(err) {
+    error=err;
+  }
+  if(error) {
     return res.status(400).send(error);
   }
-
-
-
 });
 
 module.exports = router;

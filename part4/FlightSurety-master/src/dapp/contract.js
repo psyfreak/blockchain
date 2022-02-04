@@ -7,7 +7,9 @@ export default class Contract {
     constructor(network, callback) {
 
         let config = Config[network];
-        this.web3 = new Web3(new Web3.providers.HttpProvider(config.url));
+        //this.web3 = new Web3(new Web3.providers.HttpProvider(config.url));
+        // this activates websockets and therefore listen to events
+        this.web3 = new Web3(new Web3.providers.WebsocketProvider(config.url.replace('http', 'ws')));
         this.flightSuretyApp = new this.web3.eth.Contract(FlightSuretyApp.abi, config.appAddress);
         this.flightSuretyData = new this.web3.eth.Contract(FlightSuretyData.abi, config.dataAddress);
 
@@ -23,7 +25,7 @@ export default class Contract {
 
     initialize(callback) {
         this.web3.eth.getAccounts((error, accts) => {
-            this.numOfAccounts = 10;
+          this.numOfAccounts = 10;
             this.owner = accts[0];
             this.firstAirline = accts[1];
 
@@ -43,6 +45,14 @@ export default class Contract {
             while(this.passengers.length < this.numOfAccounts) {
                 this.passengers.push(accts[counter++]);
             }
+/*
+            this.flightSuretyApp.events.OracleRegistered({})
+              .on('data', async function(event){
+                  console.log(event.returnValues);
+                  // Do something here
+              })
+              .on('error', console.error);
+*/
 
             (this.flightSuretyApp.events.allEvents({
                 filter: {
@@ -64,6 +74,8 @@ export default class Contract {
               .on('error', function(error, receipt) { // If the transaction was rejected by the network with a receipt, the second parameter will be the receipt.
                   console.log(error, receipt);
               }));
+
+
             callback();
         });
 
@@ -133,6 +145,20 @@ export default class Contract {
         callback(null, pasJson)
     }
 
+    async getOracleCount(callback) {
+
+        let self = this;
+
+        let result = await self.flightSuretyApp.methods
+          .oracleCount()
+          .call({from: self.owner});
+
+        //let title = "id/isRegistered/registeredBy/status/passengers" + `${result['0'].toString()} / ${result['1'].toString()} / ${result['3'].toString()} / ${result['2'].toString()} / ${result['4']}`;
+        //`Flight (id/isRegistered/registeredBy/status/passengers): ${result['0'].toString()} / ${result['1'].toString()} / ${result['3'].toString()} / ${result['2'].toString()} / ${result['4']} `;
+        callback(null, result)
+    }
+
+
     isOperational(callback) {
        let self = this;
        self.flightSuretyData.methods
@@ -173,10 +199,11 @@ export default class Contract {
 
         let airlineJson = {
             id: result['0'].toString(),
-            isRegistered: result['1'].toString(),
-            registeredBy: result['2'].toString(),
-            investment: result['3'].toString(),
-            timestamp: new Date(result['4'] *1000).toISOString() + ' (' + result['4'].toString() + ')'
+            name: result['1'].toString(),
+            isRegistered: result['2'].toString(),
+            registeredBy: result['3'].toString(),
+            investment: result['4'].toString(),
+            timestamp: new Date(result['5'] *1000).toISOString() + ' (' + result['5'].toString() + ')'
         };
 
         callback(error, airlineJson)
@@ -186,6 +213,7 @@ export default class Contract {
         let airlines = [];
         airlines.push({
             id: "",
+            name: "",
             registered: "",
             registeredBy: "",
             investment: "",
@@ -195,7 +223,7 @@ export default class Contract {
         for(let acc of self.airlines) {
            let airline = await this.getAirline(acc)
             //airline
-            airline['4'] = new Date(airline['4']*1000).toISOString();
+            airline['5'] = new Date(airline['5']*1000).toISOString();
             airlines.push(airline);
         }
         callback(null, airlines)
@@ -205,22 +233,25 @@ export default class Contract {
         let self = this;
 
         let result,
-          error;
+          error,
+          flightJson;
         try {
             result = await self.flightSuretyData.methods
               .getFlight(flight.airline, flight.name, flight.timestamp)
               .call({from: self.owner});
+
+            flightJson = {
+                id: result['0'].toString(),
+                isRegistered: result['1'].toString(),
+                registeredBy: result['3'].toString(),
+                status: result['2'].toString(),
+                passengers: result['4'].toString()
+            };
         } catch(err) {
             error = err;
         }
 
-        let flightJson = {
-            id: result['0'].toString(),
-            isRegistered: result['1'].toString(),
-            registeredBy: result['3'].toString(),
-            status: result['2'].toString(),
-            passengers: result['4'].toString()
-        };
+
 
         //let title = "id/isRegistered/registeredBy/status/passengers" + `${result['0'].toString()} / ${result['1'].toString()} / ${result['3'].toString()} / ${result['2'].toString()} / ${result['4']}`;
           //`Flight (id/isRegistered/registeredBy/status/passengers): ${result['0'].toString()} / ${result['1'].toString()} / ${result['3'].toString()} / ${result['2'].toString()} / ${result['4']} `;
@@ -251,10 +282,15 @@ export default class Contract {
             passenger: passengerAddress
         }
 
-        let result = await self.flightSuretyData.methods
-          .balances(payload.passenger)
-          .call({from: self.owner});
-
+        let result,
+          error;
+        try {
+            result = await self.flightSuretyData.methods
+              .balances(payload.passenger)
+              .call({from: self.owner});
+        } catch(err) {
+            error = err;
+        }
         let pasJson = {
             address: payload.passenger,
             balance: result.toString()
@@ -263,11 +299,10 @@ export default class Contract {
         //let title = "id/isRegistered/registeredBy/status/passengers" + `${result['0'].toString()} / ${result['1'].toString()} / ${result['3'].toString()} / ${result['2'].toString()} / ${result['4']}`;
         //`Flight (id/isRegistered/registeredBy/status/passengers): ${result['0'].toString()} / ${result['1'].toString()} / ${result['3'].toString()} / ${result['2'].toString()} / ${result['4']} `;
 
-        callback(null, pasJson)
+        callback(error, pasJson)
     }
 
     fetchFlightStatus(flight, callback) {
-        console.log(this.airlines[0])
         let self = this;
         let payload = {
             airline: self.airlines[0],
@@ -285,15 +320,17 @@ export default class Contract {
             });
     }
 
-    registerAirline(airline, callback) {
+    registerAirline(airline, airlineName, airlineFrom, callback) {
         let self = this;
         //await config.flightSuretyApp.registerAirline(newAirline, {from: registeredAirline});
-
+        if(!airlineFrom) {
+            airlineFrom = self.firstAirline;
+        }
         //self.flightSuretyApp.methods
         let gas = 1000000;
         self.flightSuretyApp.methods
-          .registerAirline(airline)
-          .send({from: self.firstAirline, gas: gas}, (error, result) => {
+          .registerAirline(airline, airlineName)
+          .send({from: airlineFrom, gas: gas}, (error, result) => {
               //.send({from: self.firstAirline}, (error, result) => {
               callback(error, airline);
           });
@@ -375,32 +412,51 @@ export default class Contract {
         callback(error, flight)
     }
 
-    async getInsurance(flight, callback) {
+    async getInsurance(flight, passenger, callback) {
+        console.log("getInsurance", flight, passenger)
         let self = this;
 
         let result,
-          error;
+          error,
+          insuranceJson;
         try {
-            result = await self.flightSuretyData.methods
-              .getFlight(flight.airline, flight.name, flight.timestamp)
-              .call({from: self.owner});
+            result = await self.flightSuretyApp.methods
+              .getInsurance(flight.airline, flight.name, flight.timestamp)
+              .call({from: passenger});
+            console.log("result", result)
+            insuranceJson = {
+                passenger: result['0'].toString(),
+                insurance: result['1'].toString()
+            };
         } catch(err) {
             error = err;
         }
-
-        let flightJson = {
-            id: result['0'].toString(),
-            isRegistered: result['1'].toString(),
-            registeredBy: result['3'].toString(),
-            status: result['2'].toString(),
-            passengers: result['4'].toString()
-        };
-
         //let title = "id/isRegistered/registeredBy/status/passengers" + `${result['0'].toString()} / ${result['1'].toString()} / ${result['3'].toString()} / ${result['2'].toString()} / ${result['4']}`;
         //`Flight (id/isRegistered/registeredBy/status/passengers): ${result['0'].toString()} / ${result['1'].toString()} / ${result['3'].toString()} / ${result['2'].toString()} / ${result['4']} `;
 
-        callback(error, flightJson)
+        callback(error, insuranceJson)
     }
 
+    async getInfo(passenger, callback) {
+
+        let balanceApp = await this.web3.eth.getBalance(this.flightSuretyApp._address);
+        let balanceData = await this.web3.eth.getBalance(this.flightSuretyData._address);
+
+        let balanceAcc = 0;
+
+
+        if (passenger) {
+            balanceAcc = await this.web3.eth.getBalance(passenger);
+        }
+        let line1 = `Balances (App/Data/acc): ${balanceApp.toString()} / ${balanceData.toString()} / ${balanceAcc.toString()} `;
+
+        let total = await this.flightSuretyData.methods.numOfAirlines().call();
+        let registered = await this.flightSuretyData.methods.numOfRegisteredAirlines().call();
+        let funded = await this.flightSuretyData.methods.numOfFundedAirlines().call();
+        let line2 = `Airlines (total/registered/funded): ${total.toString()} / ${registered.toString()} / ${funded.toString()} `;
+
+        callback(null, line1 +line2)
+
+    }
 
 }
