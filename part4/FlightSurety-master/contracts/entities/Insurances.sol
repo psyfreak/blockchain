@@ -17,6 +17,7 @@ contract Insurances  {
     struct Insurance {
         address passenger;
         uint256 insurance;
+        bool deposited;
     }
     // mapping for passengers flight towards insurance balance / a passenger might have multiple insurances for different flights flight 1: 1 ether, flight 2: 0.6 ether etc.
     mapping(bytes32 => Insurance[]) insurances;// mapping of passenger towards Insurance Info (insurance balanace per flight)
@@ -29,8 +30,8 @@ contract Insurances  {
     /********************************************************************************************/
     /*                                       EVENT DEFINITIONS                                  */
     /********************************************************************************************/
-    event InsurancePurchased(address indexed payee, uint256 weiAmount);
-    event InsuranceDeposited(address indexed payee, uint256 weiAmount, uint256 balance);
+    event InsurancePurchased(address indexed payee, uint256 weiAmount, bool deposited);
+    event InsuranceDeposited(address indexed payee, uint256 weiAmount, uint256 balance, bool deposited);
     event InsuranceWithdrawn(address indexed payee, uint256 weiAmount, uint256 weiBalanceDataContractBefore, uint256 weiBalanceDataContractAfter);
 
     //event LogInsuranceIt(uint counter, address passenger, uint256 balance);
@@ -43,7 +44,7 @@ contract Insurances  {
         public
         view
         //requireIsPassengerOnFlight(flight, passenger)
-        returns(address, uint256)
+        returns(address, uint256, bool)
     {
         uint len = insurances[flightKey].length;
         //TODO add modifier
@@ -54,24 +55,23 @@ contract Insurances  {
                 if(insurances[flightKey][i].passenger == passenger) {
                     return (
                         insurances[flightKey][i].passenger,
-                        insurances[flightKey][i].insurance
+                        insurances[flightKey][i].insurance,
+                        insurances[flightKey][i].deposited
                     );
                 }
             }
         }
-        return  (address(0),0);
+        return  (address(0),0, false);
     }
 
     function getInsurance (address airline, string calldata flight, uint256 timestamp, address passenger)
     public
     view
-    returns(address, uint256)
+    returns(address, uint256, bool)
     {
         bytes32 flightKey = Util.getFlightKey(airline, flight, timestamp);
         return getInsuranceByKey(flightKey, passenger);
     }
-
-
 
     function isPassengerInsuredByKey (bytes32 flight, address passenger)
         public
@@ -99,23 +99,10 @@ contract Insurances  {
                 break;
             }
         }
-        /*
-        for(uint i=0; i<insurances[flight].length; i++) {
-            emit LogInsuranceIt(i, insurances[flight][i].passenger, insurances[flight][i].insurance);
-            // if passenger on the list and insurance is greater than 0
-            if(
-                insurances[flight][i].insurance > 0 &&
-                (insurances[flight][i].passenger == passenger)
-            ) {
-                found = true;
-                break;
-            }
-        }
-        */
         return found;
     }
 
-    function isPassengerInsured (address airline, string calldata flight, uint256 timestamp, address passenger)
+    function isPassengerInsured(address airline, string calldata flight, uint256 timestamp, address passenger)
         public
         view
         returns(bool)

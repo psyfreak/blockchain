@@ -142,7 +142,7 @@ contract('Flight Surety - Passengers', async (accounts) => {
     catch(e) {
       //console.log("error registerFlight", e)
       fail= true;
-      console.log(e)
+      console.log("\t\terror", e);
     }
     assert.equal(fail, false, "Error in book flight.");
 
@@ -193,7 +193,7 @@ contract('Flight Surety - Passengers', async (accounts) => {
     catch(e) {
       //console.log("error registerFlight", e)
       fail= true;
-      console.log(e)
+      console.log("\t\terror", e)
     }
     assert.equal(fail, false, "Error in book flight.");
 
@@ -228,11 +228,11 @@ contract('Flight Surety - Passengers', async (accounts) => {
     Util.helper.printPassenger(config, passengerOnBoard);
 
     let retInsurance = await config.flightSuretyData.getInsurance.call(airline, FLIGHT_NAME, FLIGHT_timestamp, passengerOnBoard);
-    console.log("retInsurance", retInsurance);
+    console.log("\t\tretInsurance", retInsurance);
+    assert.equal(retInsurance['2'], false, "Insurance was already deposited.");
     //assert.equal(retInsurance, 0, "Passenger is still insured.");
     let isInsured = await config.flightSuretyData.isPassengerInsured.call(airline, FLIGHT_NAME, FLIGHT_timestamp, passengerOnBoard);
     assert.equal(isInsured, true, "Passenger is not insured.");
-
 
     try {
       // normally fct. is internal, but for testing purpose
@@ -240,18 +240,18 @@ contract('Flight Surety - Passengers', async (accounts) => {
       //await config.flightSuretyApp.processFlightStatus(airline, FLIGHT_NAME, FLIGHT_timestamp, 10, {from: passengerOnBoard, value: 1000});
     }
     catch(e) {
-      console.log("error processFlightStatus", e)
+      console.log("\t\terror processFlightStatus", e)
       fail= true;
       //console.log(e)
     }
     assert.equal(fail, false, "Error in processFlightStatus");
 
     retInsurance = await config.flightSuretyData.getInsurance.call(airline, FLIGHT_NAME, FLIGHT_timestamp, passengerOnBoard);
-    //assert.equal(retInsurance.toString(), 0, "Passenger is still insured.");
-    console.log("getInsurance", retInsurance);
+    console.log("\t\tgetInsurance", retInsurance);
+    assert.equal(retInsurance['2'], true, "Insurance was deposited.");
 
     isInsured = await config.flightSuretyData.isPassengerInsured.call(airline, FLIGHT_NAME, FLIGHT_timestamp, passengerOnBoard);
-    assert.equal(isInsured, false, "Passenger is still insured.");
+    assert.equal(isInsured, true, "Passenger is not insured.");
 
     Util.helper.printPassenger(config, passengerOnBoard);
 
@@ -273,7 +273,7 @@ contract('Flight Surety - Passengers', async (accounts) => {
       //await config.flightSuretyApp.processFlightStatus(airline, FLIGHT_NAME, FLIGHT_timestamp, 10, {from: passengerOnBoard, value: 1000});
     }
     catch(e) {
-      console.log("error withdraw", e)
+      console.log("\t\tgerror withdraw", e)
       fail= true;
       //console.log(e)
     }

@@ -3,6 +3,7 @@ pragma solidity ^0.8;
 
 import "../node_modules/openzeppelin-solidity/contracts/utils/math/SafeMath.sol";
 import "../node_modules/openzeppelin-solidity/contracts/access/Ownable.sol";
+import "../node_modules/openzeppelin-solidity/contracts/security/ReentrancyGuard.sol";
 
 import {Util} from "./base/Util.sol";
 import "./base/Mortal.sol";
@@ -20,7 +21,7 @@ import "./entities/Insurances.sol";
  add open zeppelin access
 */
 
-contract FlightSuretyData is Ownable, Mortal, Authentication, Airlines, Flights, Passengers, Insurances {
+contract FlightSuretyData is Ownable, Mortal, ReentrancyGuard, Authentication, Airlines, Flights, Passengers, Insurances {
     using SafeMath for uint256;
 
     //Result is 2, all integer divison rounds DOWN to the nearest integer
@@ -329,8 +330,9 @@ contract FlightSuretyData is Ownable, Mortal, Authentication, Airlines, Flights,
         }
         */
         //TODO check: payable and then use msg.value?!
-        insurances[flightKey].push(Insurance({passenger: passenger, insurance: value}));
-        emit InsurancePurchased(passenger, value);
+        bool deposited = false;
+        insurances[flightKey].push(Insurance({passenger: passenger, insurance: value, deposited: deposited}));
+        emit InsurancePurchased(passenger, value, deposited);
         emit BalanceChanged(address(msg.sender).balance, address(this).balance);
         //     event PurchasedOrigin(address indexed payee, uint256 weiAmount, uint256 balance);
         //emit PurchasedOrigin(msg.sender, msg.value, address(this).balance);
@@ -354,11 +356,6 @@ contract FlightSuretyData is Ownable, Mortal, Authentication, Airlines, Flights,
         requireIsOperational
         requireIsCallerAuthorized
     {
-        // calculate the credit (1.5 insurance fee)
-        // iterate over all passengers for this flight with
-        //bytes32 flightKey = Util.getFlightKey(airline, flight, timestamp);
-        // iterate over flight insurance array and calculate
-
         /*
         // error memory / storage issue
         Insurance[] memory insuranceArray =  insurances[flightKey];
@@ -368,23 +365,27 @@ contract FlightSuretyData is Ownable, Mortal, Authentication, Airlines, Flights,
             balances[passenger] += newBalance;
         }
         */
-
+        // iterate over flight insurance array and calculate the return (1.5 insurance fee)
         for(uint i=0; i<insurances[flightKey].length; i++) {
             uint256 payout = Util.getRoI(insurances[flightKey][i].insurance, ROI_NOMINATOR, ROI_DENOMINATOR);
             address passenger = insurances[flightKey][i].passenger;
+            insurances[flightKey][i].deposited = true;
             balances[passenger] = balances[passenger].add(payout);
-            emit InsuranceDeposited(passenger, payout, balances[passenger]);
+            emit InsuranceDeposited(passenger, payout, balances[passenger], insurances[flightKey][i].deposited);
         }
-        delete insurances[flightKey];
-        //insurances[flightKey].length = 0;// = new Insurance[](0);
-        // emit event to tell how many passenger investment + payout
 
+        //delete insurances after crediting /currently inconsistent because non credited insurance lists remains
+        //delete insurances[flightKey];
+
+        //insurances[flightKey].length = 0;// = new Insurance[](0);
+        //TODO emit event to tell how many passenger investment + payout
     }
 
     function withdrawInsuree(address insuree)
         external
         requireIsOperational
         requireIsCallerAuthorized
+        nonReentrant
     {
         uint256 currentBalance = address(this).balance;
         uint256 payout = balances[insuree];
@@ -439,9 +440,9 @@ contract FlightSuretyData is Ownable, Mortal, Authentication, Airlines, Flights,
     * @return A bool that is the current operating status
     */
     function isOperational()
-    public
-    view
-    returns(bool)
+        public
+        view
+        returns(bool)
     {
         return operational;
     }
@@ -492,8 +493,5 @@ contract FlightSuretyData is Ownable, Mortal, Authentication, Airlines, Flights,
             payable(msg.sender).transfer(msg.value - _amount);
         }
     }
-
-
-
 }
 

@@ -80,8 +80,10 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
     */   
     function registerAirline(address newAirline, string calldata name)
         external
-        //requireIsAirlineAuthorized(msg.sender)
+        requireIsOperational
+        onlyEOA
         requireIsAirlineRegistered(msg.sender)
+        //requireIsAirlineAuthorized(msg.sender)// in the case only funded airlines are allowed to register another one
         //TODO can only be called by authoirzedCallers
         //one should trigger an event ... returns(bool success, uint256 votes)
     {
@@ -121,6 +123,8 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
     function fundAirline ( )
         external
         payable
+        requireIsOperational
+        onlyEOA
         requireIsAirlineRegistered(msg.sender)
         //IsFeeSufficientChangeBack(AIRLINE_REGISTRATION_FEE) =>
     {
@@ -137,6 +141,8 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
     */  
     function registerFlight( string calldata flight, uint256 timestamp)
         external
+        requireIsOperational
+        onlyEOA
         requireIsAirlineAuthorized(msg.sender)
     {
         bytes32 flightKey = Util.getFlightKey(msg.sender, flight, timestamp);
@@ -151,6 +157,7 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
         external
         payable
         requireIsOperational
+        onlyEOA
     {
         bytes32 flightKey = Util.getFlightKey(airline, flight, timestamp);
         // check if flight is existing
@@ -162,6 +169,7 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
         external
         payable
         requireIsOperational
+        onlyEOA
         requireIsPassengerNotInsured(airline, flight, timestamp, msg.sender)
         Cap(flightSuretyData.MAX_INSURANCE_FEE())
     {
@@ -183,6 +191,7 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
     function withdraw()
         external
         requireIsOperational
+        onlyEOA
         requireHasSufficientFunds(msg.sender)
     {
         flightSuretyData.withdrawInsuree(msg.sender);
@@ -212,12 +221,12 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
 
     // Register an oracle with the contract
     /// Every oracles response to 3 random generated indices
-    function registerOracle
-    (
-    )
-    external
-    payable
-    IsFeeSufficientChangeBack(ORACLE_REGISTRATION_FEE)
+    function registerOracle()
+        external
+        payable
+        requireIsOperational
+        onlyEOA
+        IsFeeSufficientChangeBack(ORACLE_REGISTRATION_FEE)
     {
         // check if already registered
         require(!oracles[msg.sender].isRegistered, "Oracle is already registered");
@@ -254,7 +263,8 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
         uint256 timestamp,
         uint8 statusCode
     )
-    external
+        external
+        requireIsOperational
     {
         require(flightSuretyData.isFlightRegistered(airline, flight, timestamp), "Flight is not registered yet");
 
@@ -289,6 +299,7 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
     // Triggered by button click in UI
     function fetchFlightStatus( address airline, string calldata flight, uint256 timestamp, uint8 indexPredefined)
         external
+        requireIsOperational
         //TODO by anyone?
     {
         require(flightSuretyData.isFlightRegistered(airline, flight, timestamp), "Flight is not registered yet");
@@ -325,6 +336,7 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
     */
     function processFlightStatus(address airline, string calldata flight, uint256 timestamp, uint8 statusCode)
         //internal
+        requireIsOperational
         public
     {
         bytes32 flightKey = Util.getFlightKey (airline, flight, timestamp);
@@ -430,12 +442,11 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
     function getInsurance (address airline, string calldata flight, uint256 timestamp)
         public
         view
-        returns(address, uint256)
+        returns(address, uint256, bool)
     {
         return flightSuretyData.getInsurance(airline, flight, timestamp, msg.sender);
     }
 
-    //function getAirlineByAddress (address airline)
     function getAirline (address airline)
         public
         view
@@ -448,7 +459,6 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
             uint256
         )
     {
-
         return flightSuretyData.getAirline(airline);
     }
 

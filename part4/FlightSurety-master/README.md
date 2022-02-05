@@ -1,15 +1,7 @@
 # FlightSurety
 ## TODO 
-- add airline name
+
 - passenger info i.e. insurances + payment open or not
-- getBalances
-- getOracleInfo (server)
-- UI
-    3) Passengers can choose from a fixed list of flight numbers and departures that are defined in the Dapp client
-    Your UI implementation should include:
-        Fields for Airline Address and Airline Name
-        Amount of funds to send/which airline to send to
-        Ability to purchase flight insurance for no more than 1 ether
 
 https://ethereum.stackexchange.com/questions/12920/what-does-the-keyword-super-in-solidity-do
 https://ethereum.stackexchange.com/questions/93701/security-implementation-of-a-function-in-solidity
@@ -29,6 +21,7 @@ https://ethereum.stackexchange.com/questions/93701/security-implementation-of-a-
   - oracles registration fee wei to ether 
   - max insurance payment
   - airline initial funding in all caps and bottoms etc.
+
 
 - https://jsfiddle.net/Alorel/5h6ztc4r/ console to 
 
@@ -52,18 +45,30 @@ https://medium.com/quillhash/how-to-write-upgradable-smart-contracts-in-solidity
    1. Status is fine (airlines hold money)
    2. Status is delayed (passengers get payout - iterate over passengers)
       and add insurance * 1.5 to balance (increment existing amount)
-      
+   
 3.     
  
 ## Remarks + Questions
 ### Remarks
-- Changed Dapp
-- Provide server routes to register orcales + get Indices (dev)
-- Identification of a flight
+- Code old version. It took very long to update everything.
+- Requirements are not 100% clear. 
+- UI requirements not fully clear. I did not implement all UI guidelines, though they are essential for a final product.
+  The development took way too long i.e. in comparison to the other projects. For example you could get rid of the timing. 
+
+- I extend the DAPP + Server in some ways:
+   - add some routes to the server i.e. to register oracles and to see  (good idea to )
+- Provide server routes to register orcales + get Indices (for dev only)
+- Predefined indices to easily test oracles functions.
+- Change logging in DAPP
+- Websocket + Events - for the dapp it is needed, that one connects via Websockets.
+- Register airline has one additional parameter for name, which is only used at creation time, while it has no usage when you call register for voting
+- add refunding possibility.
+
 
 * Which contract should hold the money. Data contract is permanent (i.e. with immortal key-value store), but additional transfers etc. more gas costs
   Similar to data contract split in general I assume.
-
+* Delegate calls better then normal calls? i.e. to avoid an additional parameter for the prev. msg.sender when another 
+* TX.origin
 * Registered airlines means only registerd = true but not neccessarily funded.
   Only registered airlines can register other airlines.
   Only funded airlines though can either register flights and therefore play in the in insurance game.
@@ -101,6 +106,8 @@ The second example I like in terms of transactionId and the anonimity..
 - Msg.sender change Contract A call Contract B (in contract b msg.sender is contract A and tx.origin is the original msg.sender of contract A, 
   but what happens if the function in contract B calls another function in contract B (I assume the msg.sender remains (=contract A)))
   Am I right?
+- require Operational in app and data? imo the most secure and efficient variant  
+-Is it better to return empty object/struct or throwing an error 
 
 ### Deployment 
 - initialization of airline can be done in deployment script, in contract ctor or via init function.
@@ -159,6 +166,8 @@ Please update the following libraries before useage
 - Fixing this article to fix node-gyp issues https://spin.atomicobject.com/2019/03/27/node-gyp-windows/ on Windows.  
 - Dapp change webpack-dev-server to webpack serve https://stackoverflow.com/questions/40379139/cannot-find-module-webpack-bin-config-yargs/41182205
   "webpack serve --config config/webpack.dev.js --progress"
+
+
 ## Develop Client
 
 To run truffle tests:
@@ -187,9 +196,7 @@ To build dapp for prod:
 
 Deploy the contents of the ./dapp folder
 
-
 ## Resources
-
 * [How does Ethereum work anyway?](https://medium.com/@preethikasireddy/how-does-ethereum-work-anyway-22d1df506369)
 * [BIP39 Mnemonic Generator](https://iancoleman.io/bip39/)
 * [Truffle Framework](http://truffleframework.com/)

@@ -33,8 +33,17 @@ const util = {
     console.log(`\t\tPassenger (payout/): ${payout.toString()} / `)
   },
   printAirline: async function(config, airlineAddress) {
-    let result = await config.flightSuretyApp.getAirline.call(airlineAddress);
-    console.log(`\t\tAirlines (id/name/isRegistered/registeredBy/investment/timestamp): ${result['0'].toString()} / ${result['1'].toString()} / ${result['2'].toString()} / ${result['3'].toString()} /  ${result['4'].toString()} / ${new Date(result['5'].toString()*1000)} `)
+    let result,
+      error;
+    try {
+      result = await config.flightSuretyApp.getAirline.call(airlineAddress);
+    } catch(e){
+      console.log("\t\terror printAirline", airlineAddress, e.message)
+      error = e;
+    }
+    if(!error) {
+      console.log(`\t\tAirlines (id / name / isRegistered / registeredBy / investment / timestamp): ${result['0'].toString()} / ${result['1'].toString()} / ${result['2'].toString()} / ${result['3'].toString()} /  ${result['4'].toString()} / ${new Date(result['5'].toString()*1000)} `)
+    }
   },
   printAllAirlines: async function(config, accounts) {
     for(let acc of accounts) {
@@ -43,7 +52,7 @@ const util = {
   },
   printFlight: async function(config, airlineAddress, flightName, departure) {
     let result = await config.flightSuretyData.getFlight.call(airlineAddress, flightName, departure);
-    console.log(`\t\tFlight (id/isRegistered/registeredBy/status/passengers): ${result['0'].toString()} / ${result['1'].toString()} / ${result['3'].toString()} / ${result['2'].toString()} / ${result['4']} `)
+    console.log(`\t\tFlight (id / isRegistered / registeredBy / status / passengers): ${result['0'].toString()} / ${result['1'].toString()} / ${result['3'].toString()} / ${result['2'].toString()} / ${result['4']} `)
   },
   printAllFlights: async function(config) {
     for(let acc of accounts) {
@@ -57,9 +66,8 @@ const util = {
     const FLIGHT_timestamp = config.flights[0].departure;
 
     for(let acc of accounts) {
-
       let result = await config.flightSuretyData.getFlight.call(accounts[1], FLIGHT_NAME, FLIGHT_timestamp);
-      console.log("allAirlines", result);
+      console.log("passenger", result);
       //console.log(`\t\tAirlines (id/isRegistered/registeredBy/investment/timestamp): ${result['0'].toString()} / ${result['1'].toString()} / ${result['2'].toString()} / ${result['3'].toString()} / ${new Date(result['4'].toString()*1000)} `)
     }
   },
