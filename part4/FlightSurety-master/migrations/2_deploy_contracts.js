@@ -29,20 +29,22 @@ module.exports = async function(deployer, network, accounts) {
       appAddress: FlightSuretyApp.address
     },
     oracles: {
-      count: 20
+      count: 20,
+      predefinedIndex: 20,
+      randomPerOracle: false,
+      statusCodes: {
+        STATUS_CODE_UNKNOWN: 0,
+        STATUS_CODE_ON_TIME: 10,
+        STATUS_CODE_LATE_AIRLINE: 20, // => payment process gets triggered
+        STATUS_CODE_LATE_WEATHER: 30,
+        STATUS_CODE_LATE_TECHNICAL: 40,
+        STATUS_CODE_LATE_OTHER: 50
+      }
     },
     fees: {
       registrationOracle: 10,
       registrationAirline: 10,
       capInsurance: 15
-    },
-    statusCodes: {
-      STATUS_CODE_UNKNOWN: 0,
-      STATUS_CODE_ON_TIME: 10,
-      STATUS_CODE_LATE_AIRLINE: 20, // => payment process gets triggered
-      STATUS_CODE_LATE_WEATHER: 30,
-      STATUS_CODE_LATE_TECHNICAL: 40,
-      STATUS_CODE_LATE_OTHER: 50
     },
     airlines: [
       {

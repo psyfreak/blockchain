@@ -265,6 +265,7 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
     )
         external
         requireIsOperational
+        requireIsRegisteredOracle
     {
         require(flightSuretyData.isFlightRegistered(airline, flight, timestamp), "Flight is not registered yet");
 

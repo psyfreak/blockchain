@@ -48,6 +48,10 @@ https://medium.com/quillhash/how-to-write-upgradable-smart-contracts-in-solidity
    
 3.     
  
+## Issues
+I had the same issue and on my side the reason was, that I used webpack and it seems that when you rebuild that the previous event listeners are still subscribed.
+I could reproduce this by getting one duplicate more, when I trigger a rebuild. 
+ 
 ## Remarks + Questions
 ### Remarks
 - Code old version. It took very long to update everything.
@@ -77,7 +81,9 @@ https://medium.com/quillhash/how-to-write-upgradable-smart-contracts-in-solidity
 * All money is hold within the data contract, which is sth. I am not sure about i.e. about increasing gas costs.
 Furthermore one needs to transfer the money, when data contract gets updated. I think it might be better to hold the ether in the app contract.
 * One particular flight can be identified by airline, flight, and timestamp      
-
+- fetchFlightStatus:Should the status still fetchted if the flight has already a status and was processed?
+    For testing purpose it might be good, but for prod not right. I.e.the open is set again to true.
+    
 * createInsurance (better set this fct. payable or extra msg. value and work with app payable and transfer function?)
 - withDraw in data contract ?!??!?!
 - TX.origin or msg.sender as parameter in contract to contract transfers (imo if data contract can only be called by app contract, then use of tx.origin would be fine

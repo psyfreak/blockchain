@@ -425,7 +425,8 @@ export default class Contract {
             console.log("result", result)
             insuranceJson = {
                 passenger: result['0'].toString(),
-                insurance: result['1'].toString()
+                insurance: result['1'].toString(),
+                deposited: result['2'].toString()
             };
         } catch(err) {
             error = err;
