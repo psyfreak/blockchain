@@ -48,7 +48,6 @@ import Config from './config.json';
                 console.log("getOracleCount", result);
                 display('Oracles', '#Count', [ { label: 'Get Oracles count', error: error, value: result} ]);
             });
-
         });
 
 
@@ -90,8 +89,9 @@ import Config from './config.json';
 
             // Write transaction
             contract.getAirline(airline, (error, result) => {
-                console.log("getAirline", result);
-                display('Airline', '#Details ' + result.id, [ { label: 'Get Airline', error: error, value: result} ]);
+                console.log("getAirline", error, result);
+
+                display('Airline', '#Details ', [ { label: 'Get Airline', error: error, value: result} ]);
             });
             /*
             contract.getAirline(1,(error, result) => {
@@ -104,9 +104,8 @@ import Config from './config.json';
         DOM.elid('submit-fetchAllAirlines').addEventListener('click', () => {
             contract.getAllAirlines((error, result) => {
                 console.log(error,result);
-                display('Airline', 'All Airlines (' + contract.numOfAccounts + ')' , [ { label: 'Airlines', error: error, value: result} ]);
-                console.log("result", result);
-                constructTable(result,'#table')
+                display('Airline', 'All Airlines (' + result.length-1 + ')' , [ { label: 'Airlines', error: error, value: result} ]);
+                //constructTable(result,'#table')
             });
         })
 
@@ -189,8 +188,25 @@ import Config from './config.json';
             });
         })
 
+        DOM.elid('submit-addFlight').addEventListener('click', () => {
+            let flightName = DOM.elid('flight-name').value;
+            let flightTimestamp = DOM.elid('flight-timestamp').value;
+            let airlineObj = getAirlineObj('airlines-selector-flight');
 
-
+            let newFlight = 		{
+                "airline": airlineObj.airline,
+                "name": flightName,
+                "departure": flightTimestamp
+            }
+            let addAirline = confirm("Add airline " + JSON.stringify(newFlight));
+            if(addAirline) {
+                let ddl = DOM.elid("flights-selector");
+                let option = document.createElement("OPTION");
+                option.innerHTML = genReadableFlight(newFlight);//JSON.stringify(flight);
+                option.value = newFlight.airline + "|" + newFlight.name + "|" + newFlight.departure;
+                ddl.options.add(option);
+            }
+        })
     });
 
 })();
@@ -220,6 +236,15 @@ function initializeUI(contract) {
         option.value = airline.airline + "|" + airline.name;
         ddl.options.add(option);
     }
+    ddl = DOM.elid("airlines-selector-flight");
+    for(let airline of Config.airlines) {
+        let option = document.createElement("OPTION");
+        option.innerHTML = airline.name + ' (' + genReadableAddress(airline.airline) + ')'
+        option.value = airline.airline + "|" + airline.name;
+        ddl.options.add(option);
+    }
+
+
 
     ddl = DOM.elid("passengers-selector");
     for(let passenger of contract.passengers) {

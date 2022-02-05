@@ -72,10 +72,10 @@ contract('Flight Surety - Passengers', async (accounts) => {
   /* Operations and Settings                                                              */
   /****************************************************************************************/
 
-  it(`getAirlineByAddress`, async function () {
+  it(`getAirline`, async function () {
     // Get operating status
-    //let result = await config.flightSuretyData.getAirlineByAddress.call(config.firstAirline);
-    //console.log("getAirlineByAddress", result['3'].toString())
+    //let result = await config.flightSuretyData.getAirline.call(config.firstAirline);
+    //console.log("getAirline", result['3'].toString())
     await Util.helper.printAirline(config,config.firstAirline )
     //assert.equal(status, true, "Incorrect initial operating status value");
   });

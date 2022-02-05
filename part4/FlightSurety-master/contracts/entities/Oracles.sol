@@ -20,9 +20,9 @@ contract Oracles  {
     uint8 internal constant STATUS_CODE_LATE_OTHER = 50;
 
     // Fee to be paid when registering oracle
-    uint256 public constant ORACLE_REGISTRATION_FEE = 10 wei; //1 ether;
+    uint256 public constant ORACLE_REGISTRATION_FEE = 10 wei; //10 wei; //ether;
     // Number of oracles that must respond for valid status
-    uint256 internal constant MIN_RESPONSES = 1; // should be 3
+    uint256 internal constant MIN_RESPONSES = 3; // should be 3
 
     struct Oracle {
         bool isRegistered;

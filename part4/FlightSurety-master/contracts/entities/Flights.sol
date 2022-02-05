@@ -44,6 +44,21 @@ contract Flights  {
         )
     {
         bytes32 flightKey = Util.getFlightKey(airline, flight, timestamp);
+        return getFlightByKey(flightKey);
+    }
+
+    function getFlightByKey (bytes32 flightKey)
+        public
+        view
+        requireIsFlightExisting(flightKey)
+        returns(
+            uint256 ,
+            bool,
+            uint8,
+            address,
+            address[] memory
+        )
+    {
         return (flights[flightKey].id, flights[flightKey].isRegistered, flights[flightKey].status, flights[flightKey].registeredBy, flights[flightKey].passengers);
     }
 
@@ -78,7 +93,7 @@ contract Flights  {
     /********************************************************************************************/
     modifier requireIsFlightExisting(bytes32 flightKey)
     {
-        require(isFlightRegisteredByKey(flightKey), "Flight is not existing.");
+        require(isFlightRegisteredByKey(flightKey), "Flight does not exist.");
         _;
     }
 

@@ -46,7 +46,7 @@ contract('Flight Surety - Airlines', async (accounts) => {
   /* Operations and Settings                                                              */
   /****************************************************************************************/
 
-  it(`getAirlineByAddress`, async function () {
+  it(`getAirline`, async function () {
 
      // Get operating status
     await Util.helper.printAirline(config,config.firstAirline);
@@ -121,7 +121,7 @@ contract('Flight Surety - Airlines', async (accounts) => {
     result = await config.flightSuretyData.isAirlineRegistered.call(newAirline);
     assert.equal(result, true, "Airline is not registered");
     await Util.helper.printAirline(config, newAirline);
-    //console.log("getAirlineByAddress", result)
+    //console.log("getAirline", result)
     // ASSERT
     //assert.equal(fail, true, "Airline should not be able to register another airline if it hasn't provided funding");
 
@@ -160,7 +160,7 @@ contract('Flight Surety - Airlines', async (accounts) => {
 
     await Util.helper.printAirline(config, newAirline);
 
-    //console.log("getAirlineByAddress ", result)
+    //console.log("getAirline ", result)
   });
 
 

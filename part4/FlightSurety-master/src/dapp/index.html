@@ -29,39 +29,23 @@
     6. Fetch Flight-Status of selected flight
     7. Show balances
 -->
-    <h4>Tests + Checks</h4>
-    initializeTestSetup
-    <div class="row top-20 mb-4">
-        <div class="col-sm-12">
-
-            <div class="btn-group" role="group" aria-label="Basic example">
-               <!--
-                <button id="submit-initTestsetup" type="button" class="btn btn-secondary" title="Register flight and book passenger + insurance for this flight">Init Testsetup</button>
-                -->
-                <div class="btn-group" role="group" aria-label="Basic example">
-                    <btn class="btn btn-secondary" id="submit-fetchAllAirlines">getAllAirlines</btn>
-                </div>
-                <div class="btn-group" role="group" aria-label="Basic example">
-                    <btn class="btn btn-secondary disabled" id="submit-fetchBalances">getBalances</btn>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <h4>Oracles + Airlines</h4>
     <div class="row top-20 mb-4">
         <div class="col-sm-12 col-md-6">
 
             <label class="form">Oracles</label>
+            <!--
             <select id="oracles-selector" class="form-control disabled">
                 <option disabled>Select oracle</option>
             </select>
+            -->
             <div class="btn-group" role="group" aria-label="Basic example">
-                <btn class="btn btn-primary" id="submit-registerAllOracles">Register all oracles</btn>
-                <btn class="btn btn-primary disabled" id="submit-oracle">Register Oracle</btn>
-                <btn class="btn btn-primary disabled" id="submit-getOracle">Get Oracle</btn>
+                <btn class="btn btn-primary" id="submit-registerAllOracles">Register</btn>
                 <btn class="btn btn-primary" id="submit-getOracleCount">getOracleCount</btn>
-
+                <!--
+                <btn class="btn btn-primary disabled" id="submit-oracle">Register one</btn>
+                <btn class="btn btn-primary disabled" id="submit-getOracle">Get</btn>
+                -->
             </div>
         </div>
         <div class="col-sm-12 col-md-6">
@@ -82,7 +66,8 @@
             <div class="btn-group" role="group" aria-label="AirlineGroup">
                 <btn class="btn btn-primary" id="submit-registerAirline">Register</btn>
                 <btn class="btn btn-primary" id="submit-fundAirline">Fund</btn>
-                <btn class="btn btn-primary" id="submit-getAirline">getAirline</btn>
+                <btn class="btn btn-primary" id="submit-getAirline">Details</btn>
+                <btn class="btn btn-primary" id="submit-fetchAllAirlines">List all airlines</btn>
             </div>
 
         </div>
@@ -96,10 +81,11 @@
                 <option disabled>Select flight</option>
             </select>
             <div class="btn-group" role="group" aria-label="Basic example">
-                <btn class="btn btn-primary" id="submit-registerFlight">registerFlight</btn>
-                <btn class="btn btn-primary" id="submit-getFlight">getFlight</btn>
+                <btn class="btn btn-primary" id="submit-registerFlight">Register</btn>
+                <btn class="btn btn-primary" id="submit-getFlight">Details</btn>
                 <btn class="btn btn-primary" id="submit-fetchFlightStatus">fetchFlightStatus</btn>
             </div>
+
 
         </div>
         <div class="col-sm-12 col-md-6">
@@ -108,7 +94,7 @@
                 <option disabled>Select passenger</option>
             </select>
             <div class="btn-group" role="group" aria-label="Basic example">
-                <btn class="btn btn-primary" id="submit-getPassenger">getPassenger</btn>
+                <btn class="btn btn-primary" id="submit-getPassenger">Payout</btn>
                 <btn class="btn btn-primary" id="submit-bookFlight">bookFlight</btn>
                 <btn class="btn btn-primary" id="submit-purchaseInsurance">purchaseInsurance</btn>
                 <btn class="btn btn-primary" id="submit-getInsurance">getInsurance</btn>
@@ -117,6 +103,22 @@
 
         </div>
     </div>
+    <div class="row top-20 mb-4">
+        <div class="col-sm-12 col-md-6">
+            Add flight to listbox (only temporarily):<br>
+            <label for="airlines-selector-flight" class="form">Airline</label>
+            <select id="airlines-selector-flight" class="form-control">
+                <option disabled>Select airline</option>
+            </select>
+            <label class="form">Name</label>
+            <input id="flight-name" class="form-control">
+            <label class="form">timestamp</label>
+            <input id="flight-timestamp" class="form-control disabled" value="1644011230">
+            <btn class="btn btn-primary" id="submit-addFlight">addFlight</btn>
+        </div>
+    </div>
+
+
 
     <table align = "center"
            id="table" border="1">

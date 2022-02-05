@@ -168,44 +168,41 @@ export default class Contract {
 
     async printAirline(airlineIndex, callback) {
         let self = this;
-        self.flightSuretyData.methods
-          //.getAirlineByAddress(self.firstAirline)
-          .getAirlineByAddress(self.airlines[airlineIndex])
+        self.flightSuretyApp.methods
+          .getAirline(self.airlines[airlineIndex])
           .call({from: self.owner}, callback);
     }
     async getAirline(airlineAddress, callback) {
         let self = this;
         /*
         self.flightSuretyData.methods
-          //.getAirlineByAddress(self.firstAirline)
           .getAirlineByAddress(self.airlines[airlineIndex])
           .call({from: self.owner}, callback);
         */
 
         let result,
-          error;
+          error,
+          airlineJson;
         try {
-            result = await self.flightSuretyData.methods
-              //.getAirlineByAddress(self.firstAirline)
-              .getAirlineByAddress(airlineAddress)
+            result = await self.flightSuretyApp.methods
+              .getAirline(airlineAddress)
               .call({from: self.owner});
+
+            airlineJson = {
+                id: result['0'].toString(),
+                name: result['1'].toString(),
+                isRegistered: result['2'].toString(),
+                registeredBy: result['3'].toString(),
+                investment: result['4'].toString(),
+                timestamp: new Date(result['5'] *1000).toISOString() + ' (' + result['5'].toString() + ')'
+            };
+
         } catch(err) {
             error = err;
         }
-
-        if(callback == null) {
-            return result;
+        if(!callback) {
+            return airlineJson;
         }
-
-        let airlineJson = {
-            id: result['0'].toString(),
-            name: result['1'].toString(),
-            isRegistered: result['2'].toString(),
-            registeredBy: result['3'].toString(),
-            investment: result['4'].toString(),
-            timestamp: new Date(result['5'] *1000).toISOString() + ' (' + result['5'].toString() + ')'
-        };
-
         callback(error, airlineJson)
     }
     async getAllAirlines(callback) {
@@ -222,9 +219,11 @@ export default class Contract {
 
         for(let acc of self.airlines) {
            let airline = await this.getAirline(acc)
-            //airline
-            airline['5'] = new Date(airline['5']*1000).toISOString();
-            airlines.push(airline);
+            console.log("airline", airline)
+            if(airline) {
+                //airline['5'] = new Date(airline['5']*1000).toISOString();
+                airlines.push(airline);
+            }
         }
         callback(null, airlines)
     }

@@ -37,9 +37,10 @@ contract Airlines  {
     /********************************************************************************************/
     /*                                       UTILITY FUNCTIONS                                  */
     /********************************************************************************************/
-    function getAirlineByAddress (address airline)
+    function getAirline (address airline)
         public
         view
+        requireIsAirlineExisting(airline)
         returns(
             uint256,
             string memory name,
