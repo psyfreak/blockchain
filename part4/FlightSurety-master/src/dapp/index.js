@@ -123,7 +123,7 @@ import Config from './config.json';
         DOM.elid('submit-getFlight').addEventListener('click', () => {
             let flightObj = getFlightObj();
             contract.getFlight(flightObj, (error, result) => {
-                display('Flight', 'getFlight  (' + JSON.stringify(contract.firstFlight) + ')' , [ { label: 'Flight', error: error, value: result} ]);
+                display('Flight', 'getFlight  (' + flightObj.name + ' at: ' + new Date(flightObj.timestamp*1000).toISOString() + ')' , [ { label: 'Flight', error: error, value: result} ]);
             });
         })
 

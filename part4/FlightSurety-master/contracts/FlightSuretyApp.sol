@@ -521,7 +521,7 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
     **/
     modifier requireIsAirlineAuthorized(address airline)
     {
-        require(flightSuretyData.isAirlineFunded(airline), "Airline is not authorized");
+        require(flightSuretyData.isAirlineFunded(airline), "Airline is not authorized/funded yet");
         _;
     }
 
