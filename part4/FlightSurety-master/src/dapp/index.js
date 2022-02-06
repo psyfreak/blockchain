@@ -10,6 +10,9 @@ let Toast;
 
 (async() => {
 
+    initEventLogger();
+
+
     let result = null;
 
     Toast = Swal.mixin({
@@ -44,6 +47,7 @@ let Toast;
         // User-submitted transaction
         DOM.elid('clear-log').addEventListener('click', () => {
             DOM.elid('display-wrapper').innerHTML = "";
+            DOM.elid('log').innerHTML = "";
         })
 
         ////// Test setup + fetches
@@ -56,7 +60,7 @@ let Toast;
 
         DOM.elid('submit-registerAllOracles').addEventListener('click', () => {
             let value = prompt("Please enter the amount of oracles you want to register", "20");
-            
+
             if(value) {
                 contract.registerAllOracles(value, (error, result) => {
                     console.log(error,result);
@@ -397,6 +401,18 @@ function constructTable(list, selector) {
 
         // Adding each row to the table
         $(selector).append(row);
+    }
+}
+
+function initEventLogger() {
+    var old = console.info;
+    var logger = document.getElementById('log');
+    console.info = function (message) {
+        if (typeof message == 'object') {
+            logger.innerHTML += (JSON && JSON.stringify ? JSON.stringify(message) : message) + '<br />';
+        } else {
+            logger.innerHTML += message + '<br />';
+        }
     }
 }
 

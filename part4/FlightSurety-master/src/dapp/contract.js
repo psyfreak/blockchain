@@ -59,20 +59,21 @@ export default class Contract {
                     //fromBlock: 0, toBlock: 'latest'
                     // myIndexedParam: [20,23], myOtherIndexedParam: '0x123456789...'
                 }, // Using an array means OR: e.g. 20 or 23
-                fromBlock: 0
-            }, function(error, event){ console.log(event); })
+                fromBlock: "latest"
+            }, function(error, event){ console.info(event); })
               .on("connected", function(subscriptionId){
-                  console.log(subscriptionId);
+                  console.info(subscriptionId);
               })
               .on('data', function(event){
-                  console.log(event); // same results as the optional callback above
+                  console.info(event); // same results as the optional callback above
+
               })
               .on('changed', function(event){
                   // remove event from local database
-                  console.log(event);
+                  console.info(event);
               })
               .on('error', function(error, receipt) { // If the transaction was rejected by the network with a receipt, the second parameter will be the receipt.
-                  console.log(error, receipt);
+                  console.info(error, receipt);
               }));
 
 
