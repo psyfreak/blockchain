@@ -11,7 +11,7 @@ contract Insurances  {
     /********************************************************************************************/
     /*                                       DATA VARIABLES                                     */
     /********************************************************************************************/
-    uint256 public constant MAX_INSURANCE_FEE = 150 wei; //ether;
+    uint256 public constant MAX_INSURANCE_FEE = 1 ether; //150 wei; //ether;
 
     // insurance
     struct Insurance {

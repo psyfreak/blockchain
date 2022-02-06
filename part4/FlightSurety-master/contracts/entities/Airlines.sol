@@ -6,7 +6,7 @@ contract Airlines  {
     /********************************************************************************************/
     /*                                       DATA VARIABLES                                     */
     /********************************************************************************************/
-    uint256 public constant AIRLINE_REGISTRATION_FEE = 10 wei; //10 ether;
+    uint256 public constant AIRLINE_REGISTRATION_FEE = 10 ether; //10 ether/wei;
 
     // airlines
     struct Airline {
