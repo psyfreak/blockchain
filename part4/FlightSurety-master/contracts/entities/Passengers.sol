@@ -53,12 +53,12 @@ contract Passengers  {
     /********************************************************************************************/
     modifier requireIsPassengerOnFlight(bytes32 flightKey, address passenger)
     {
-        require(isPassengerRegisteredByKey(flightKey, passenger), "Passenger is not on board, though it should .");
+        require(isPassengerRegisteredByKey(flightKey, passenger), "Passenger is not on board");
         _;
     }
     modifier requireIsPassengerNotOnFlight(bytes32 flightKey, address passenger)
     {
-        require(!isPassengerRegisteredByKey(flightKey, passenger), "Passenger is already on board, though it should not.");
+        require(!isPassengerRegisteredByKey(flightKey, passenger), "Passenger is already on board");
         _;
     }
 }

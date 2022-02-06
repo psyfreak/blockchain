@@ -111,17 +111,22 @@ export default class Contract {
             const myJson = await response.json(); //extract JSON from the http response
             // do something with myJson
         }*/
-        const response = await fetch('http://127.0.0.1:3000/api/oracles/' + countOracles, {
-            method: 'POST',
-            body: "", // string or object
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-        console.log("response", response)
-        const myJson = await response.json(); //extract JSON from the http response
+        let myJson, error;
+        try {
+            const response = await fetch('http://127.0.0.1:3000/api/oracles/' + countOracles, {
+                method: 'POST',
+                body: "", // string or object
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            console.log("response", response)
+            myJson = await response.json(); //extract JSON from the http response
+        } catch(e) {
+            error = e;
+        }
         // do something with myJson
-        callback(null, myJson);
+        callback(error, myJson);
     }
     async getOracle(passengerAddress, callback) {
 
@@ -448,7 +453,7 @@ export default class Contract {
         if (passenger) {
             balanceAcc = await this.web3.eth.getBalance(passenger);
         }
-        let line1 = `Balances (App/Data/acc): ${balanceApp.toString()} / ${balanceData.toString()} / ${balanceAcc.toString()} `;
+        let line1 = `Balances (App/Data/Account): ${balanceApp.toString()} / ${balanceData.toString()} / ${balanceAcc.toString()} `;
 
         let total = await this.flightSuretyData.methods.numOfAirlines().call();
         let registered = await this.flightSuretyData.methods.numOfRegisteredAirlines().call();

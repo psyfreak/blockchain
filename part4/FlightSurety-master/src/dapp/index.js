@@ -3,11 +3,30 @@ import Contract from './contract';
 import './flightsurety.css';
 import Config from './config.json';
 
+import Swal from 'sweetalert2'
+
+let Toast;
+
+
 (async() => {
 
     let result = null;
 
+    Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.addEventListener('mouseenter', Swal.stopTimer)
+            toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+    })
 
+
+    notify("Initialization...", '','info');
+    display('Initialization', 'UI is intialized and check if contract is operational. This may take some time...', [  ]);
     let contract = new Contract('localhost', () => {
 
         initializeUI(contract);
@@ -16,6 +35,7 @@ import Config from './config.json';
         // Read transaction
         contract.isOperational((error, result) => {
             console.log(error,result);
+            notify("Loading complete");
             display('Operational Status', 'Check if contract is operational', [ { label: 'Operational Status', error: error, value: result} ]);
         });
 
@@ -36,9 +56,11 @@ import Config from './config.json';
 
         DOM.elid('submit-registerAllOracles').addEventListener('click', () => {
             let value = prompt("Please enter the amount of oracles you want to register", "20");
+            
             if(value) {
                 contract.registerAllOracles(value, (error, result) => {
                     console.log(error,result);
+                    notify("registerAllOracles complete", error);
                     display('Oracles', 'register oracles' , [ { label: 'Oracles', error: error, value: result} ]);
                 });
             }
@@ -46,6 +68,7 @@ import Config from './config.json';
         DOM.elid('submit-getOracleCount').addEventListener('click', () => {
             contract.getOracleCount((error, result) => {
                 console.log("getOracleCount", result);
+                notify("getOracleCount complete", error);
                 display('Oracles', '#Count', [ { label: 'Get Oracles count', error: error, value: result} ]);
             });
         });
@@ -65,6 +88,7 @@ import Config from './config.json';
 
             // Write transaction
             contract.registerAirline(airline, airlineName, airlineFrom, (error, result) => {
+                notify(`registerAirline ${airlineName} complete`, error);
                 display('Airline', 'Register Airline', [ { label: 'Fetch Flight Status', error: error, value: JSON.stringify(result)} ]);
             });
         });
@@ -77,6 +101,7 @@ import Config from './config.json';
             let value = prompt("Please enter the amount for the registration fee in wei (or refund)", "10");
             if(value) {
                 contract.fundAirline(airline, value, (error, result) => {
+                    notify(`fundAirline ${airlineObj.name} complete`, error);
                     display('Airline', 'Fund Airline', [{label: 'Fund', error: error, value: JSON.stringify(result)}]);
                 });
             }
@@ -90,7 +115,7 @@ import Config from './config.json';
             // Write transaction
             contract.getAirline(airline, (error, result) => {
                 console.log("getAirline", error, result);
-
+                notify(`getAirline ${airlineObj.name} complete`, error);
                 display('Airline', '#Details ', [ { label: 'Get Airline', error: error, value: result} ]);
             });
             /*
@@ -104,6 +129,7 @@ import Config from './config.json';
         DOM.elid('submit-fetchAllAirlines').addEventListener('click', () => {
             contract.getAllAirlines((error, result) => {
                 console.log(error,result);
+                notify(`fetchAllAirlines complete`, error);
                 display('Airline', 'All Airlines (' + result.length-1 + ')' , [ { label: 'Airlines', error: error, value: result} ]);
                 //constructTable(result,'#table')
             });
@@ -113,6 +139,7 @@ import Config from './config.json';
         DOM.elid('submit-getPassenger').addEventListener('click', () => {
             let passenger = DOM.elid('passengers-selector').value;
             contract.getPassenger(passenger, (error, result) => {
+                notify(`getPassenger ${genReadableAddress(passenger)} complete`, error);
                 console.log(error,result);
                 display('Passenger', 'Fetches Passenger' , [ { label: 'Passenger', error: error, value: result} ]);
             });
@@ -123,6 +150,7 @@ import Config from './config.json';
         DOM.elid('submit-getFlight').addEventListener('click', () => {
             let flightObj = getFlightObj();
             contract.getFlight(flightObj, (error, result) => {
+                notify(`getFlight ${flightObj.name} complete`, error);
                 display('Flight', 'getFlight  (' + flightObj.name + ' at: ' + new Date(flightObj.timestamp*1000).toISOString() + ')' , [ { label: 'Flight', error: error, value: result} ]);
             });
         })
@@ -133,6 +161,7 @@ import Config from './config.json';
             let flightObj = getFlightObj();
             // Write transaction
             contract.registerFlight(flightObj, (error, result) => {
+                notify(`registerFlight ${flightObj.name} complete`, error);
                 display('Flight', 'Register Flight', [ { label: 'Flight', error: error, value: JSON.stringify(result)} ]);
             });
         });
@@ -143,6 +172,7 @@ import Config from './config.json';
             let flightObj = getFlightObj();
             // Write transaction
             contract.fetchFlightStatus(flightObj, (error, result) => {
+                notify(`fetchFlightStatus ${flightObj.name} complete`, error);
                 display('Oracles', 'Trigger oracles', [ { label: 'Fetch Flight Status', error: error, value: 'airline: ' + result.airline + ' name: ' + result.name + ' timestamp: ' + new Date(result.timestamp*1000).toISOString() + ' (' + result.timestamp + ')'} ]);
             });
         });
@@ -152,6 +182,7 @@ import Config from './config.json';
             let passenger = DOM.elid('passengers-selector').value;
             // Write transaction
             contract.bookFlight(flightObj, passenger,(error, result) => {
+                notify(`bookFlight ${flightObj.name} for passenger ${genReadableAddress(passenger)} complete`, error);
                 display('Flight', 'bookFlight', [ { label: 'bookFlight', error: error, value: 'airline: ' + result.airline + ' name: ' + result.name + ' timestamp: ' + new Date(result.timestamp*1000).toISOString() + ' (' + result.timestamp + ')'} ]);
             });
         });
@@ -163,6 +194,7 @@ import Config from './config.json';
             if(value) {
                 // Write transaction
                 contract.purchaseInsurance(flightObj, passenger,value,(error, result) => {
+                    notify(`purchaseInsurance ${flightObj.name} for passenger ${genReadableAddress(passenger)} complete`, error);
                     display('Flight Insurance', 'purchaseInsurance with value (wei):' + value + ' for passenger: ' + genReadableAddress(passenger), [ { label: ' for flight', error: error, value: 'airline: ' + result.airline + ' name: ' + result.name + ' timestamp: ' + new Date(result.timestamp*1000).toISOString() + ' (' + result.timestamp + ')'} ]);
                 });
             }
@@ -175,6 +207,7 @@ import Config from './config.json';
 
             contract.getInsurance(flightObj, passenger, (error, result) => {
                 console.log(error,result);
+                notify(`getInsurance ${flightObj.name} for passenger ${genReadableAddress(passenger)} complete`, error);
                 display('Flight Insurance', 'getInsurance for passenger' , [ { label: 'Passenger', error: error, value: result} ]);
             });
         })
@@ -184,6 +217,7 @@ import Config from './config.json';
 
             contract.getInfo(passenger, (error, result) => {
                 console.log(error,result);
+                notify(`getInfo for passenger ${genReadableAddress(passenger)} complete`, error);
                 display('Status Info', 'Balances + Airlines' , [ { label: 'Status', error: error, value: result} ]);
             });
         })
@@ -207,6 +241,7 @@ import Config from './config.json';
                 ddl.options.add(option);
             }
         })
+
     });
 
 })();
@@ -307,6 +342,38 @@ function display(title, description, results) {
     displayDiv.prepend(section);
     //displayDiv.append(section);
 }
+
+
+function notify2(title, text, icon) {
+    icon = icon?icon: 'success'
+    Swal.fire({
+        title: title,
+        text: text,
+        icon: icon,
+        //confirmButtonText: 'Ok',
+        toast: true,
+        position:  'top-end',
+        timer: 1000,
+        timerProgressBar: true,
+        showLoaderOnConfirm: true
+    })
+}
+function notify(title, error, icon) {
+    icon = icon?icon: 'success';
+
+    if(error) {
+        icon='error';
+        title = error.message
+    }
+    title += ' - see log for details';
+
+    Toast.fire({
+        icon: icon,
+        title: title
+    })
+}
+
+
 
 
 

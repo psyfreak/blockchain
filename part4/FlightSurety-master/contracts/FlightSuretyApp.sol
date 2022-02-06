@@ -323,7 +323,7 @@ contract FlightSuretyApp is Ownable, Mortal, Oracles {
         */
         // new
         oracleResponses[key].requester = msg.sender;
-        oracleResponses[key].isOpen = true;
+        oracleResponses[key].isOpen = true; //fetch forsame flight - is this allowed
         emit OracleRequest(index, airline, flight, timestamp);
     }
 
