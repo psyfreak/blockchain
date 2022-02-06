@@ -29,8 +29,10 @@
     6. Fetch Flight-Status of selected flight
     7. Show balances
 -->
-    <h4>Oracles + Airlines</h4>
-    <div class="row top-20 mb-4">
+    <!--
+        <h4>Oracles + Airlines</h4>
+    -->
+    <div class="row">
         <div class="col-sm-12 col-md-6">
 
             <label class="form">Oracles</label>
@@ -73,8 +75,10 @@
         </div>
 
     </div>
+    <!--
     <h4>Flight + Passenger</h4>
-    <div class="row top-20 mb-4">
+    -->
+    <div class="row top-20">
         <div class="col-sm-12 col-md-6">
             <label class="form">Flights</label>
             <select id="flights-selector" class="form-control">
@@ -85,8 +89,6 @@
                 <btn class="btn btn-primary" id="submit-getFlight">Details</btn>
                 <btn class="btn btn-primary" id="submit-fetchFlightStatus">fetchFlightStatus</btn>
             </div>
-
-
         </div>
         <div class="col-sm-12 col-md-6">
             <label class="form">Passengers</label>
@@ -103,17 +105,17 @@
 
         </div>
     </div>
-    <div class="row top-20 mb-4">
+    <div class="row top-20">
         <div class="col-sm-12 col-md-6">
-            Add flight to listbox (only temporarily):<br>
+            <label class="form">Add flight to listbox (only temporarily):</label>
+           <!--
             <label for="airlines-selector-flight" class="form">Airline</label>
+            -->
             <select id="airlines-selector-flight" class="form-control">
                 <option disabled>Select airline</option>
             </select>
-            <label class="form">Name</label>
-            <input id="flight-name" class="form-control">
-            <label class="form">timestamp</label>
-            <input id="flight-timestamp" class="form-control disabled" value="1644011230">
+            <input id="flight-name" placeholder="Flight name" class="form-control mt-1">
+            <input id="flight-timestamp"  placeholder="timestamp (epoch in seconds)" class="form-control disabled mt-1" value="1644011230">
             <btn class="btn btn-primary" id="submit-addFlight">addFlight</btn>
         </div>
     </div>

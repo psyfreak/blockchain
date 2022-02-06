@@ -60,22 +60,50 @@ export default class Contract {
                     // myIndexedParam: [20,23], myOtherIndexedParam: '0x123456789...'
                 }, // Using an array means OR: e.g. 20 or 23
                 fromBlock: "latest"
-            }, function(error, event){ console.info(event); })
+            }, function(error, event){
+                console.log("init (flightSuretyApp)", event);
+            })
               .on("connected", function(subscriptionId){
-                  console.info(subscriptionId);
+                  console.log("connected (flightSuretyApp)", subscriptionId);
               })
               .on('data', function(event){
-                  console.info(event); // same results as the optional callback above
-
+                  console.log("data (flightSuretyApp)", event); // same results as the optional callback above
+                  //returnValues
+                  //let json = transformEventReturnToJson();
+                  console.info( 'Event (flightSuretyApp) ' + event.event + ' triggered with return value: ' + JSON.stringify(event.returnValues));
               })
               .on('changed', function(event){
                   // remove event from local database
-                  console.info(event);
+                  console.log("changed (flightSuretyApp)", event);
               })
               .on('error', function(error, receipt) { // If the transaction was rejected by the network with a receipt, the second parameter will be the receipt.
-                  console.info(error, receipt);
+                  console.log("changed(flightSuretyApp)", error, receipt);
               }));
-
+            (this.flightSuretyData.events.allEvents({
+                filter: {
+                    //fromBlock: 0, toBlock: 'latest'
+                    // myIndexedParam: [20,23], myOtherIndexedParam: '0x123456789...'
+                }, // Using an array means OR: e.g. 20 or 23
+                fromBlock: "latest"
+            }, function(error, event){
+                console.log("init (flightSuretyData)", event);
+            })
+              .on("connected", function(subscriptionId){
+                  console.log("connected (flightSuretyData)", subscriptionId);
+              })
+              .on('data', function(event){
+                  console.log("data (flightSuretyData)", event); // same results as the optional callback above
+                  //returnValues
+                  //let json = transformEventReturnToJson();
+                  console.info( 'Event (flightSuretyData) ' + event.event + ' triggered with return value: ' + JSON.stringify(event.returnValues));
+              })
+              .on('changed', function(event){
+                  // remove event from local database
+                  console.log("changed (flightSuretyData)", event);
+              })
+              .on('error', function(error, receipt) { // If the transaction was rejected by the network with a receipt, the second parameter will be the receipt.
+                  console.log("changed(flightSuretyData)", error, receipt);
+              }));
 
             callback();
         });
@@ -465,4 +493,17 @@ export default class Contract {
 
     }
 
+}
+
+/**
+ * Transform event return Value to json.
+ * @param eventReturnValues
+ * @returns {any}
+ */
+function transformEventReturnToJson(eventReturnValues) {
+    console.log("transformEventReturnToJson", eventReturnValues);
+    let retString = JSON.stringify(eventReturnValues);
+    let parsesd = retString.replace("Result ", "");
+    let parsedJson = JSON.parse(parsesd);
+    return parsedJson;
 }
