@@ -8,6 +8,7 @@ contract('Flight Surety - Oracles', async (accounts) => {
   let FLIGHT_NAME = "",
     FLIGHT_timestamp = "",
     predefinedOracleIds =[],
+    FUNDING_ORACLE = web3.utils.toWei('1', 'ether'), // ether //TODO use config
     ROI_MULTI = 1.5,
     INSURANCE_PAYMENT = 10,
     INSURANCE_PAYMENT2 = 15,
@@ -183,7 +184,7 @@ contract('Flight Surety - Oracles', async (accounts) => {
     */
     let fail = false;
     try {
-      await config.flightSuretyApp.registerOracle({from: accounts[0], value: 10, gas: 2800707 });
+      await config.flightSuretyApp.registerOracle({from: accounts[0], value: FUNDING_ORACLE, gas: 2800707 });
     }
     catch(e) {
       fail= true;

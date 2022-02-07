@@ -7,9 +7,10 @@ contract('Flight Surety - Funding', async (accounts) => {
   let config;
   let FLIGHT_NAME = "",
     FLIGHT_timestamp = "",
-    REFUND_AIRLINE = 50,
-    FUND_CONTRACT = 20;
-
+    REFUND_AIRLINE = web3.utils.toWei('4', 'ether'),//TODO use config
+    FUND_CONTRACT = web3.utils.toWei('2', 'ether'),//TODO use config
+    FUNDING_AIRLINE = web3.utils.toWei('10', 'ether'),//TODO use config
+    FUNDING_ORACLE = web3.utils.toWei('1', 'ether');//TODO use config
 
   before('setup contract', async () => {
     config = await Test.Config(accounts);
@@ -146,7 +147,7 @@ contract('Flight Surety - Funding', async (accounts) => {
 
     let fail = false;
     try {
-     await config.flightSuretyApp.fundAirline({from: registeredAirline, value: 10});
+     await config.flightSuretyApp.fundAirline({from: registeredAirline, value: FUNDING_AIRLINE});
     }
     catch(e) {
       console.log("fundAirline error", e)
@@ -173,7 +174,7 @@ contract('Flight Surety - Funding', async (accounts) => {
 
     let fail = false;
     try {
-      await config.flightSuretyData.fundAirline(registeredAirline, {from: registeredAirline, value: 50});
+      await config.flightSuretyData.fundAirline(registeredAirline, {from: registeredAirline, value: FUNDING_AIRLINE});
     }
     catch(e) {
       fail = true;
@@ -236,7 +237,7 @@ contract('Flight Surety - Funding', async (accounts) => {
     */
     let fail = false;
     try {
-      await config.flightSuretyApp.registerOracle({from: accounts[10], value: 10, gas: 2800707 });
+      await config.flightSuretyApp.registerOracle({from: accounts[10], value: FUNDING_ORACLE, gas: 2800707 });
     }
     catch(e) {
       fail= true;

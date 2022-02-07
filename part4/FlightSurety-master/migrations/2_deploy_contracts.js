@@ -4,8 +4,9 @@ const MultiSignatureWallet = artifacts.require("MultiSignatureWallet");
 const fs = require('fs');
 
 module.exports = async function(deployer, network, accounts) {
-  let firstAirline = accounts[1];
-  await deployer.deploy(FlightSuretyData, firstAirline, {value: 10});
+  let firstAirline = accounts[1],
+    FUNDING_AIRLINE = web3.utils.toWei('10', 'ether');// ether;
+  await deployer.deploy(FlightSuretyData, firstAirline, {value: FUNDING_AIRLINE});
   let flightSuretyDataInstance = await FlightSuretyData.deployed();
 
   await deployer.deploy(MultiSignatureWallet, [firstAirline], 1);
@@ -31,7 +32,7 @@ module.exports = async function(deployer, network, accounts) {
     oracles: {
       count: 20,
       predefinedIndex: 20,
-      randomPerOracle: false,
+      randomPerOracle: false,// true - every oracles return a different randomized statusCode | false all oracles return the identicial randomized statusCode.
       statusCodes: {
         STATUS_CODE_UNKNOWN: 0,
         STATUS_CODE_ON_TIME: 10,

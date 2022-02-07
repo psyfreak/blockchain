@@ -8,10 +8,8 @@ contract('Flight Surety - Airlines', async (accounts) => {
   let config;
   let FLIGHT_NAME = "",
     FLIGHT_AIRLINE = "",
-    FLIGHT_AIRLINE2 = "",
     FLIGHT_timestamp = "",
-    INSURANCE_PAYMENT = 100,
-    ROI_PAYMENT = 150;
+    FUNDING_AIRLINE = web3.utils.toWei('10', 'ether')// ether; //TODO use config
 
   before('setup contract', async () => {
     config = await Test.Config(accounts);
@@ -20,10 +18,7 @@ contract('Flight Surety - Airlines', async (accounts) => {
     FLIGHT_timestamp = config.flights[0].departure;
 
     await Util.helper.printBaseInfo(config);
-
     //await config.flightSuretyData.authorizeCaller(config.flightSuretyApp.address);
-
-
   });
 
   beforeEach('setup contract', async () => {
@@ -174,7 +169,8 @@ contract('Flight Surety - Airlines', async (accounts) => {
 
     let fail = false;
     try {
-      await config.flightSuretyApp.fundAirline({from: registeredAirline, value: 10});
+
+      await config.flightSuretyApp.fundAirline({from: registeredAirline, value: FUNDING_AIRLINE});
     }
     catch(e) {
       console.log("fundAirline error", e)

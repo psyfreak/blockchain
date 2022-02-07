@@ -7,9 +7,7 @@ contract('Flight Surety Multiparty', async (accounts) => {
 
   let config;
   let FLIGHT_NAME = "",
-    FLIGHT_timestamp = "",
-    INSURANCE_PAYMENT = 100,
-    ROI_PAYMENT = 150;
+    FLIGHT_timestamp = "";
 
   before('setup contract', async () => {
     config = await Test.Config(accounts);

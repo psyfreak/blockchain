@@ -9,7 +9,7 @@ contract('Flight Surety - Passengers', async (accounts) => {
   let FLIGHT_NAME = "",
     FLIGHT_timestamp = "",
     ROI_MULTI = 1.5,
-    INSURANCE_PAYMENT = 10,
+    INSURANCE_PAYMENT = web3.utils.toWei('1', 'ether'), //TODO use config
     ROI_PAYMENT = INSURANCE_PAYMENT*ROI_MULTI;
 
   before('setup contract', async () => {
