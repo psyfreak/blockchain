@@ -102,9 +102,9 @@ let Toast;
             let airlineObj = getAirlineObj('airlines-selector');
             let airline = airlineObj.airline;
             // Write transaction
-            let value = prompt("Please enter the amount for the registration fee in wei (or refund)", "10");
-            if(value) {
-                contract.fundAirline(airline, value, (error, result) => {
+            let regFeeAirline = prompt("Please enter the amount for the registration fee in ether (or refund)", "10");
+            if(regFeeAirline) {
+                contract.fundAirline(airline, regFeeAirline, (error, result) => {
                     notify(`fundAirline ${airlineObj.name} complete`, error);
                     display('Airline', 'Fund Airline', [{label: 'Fund', error: error, value: JSON.stringify(result)}]);
                 });
@@ -194,12 +194,12 @@ let Toast;
         DOM.elid('submit-purchaseInsurance').addEventListener('click', () => {
             let flightObj = getFlightObj();
             let passenger = DOM.elid('passengers-selector').value;
-            let value = prompt("Please enter the amount for the insurance fee in wei", "10");
+            let value = prompt("Please enter the amount for the insurance fee in ether", "1");
             if(value) {
                 // Write transaction
                 contract.purchaseInsurance(flightObj, passenger,value,(error, result) => {
                     notify(`purchaseInsurance ${flightObj.name} for passenger ${genReadableAddress(passenger)} complete`, error);
-                    display('Flight Insurance', 'purchaseInsurance with value (wei):' + value + ' for passenger: ' + genReadableAddress(passenger), [ { label: ' for flight', error: error, value: 'airline: ' + result.airline + ' name: ' + result.name + ' timestamp: ' + new Date(result.timestamp*1000).toISOString() + ' (' + result.timestamp + ')'} ]);
+                    display('Flight Insurance', 'purchaseInsurance with value (ether):' + value + ' for passenger: ' + genReadableAddress(passenger), [ { label: ' for flight', error: error, value: 'airline: ' + result.airline + ' name: ' + result.name + ' timestamp: ' + new Date(result.timestamp*1000).toISOString() + ' (' + result.timestamp + ')'} ]);
                 });
             }
         });

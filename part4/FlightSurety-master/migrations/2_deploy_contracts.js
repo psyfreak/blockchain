@@ -42,10 +42,10 @@ module.exports = async function(deployer, network, accounts) {
         STATUS_CODE_LATE_OTHER: 50
       }
     },
-    fees: {
-      registrationOracle: 10,
-      registrationAirline: 10,
-      capInsurance: 15
+    fees: { // number should be stringify web3 works with string and big numbers
+      registrationOracle: "1",
+      registrationAirline: "10",
+      capInsurance: "1"
     },
     airlines: [
       {

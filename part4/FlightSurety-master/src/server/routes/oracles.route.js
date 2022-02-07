@@ -75,7 +75,7 @@ router.post("/:countOracles", async (req, res)=> {
   // console.log("result to save", result);
   let numOfOraclesToRegister = req.params['countOracles'];
   if(numOfOraclesToRegister <= 0 || Number.isNaN(numOfOraclesToRegister)) {
-    numOfOraclesToRegister =config.oracles.count
+    numOfOraclesToRegister = config.oracles.count
   }
   // TODO clarify this had no effect if consensus: false gets dropped...
   try {
@@ -94,11 +94,16 @@ router.post("/:countOracles", async (req, res)=> {
       if(i == numOfOraclesToRegister) {
         break;
       }
+
+      let registrationOracleFee = web3.utils.toWei(config.fees.registrationOracle, 'ether');
       newOracle = await flightSuretyApp.methods
         .registerOracle()
-        .send({from: global.accounts[i + beforeOracleCount], value: config.fees.registrationOracle, gas: 2800707 });
+        .send({from: global.accounts[i + beforeOracleCount], value: registrationOracleFee, gas: 2800707 });
+      registeredOracles.push(newOracle);
+
       registeredOracles.push(newOracle);
     }
+    console.log("afterregisterOracle", newOracle)
     let afterOracleCount = await flightSuretyApp.methods
       .oracleCount()
       .call({from: global.accounts[0]});
@@ -117,7 +122,7 @@ router.post("/:countOracles", async (req, res)=> {
   catch(error) {
     return res.status(400).send(error);
   }
-
+/*
   let error = null;
   // console.log("result to save", result);
   // TODO clarify this had no effect if consensus: false gets dropped...
@@ -146,6 +151,7 @@ router.post("/:countOracles", async (req, res)=> {
   if(error) {
     return res.status(400).send(error);
   }
+ */
 });
 
 module.exports = router;

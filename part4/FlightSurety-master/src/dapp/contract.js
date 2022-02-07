@@ -387,12 +387,12 @@ export default class Contract {
         let self = this,
             gas = 1000000,
             result,
-            error;
-
+            error,
+            regFeeAirline = this.web3.utils.toWei(value, 'ether');
         try {
             result = await self.flightSuretyApp.methods
               .fundAirline()
-              .send({from: airline, gas: gas, value: value}, (error, result) => {
+              .send({from: airline, gas: gas, value: regFeeAirline}, (error, result) => {
                   //.send({from: self.firstAirline}, (error, result) => {
                   callback(error, airline);
               });
@@ -432,11 +432,12 @@ export default class Contract {
         }
         */
         let result,
-          error;
+          error,
+          investmentInsurance = this.web3.utils.toWei(value, 'ether');
         try {
             result =  await self.flightSuretyApp.methods
               .buyFlightInsurance(flight.airline, flight.name, flight.timestamp)
-              .send({ from: passenger, gas: gas, value: value});
+              .send({ from: passenger, gas: gas, value: investmentInsurance});
 
         } catch(err) {
             error = err;
