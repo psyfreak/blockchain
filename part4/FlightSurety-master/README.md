@@ -5,7 +5,7 @@ See detailed requirements (based on videos and introduction) of the project belo
 
 ## Overview
 There are 4 independent contracts implementing 4 major components:
-- App contract
+- App contract - provide all services
 - Oracles included in app contract
 - Data Contract can be called by App and MultiSignatureWallet exclusively for any state changing operations.
   This is secured by the inherited Authentication contract.
@@ -15,9 +15,9 @@ There are 4 independent contracts implementing 4 major components:
   - https://medium.com/hellogold/ethereum-multi-signature-wallets-77ab926ab63b
   - https://medium.com/hellogold/ethereum-multi-sig-wallets-part-ii-19077f6280a
   - https://github.com/ConsenSys-Academy/multisig-wallet-exercise/tree/master/contracts
-  
+
 - Util contract/library to provide some generic functions.
-  Actually I also wanted to try out using a library, and I thought it might be a good fit here. 
+  Actually I also wanted to try out using a library, and I thought it might be a good fit here.
 
 ## Requirements 
 
@@ -173,7 +173,7 @@ properJsonObject = transformEventReturnToJson(event.returnValues)
 
 - As one example: createInsurance (better set this fct. payable or extra msg. value and work with app payable and transfer function?)
     I call it like this flightSuretyData.createInsuranceForFlight{value: msg.value}(flightKey, msg.sender, msg.value);
-    But might it better to have this createInsuranceForFlight functnion not payable and transfer to the contract directly via receive?
+    But might it better to have this createInsuranceForFlight function not payable and transfer to the contract directly via receive?
 
 - Is it better to move all modifiers and requires such as "isOperational" to the logic contract or having them in both or only app?  
   As you can see I put e.g. requireIsOperational in app and data contract functions, because I though this might be the most secure method.
