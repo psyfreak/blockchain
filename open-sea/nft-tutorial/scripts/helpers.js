@@ -30,6 +30,18 @@ function getContract(contractName, hre) {
   return getContractAt(hre, contractName, getEnvVariable("NFT_CONTRACT_ADDRESS"), account);
 }
 
+// proposal from community
+task("withdraw", "*** Transfer the ETH hold by the SC to the account")
+  .setAction(async function (taskArguments, hre) {
+    const account = getAccount();
+    const contract = await getContract("NFT", hre);
+    const transactionResponse = await contract.withdrawPayments(account.address,
+      {
+        gasLimit: 500_000,
+      });
+    console.log(`Transaction Hash: ${transactionResponse.hash}`);
+  });
+
 module.exports = {
   getEnvVariable,
   getProvider,
