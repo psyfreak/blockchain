@@ -6,7 +6,8 @@ The capstone will build upon the knowledge you have gained in the course in orde
 - Update openzeppelin
 - Update oracalize 
   - Change byte to bytes1
-  - 2 lines comments for bla must be called (marked with FGZ)
+  - Line 1095: mstore(add(unonce, 0x20), xor(blockhash(sub(number, 1)), xor(coinbase, timestamp))) => mstore(add(unonce, 0x20), xor(blockhash(sub(number(), 1)), xor(coinbase(), timestamp())))
+  - Line 1331: from codecopy(fmem, codesize, sub(msize, fmem)) => codecopy(fmem, codesize(), sub(msize(), fmem))
 
 # Further references & help
 - https://andresaaap.medium.com/capstone-real-estate-marketplace-project-faq-udacity-blockchain-69fe13b4c14e
