@@ -35,7 +35,8 @@ contract OraclizeI {
 
     address public cbAddress;
 
-    function setProofType(byte _proofType) external;
+    //function setProofType(byte _proofType) external;
+    function setProofType(bytes1 _proofType) external;
     function setCustomGasPrice(uint _gasPrice) external;
     function getPrice(string memory _datasource) public returns (uint _dsprice);
     function randomDS_getSessionPubKeyHash() external view returns (bytes32 _sessionKeyHash);
@@ -280,12 +281,12 @@ contract usingOraclize {
     uint constant week = 60 * 60 * 24 * 7;
     uint constant month = 60 * 60 * 24 * 30;
 
-    byte constant proofType_NONE = 0x00;
-    byte constant proofType_Ledger = 0x30;
-    byte constant proofType_Native = 0xF0;
-    byte constant proofStorage_IPFS = 0x01;
-    byte constant proofType_Android = 0x40;
-    byte constant proofType_TLSNotary = 0x10;
+    bytes1 constant proofType_NONE = 0x00;
+    bytes1 constant proofType_Ledger = 0x30;
+    bytes1 constant proofType_Native = 0xF0;
+    bytes1 constant proofStorage_IPFS = 0x01;
+    bytes1 constant proofType_Android = 0x40;
+    bytes1 constant proofType_TLSNotary = 0x10;
 
     string oraclize_network_name;
     uint8 constant networkID_auto = 0;
@@ -837,7 +838,7 @@ contract usingOraclize {
         return oraclize_query(_datasource, dynargs, _gasLimit);
     }
 
-    function oraclize_setProof(byte _proofP) oraclizeAPI internal {
+    function oraclize_setProof(bytes1 _proofP) oraclizeAPI internal {
         return oraclize.setProofType(_proofP);
     }
 
@@ -1046,7 +1047,7 @@ contract usingOraclize {
         bytes memory bstr = new bytes(len);
         uint k = len - 1;
         while (_i != 0) {
-            bstr[k--] = byte(uint8(48 + _i % 10));
+            bstr[k--] = bytes1(uint8(48 + _i % 10));
             _i /= 10;
         }
         return string(bstr);
@@ -1080,7 +1081,7 @@ contract usingOraclize {
         require((_nbytes > 0) && (_nbytes <= 32));
         _delay *= 10; // Convert from seconds to ledger timer ticks
         bytes memory nbytes = new bytes(1);
-        nbytes[0] = byte(uint8(_nbytes));
+        nbytes[0] = bytes1(uint8(_nbytes));
         bytes memory unonce = new bytes(32);
         bytes memory sessionKeyHash = new bytes(32);
         bytes32 sessionKeyHash_bytes32 = oraclize_randomDS_getSessionPubKeyHash();
@@ -1091,7 +1092,7 @@ contract usingOraclize {
              Check the relaxed random contract at https://github.com/oraclize/ethereum-examples
              for an idea on how to override and replace commit hash variables.
             */
-            mstore(add(unonce, 0x20), xor(blockhash(sub(number, 1)), xor(coinbase, timestamp)))
+            //FGZ mstore(add(unonce, 0x20), xor(blockhash(sub(number, 1)), xor(coinbase, timestamp)))
             mstore(sessionKeyHash, 0x20)
             mstore(add(sessionKeyHash, 0x20), sessionKeyHash_bytes32)
         }
@@ -1155,7 +1156,7 @@ contract usingOraclize {
         bytes memory appkey1_pubkey = new bytes(64);
         copyBytes(_proof, 3 + 1, 64, appkey1_pubkey, 0);
         bytes memory tosign2 = new bytes(1 + 65 + 32);
-        tosign2[0] = byte(uint8(1)); //role
+        tosign2[0] = bytes1(uint8(1)); //role
         copyBytes(_proof, _sig2offset - 65, 65, tosign2, 1);
         bytes memory CODEHASH = hex"fd94fa71bc0ba10d39d464d0d8f465efeef0a2764e3887fcc9df41ded20f505c";
         copyBytes(CODEHASH, 0, 32, tosign2, 1 + 65);
@@ -1327,7 +1328,7 @@ contract usingOraclize {
     function safeMemoryCleaner() internal pure {
         assembly {
             let fmem := mload(0x40)
-            codecopy(fmem, codesize, sub(msize, fmem))
+            //FGZ codecopy(fmem, codesize, sub(msize, fmem))
         }
     }
 }
