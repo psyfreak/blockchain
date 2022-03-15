@@ -5,9 +5,12 @@ import 'openzeppelin-solidity/contracts/utils/Counters.sol';
 import 'openzeppelin-solidity/contracts/utils/math/SafeMath.sol';
 import 'openzeppelin-solidity/contracts/token/ERC721/IERC721Receiver.sol';
 
+//import 'openzeppelin-solidity/contracts/access/Ownable.sol';
+//import 'openzeppelin-solidity/contracts/security/Pausable.sol';
 import './Pausable.sol';
-import './ERC165.sol';
 
+import './ERC165.sol';
+//contract ERC721 is Pausable, Ownable, ERC165 {
 contract ERC721 is Pausable, ERC165 {
 
     event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);

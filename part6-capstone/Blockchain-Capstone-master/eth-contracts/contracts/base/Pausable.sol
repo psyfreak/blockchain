@@ -4,13 +4,14 @@ pragma solidity ^0.8.1;
 
 import "./Ownable.sol";
 
-//  4) create 'whenNotPaused' & 'paused' modifier that throws in the appropriate situation
-//  5) create a Paused & Unpaused event that emits the address that triggered the event
+
+
 contract Pausable is Ownable {
     //  TODO's
     //  1) create a private '_paused' variable of type bool
     bool private _paused;
 
+    //  5) create a Paused & Unpaused event that emits the address that triggered the event
     event Paused(address indexed from);
     event Unpaused(address indexed from);
 
@@ -30,19 +31,18 @@ contract Pausable is Ownable {
         }
     }
 
-    //  2) create a public setter using the inherited onlyOwner modifier
-    function isPaused() public returns (bool) {
+    function isPaused() public view returns (bool) {
         return _paused;
     }
 
-
+    //  4) create 'whenNotPaused' & 'paused' modifier that throws in the appropriate situation
     modifier paused() {
-        require(_paused, "Must be paused");
+        require(isPaused(), "Must be paused");
         _;
     }
 
     modifier whenNotPaused() {
-        require(!_paused, "Must be not paused");
+        require(!isPaused(), "Must be not paused");
         _;
     }
 }
