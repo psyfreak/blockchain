@@ -20,19 +20,25 @@ initialize().then((zokratesProvider) => {
   // compilation
   const artifacts = zokratesProvider.compile(source);
 
-  // computation
-  const { witness, output } = zokratesProvider.computeWitness(artifacts, ["2", "4"]);
 
-  console.log("output", output)
+
 
   // run setup
   const keypair = zokratesProvider.setup(artifacts.program);
 
-  // generate proof
-  const proof = zokratesProvider.generateProof(artifacts.program, witness, keypair.pk);
+  // computation
 
   // generate 10 witnesses/proofs
-
+  const { witness, output } = zokratesProvider.computeWitness(artifacts, ["2", "4"]);
+  console.log("output", output)
+  // generate proof
+  const proof = zokratesProvider.generateProof(artifacts.program, witness, keypair.pk);
+  console.log("proof", proof);
+  // fiddle arround with the proof
+  console.log("proof.proof", proof.proof.c[0])
+  proof.proof.c[0] = proof.proof.c[0].replace("8", "9");
+  console.log("proof.proof", proof.proof.c[0]);
+  /*
   // export solidity verifier
   const verifier = zokratesProvider.exportSolidityVerifier(keypair.vk, "v1");
   //console.log("verifier", verifier)
@@ -40,6 +46,7 @@ initialize().then((zokratesProvider) => {
     if (err) return console.log(err);
     console.log('Verifier contract written');
   });
+  */
   const verify = zokratesProvider.verify(keypair.vk, proof);
   console.log("verify", verify)
 

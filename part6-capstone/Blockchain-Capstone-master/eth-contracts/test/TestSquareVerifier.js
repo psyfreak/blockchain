@@ -18,7 +18,6 @@ contract('Verifier', accounts => {
     // Test verification with correct proof
     // - use the contents from proof.json generated from zokrates steps
     it('should return total supply', async function () {
-
       const accounts = await web3.eth.getAccounts();
       const address = '0x456...'; // verifier contract address
 

@@ -35,6 +35,7 @@ contract SolnSquareVerifier is ERC721Mintable {
 
     // TODO define another contract named SolnSquareVerifier that inherits from your ERC721Mintable class
     constructor(Verifier verifierContract)
+    ERC721Mintable("HouseToken", "HT")
     {
         //ERC721Mintable
 
@@ -43,15 +44,15 @@ contract SolnSquareVerifier is ERC721Mintable {
     }
 
     // TODO Create a function to add the solutions to the array and emit the event
-    function addSolution ()
+    // The solution refers to the set of variables that you pass to verifyTx  .verifyTx(proof.proof, proof.inputs)
+    function addSolution (bytes32 p, bytes32 q)
         public
     {
-        bytes32 solutionHash = "";
+        bytes32 solutionHash =  keccak256(abi.encodePacked(p, q));
         // only add solution if not already existing
         if(!isSolutionRegistered(solutionHash)) {
-            counter.add(counter, 1);
+            counter = counter.add(1);
             solutions[solutionHash].id = counter;
-            solutions[solutionHash].solutionIndex = solutionHash;
             solutions[solutionHash].isRegistered = true;
             solutions[solutionHash].registeredBy = msg.sender;
             emit SolutionAdded(solutions[solutionHash].id, solutions[solutionHash].registeredBy, solutionHash);
@@ -63,6 +64,7 @@ contract SolnSquareVerifier is ERC721Mintable {
         public
     {
         //  - make sure the solution is unique (has not been used before)
+        require(isSolutionRegistered(solution), "Solution was already commited");
         //  - make sure you handle metadata as well as tokenSuply
     }
 
@@ -82,13 +84,13 @@ contract SolnSquareVerifier is ERC721Mintable {
         view
         requireIsSolutionExisting(solKey)
         returns(
-            uint256 ,
+            uint256,
             bytes32,
             bool,
             address
         )
     {
-        return (solutions[solKey].id, solutions[solKey].solutionIndex, solutions[solKey].isRegistered, solutions[solKey].registeredBy);
+        return (solutions[solKey].id, solKey, solutions[solKey].isRegistered, solutions[solKey].registeredBy);
     }
 
 
