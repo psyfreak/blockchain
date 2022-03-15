@@ -15,10 +15,14 @@ The capstone will build upon the knowledge you have gained in the course in orde
 - https://andresaaap.medium.com/capstone-real-estate-marketplace-project-faq-udacity-blockchain-69fe13b4c14e
 
 # References
-# General solidity
+## General solidity
 - https://solidity-by-example.org/hashing/
 - https://knowledge.udacity.com/questions/720350
 - https://andresaaap.medium.com/capstone-real-estate-marketplace-project-faq-udacity-blockchain-69fe13b4c14e
+
+## Open Sea
+- https://www.youtube.com/watch?v=_fWfPVL6wOA&ab_channel=NFTTIMES
+
 ## Zksnark
 - https://consensys.net/blog/developers/introduction-to-zk-snarks/
 - https://blog.gnosis.pm/getting-started-with-zksnarks-zokrates-61e4f8e66bcc

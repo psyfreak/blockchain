@@ -1,10 +1,9 @@
+// SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.1;
 
 //  TODO's: Create a Pausable contract that inherits from the Ownable contract
 
 import "./Ownable.sol";
-
-
 
 contract Pausable is Ownable {
     //  TODO's
