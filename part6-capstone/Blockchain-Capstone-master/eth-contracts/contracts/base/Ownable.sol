@@ -33,6 +33,7 @@ contract Ownable {
         _;
     }
 
+    //TODO use address lib open zeppelin
     modifier onlyEOA() {
         require(msg.sender == tx.origin, "Must use EOA");
         _;

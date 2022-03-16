@@ -13,16 +13,27 @@ import './Pausable.sol';
 import './ERC165.sol';
 //contract ERC721 is Pausable, Ownable, ERC165 {
 contract ERC721 is Pausable, ERC165 {
-
-    event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
-
-    event Approval(address indexed owner, address indexed approved, uint256 indexed tokenId);
-
-    event ApprovalForAll(address indexed owner, address indexed operator, bool approved);
-
     using SafeMath for uint256;
     using Address for address;
     using Counters for Counters.Counter;
+
+    /// @dev This emits when ownership of any NFT changes by any mechanism.
+    ///  This event emits when NFTs are created (`from` == 0) and destroyed
+    ///  (`to` == 0). Exception: during contract creation, any number of NFTs
+    ///  may be created and assigned without emitting Transfer. At the time of
+    ///  any transfer, the approved address for that NFT (if any) is reset to none.
+    event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
+
+    /// @dev This emits when the approved address for an NFT is changed or
+    ///  reaffirmed. The zero address indicates there is no approved address.
+    ///  When a Transfer event emits, this also indicates that the approved
+    ///  address for that NFT (if any) is reset to none.
+    event Approval(address indexed owner, address indexed approved, uint256 indexed tokenId);
+
+    /// @dev This emits when an operator is enabled or disabled for an owner.
+    ///  The operator can manage all NFTs of the owner.
+    event ApprovalForAll(address indexed owner, address indexed operator, bool approved);
+
 
     // Equals to `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`
     // which can be also obtained as `IERC721Receiver(0).onERC721Received.selector`
@@ -50,30 +61,58 @@ contract ERC721 is Pausable, ERC165 {
         _registerInterface(_INTERFACE_ID_ERC721);
     }
 
+    /// @notice Count all NFTs assigned to an owner
+    /// @dev NFTs assigned to the zero address are considered invalid, and this
+    ///  function throws for queries about the zero address.
+    /// @param owner An address for whom to query the balance
+    /// @return The number of NFTs owned by `_owner`, possibly zero
     function balanceOf(address owner) public view returns (uint256) {
         // TODO return the token balance of given address
+        require(owner != address(0), "ERC721: balance query for the zero address");
         // TIP: remember the functions to use for Counters. you can refresh yourself with the link above
+        return _ownedTokensCount[owner].current();
     }
 
+    /// @notice Find the owner of an NFT
+    /// @dev NFTs assigned to zero address are considered invalid, and queries
+    ///  about them do throw.
+    /// @param tokenId The identifier for an NFT
+    /// @return The address of the owner of the NFT
     function ownerOf(uint256 tokenId) public view returns (address) {
-        // TODO return the owner of the given tokenId
+        // DONE TODO return the owner of the given tokenId
+        address owner = _tokenOwner[tokenId];
+        require(owner != address(0), "ERC721: owner query for nonexistent token");
+        return owner;
     }
 
-    //    @dev Approves another address to transfer the given token ID
+    // @dev Approves another address to transfer the given token ID
+    /// @notice Change or reaffirm the approved address for an NFT
+    /// @dev The zero address indicates there is no approved address.
+    ///  Throws unless `msg.sender` is the current NFT owner, or an authorized
+    ///  operator of the current owner.
+    /// @param to The new approved NFT controller
+    /// @param tokenId The NFT to approve
     function approve(address to, uint256 tokenId) public {
 
         // TODO require the given address to not be the owner of the tokenId
-
+        address currentOwner = ownerOf(tokenId);
+        require(currentOwner != to, "ERC721: token owner is the one who it is transferred to.");
         // TODO require the msg sender to be the owner of the contract or isApprovedForAll() to be true
-
+        require(msg.sender == currentOwner || isApprovedForAll(currentOwner, msg.sender), "");
         // TODO add 'to' address to token approvals
-
+        _tokenApprovals[tokenId] = to;
         // TODO emit Approval Event
-
+        emit Approval(currentOwner, to, tokenId);
     }
 
+    /// @notice Get the approved address for a single NFT
+    /// @dev Throws if `_tokenId` is not a valid NFT.
+    /// @param tokenId The NFT to find the approved address for
+    /// @return The approved address for this NFT, or the zero address if there is none
     function getApproved(uint256 tokenId) public view returns (address) {
         // TODO return token approval if it exists
+        address currentOwner = ownerOf(tokenId);
+        return _tokenApprovals[tokenId];
     }
 
     /**
@@ -98,16 +137,44 @@ contract ERC721 is Pausable, ERC165 {
         return _operatorApprovals[owner][operator];
     }
 
+    /// @notice Transfer ownership of an NFT -- THE CALLER IS RESPONSIBLE
+    ///  TO CONFIRM THAT `_to` IS CAPABLE OF RECEIVING NFTS OR ELSE
+    ///  THEY MAY BE PERMANENTLY LOST
+    /// @dev Throws unless `msg.sender` is the current owner, an authorized
+    ///  operator, or the approved address for this NFT. Throws if `_from` is
+    ///  not the current owner. Throws if `to` is the zero address. Throws if
+    ///  `tokenId` is not a valid NFT.
+    /// @param from The current owner of the NFT
+    /// @param to The new owner
+    /// @param tokenId The NFT to transfer
     function transferFrom(address from, address to, uint256 tokenId) public {
         require(_isApprovedOrOwner(msg.sender, tokenId));
 
         _transferFrom(from, to, tokenId);
     }
 
+    /// @notice Transfers the ownership of an NFT from one address to another address
+    /// @dev This works identically to the other function with an extra data parameter,
+    ///  except this function just sets data to "".
+    /// @param from The current owner of the NFT
+    /// @param to The new owner
+    /// @param tokenId The NFT to transfer
     function safeTransferFrom(address from, address to, uint256 tokenId) public {
         safeTransferFrom(from, to, tokenId, "");
     }
 
+    /// @notice Transfers the ownership of an NFT from one address to another address
+    /// @dev Throws unless `msg.sender` is the current owner, an authorized
+    ///  operator, or the approved address for this NFT. Throws if `_from` is
+    ///  not the current owner. Throws if `_to` is the zero address. Throws if
+    ///  `_tokenId` is not a valid NFT. When transfer is complete, this function
+    ///  checks if `_to` is a smart contract (code size > 0). If so, it calls
+    ///  `onERC721Received` on `_to` and throws if the return value is not
+    ///  `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`.
+    /// @param from The current owner of the NFT
+    /// @param to The new owner
+    /// @param tokenId The NFT to transfer
+    /// @param _data Additional data with no specified format, sent in call to `to`
     function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory _data) public {
         transferFrom(from, to, tokenId);
         require(_checkOnERC721Received(from, to, tokenId, _data));
@@ -140,10 +207,15 @@ contract ERC721 is Pausable, ERC165 {
     function _mint(address to, uint256 tokenId) internal virtual {
 
         // TODO revert if given tokenId already exists or given address is invalid
+        address currentOwner = ownerOf(tokenId);
+        require(currentOwner == address(0), "Token was already minted");
 
+        require(to != address(0) && !to.isContract(), "New owner is not a valid address");
         // TODO mint tokenId to given address & increase token count of owner
-
+        _tokenOwner[tokenId] = to;
+        _ownedTokensCount[to].increment();
         // TODO emit Transfer event
+        emit Transfer( address(0), to, tokenId);
     }
 
     // @dev Internal function to transfer ownership of a given token ID to another address.
@@ -151,14 +223,18 @@ contract ERC721 is Pausable, ERC165 {
     function _transferFrom(address from, address to, uint256 tokenId) internal virtual {
 
         // TODO: require from address is the owner of the given token
-
-        // TODO: require token is being transfered to valid address
-
+        address currentOwner = ownerOf(tokenId);
+        require(currentOwner == from, "From is not current owner");
+        // TODO: require token is being transferred to valid address
+        require(!to.isContract() && to != address(0), "To is not a valid address");
         // TODO: clear approval
-
+        approve(address(0), tokenId);
         // TODO: update token counts & transfer ownership of the token ID
-
+        _tokenOwner[tokenId] = to;
+        _ownedTokensCount[from].decrement();
+        _ownedTokensCount[to].increment();
         // TODO: emit correct event
+        emit Transfer(from, to, tokenId);
     }
 
     /**

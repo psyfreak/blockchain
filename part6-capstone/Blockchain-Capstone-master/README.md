@@ -39,6 +39,10 @@ The capstone will build upon the knowledge you have gained in the course in orde
 ### Samples:
 - https://101blockchains.com/zero-knowledge-proof-example/
 
+## ERCs
+- https://eips.ethereum.org/EIPS/eip-165
+- https://eips.ethereum.org/EIPS/eip-721
+
 ## Docker
 - https://earthly.dev/blog/docker-volumes/
 
