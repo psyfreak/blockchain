@@ -58,14 +58,26 @@ contract('TestERC721Mintable', async (accounts) => {
     describe('have ownership properties', function () {
         beforeEach(async function () { 
             //this.contract = await ERC721Mintable.new({from: account_one});
+            this.contract = await ERC721Mintable.new("Housetoken", "HT", {from: account_one});
         })
 
-        it('should fail when minting when address is not contract owner', async function () { 
-            
+        it('should fail when minting when address is not contract owner', async function () {
+            let fail = false;
+            // ACT
+            try {
+                await this.contract.mint(account_one, 1, {from: account_two});
+            }
+            catch(e) {
+                fail= true;
+                //console.log("first flight fail, which should not be the case", e)
+            }
+            // ASSERT
+            assert.equal(fail, true, "Token could be minted though account is no owner");
         })
 
-        it('should return contract owner', async function () { 
-            
+        it('should return contract owner', async function () {
+            let owner = await this.contract.owner.call({from: account_two});
+            assert.equal(account_one, owner, "Owner does not match");
         })
 
     });

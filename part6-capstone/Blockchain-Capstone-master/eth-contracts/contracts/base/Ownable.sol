@@ -15,9 +15,9 @@ contract Ownable {
 
     //  4) fill out the transferOwnership function
     function transferOwnership(address newOwner)
-    public
-    onlyOwner
-    onlyEOA
+        public
+        onlyOwner
+        onlyEOA
     {
         // TODO add functionality to transfer control of the contract to a newOwner.
         // make sure the new owner is a real address
@@ -25,6 +25,14 @@ contract Ownable {
         address oldOwner = _owner;
         _owner = newOwner;
         emit Transfer(oldOwner, newOwner);
+    }
+
+    function owner()
+        public
+        view
+        returns (address)
+    {
+        return _owner;
     }
 
     //  3) create an 'onlyOwner' modifier that throws if called by any account other than the owner.
