@@ -26,6 +26,7 @@ contract ERC721Mintable is ERC721Metadata {
         returns (bool)
     {
         _mint(to, tokenId);
+        setTokenURI(tokenId);
         return true;
     }
 }
