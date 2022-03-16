@@ -51,7 +51,7 @@ contract SolnSquareVerifier is ERC721Mintable {
         bytes32 solutionHash =  keccak256(abi.encodePacked(p, q));
         // only add solution if not already existing
         if(!isSolutionRegistered(solutionHash)) {
-            counter = counter.add(1);
+            counter = counter.add(1); //TODO use counter openzeppelin lib instead
             solutions[solutionHash].id = counter;
             solutions[solutionHash].isRegistered = true;
             solutions[solutionHash].registeredBy = msg.sender;
@@ -60,12 +60,25 @@ contract SolnSquareVerifier is ERC721Mintable {
     }
 
     // TODO Create a function to mint new NFT only after the solution has been verified
-    function mint (bytes32 solution)
+    function mint (bytes32 proof, bytes32 inputs,  address to, uint256 tokenId)
         public
     {
+        //Verify that the proof was not used previously
+        // generate bytes32 => solution
+        bytes32 solutionHash = keccak256(abi.encodePacked(proof, inputs));
         //  - make sure the solution is unique (has not been used before)
-        require(isSolutionRegistered(solution), "Solution was already commited");
-        //  - make sure you handle metadata as well as tokenSuply
+        require(isSolutionRegistered(solutionHash), "Solution was already commited");
+        // TODO addSolution();
+        // Verify that the proof is valid
+        /*
+        // TODO proof input
+        if(verifier.verifyTx(proof, inputs)) {
+            //  - make sure you handle metadata as well as tokenSuply
+            super.mint(to, tokenId);
+        }
+        */
+
+
     }
 
     /********************************************************************************************/
