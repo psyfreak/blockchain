@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.1;
 
+import 'openzeppelin-solidity/contracts/utils/Counters.sol';
 import "openzeppelin-solidity/contracts/utils/math/SafeMath.sol";
 import "./ERC721Mintable.sol";
 import "./Verifier.sol";
 
 contract SolnSquareVerifier is ERC721Mintable {
+    using Counters for Counters.Counter;
     using SafeMath for uint256; // Allow SafeMath functions to be called for all uint256 types (similar to "prototype" in Javascript)
-
     /********************************************************************************************/
     /*                                       DATA VARIABLES                                     */
     /********************************************************************************************/
@@ -43,12 +44,11 @@ contract SolnSquareVerifier is ERC721Mintable {
         verifier = Verifier(verifierContract);
     }
 
-    // TODO Create a function to add the solutions to the array and emit the event
+   // TODO Create a function to add the solutions to the array and emit the event
     // The solution refers to the set of variables that you pass to verifyTx  .verifyTx(proof.proof, proof.inputs)
-    function addSolution (bytes32 p, bytes32 q)
+    function addSolution (bytes32 solutionHash)
         public
     {
-        bytes32 solutionHash =  keccak256(abi.encodePacked(p, q));
         // only add solution if not already existing
         if(!isSolutionRegistered(solutionHash)) {
             counter = counter.add(1); //TODO use counter openzeppelin lib instead
@@ -60,30 +60,59 @@ contract SolnSquareVerifier is ERC721Mintable {
     }
 
     // TODO Create a function to mint new NFT only after the solution has been verified
-    function mint (bytes32 proof, bytes32 inputs,  address to, uint256 tokenId)
+    // proof and input are taken from the verifier code
+    function mintToken (Verifier.Proof memory proof, uint[2] memory input,  address to) //, uint256 tokenId
         public
     {
         //Verify that the proof was not used previously
         // generate bytes32 => solution
-        bytes32 solutionHash = keccak256(abi.encodePacked(proof, inputs));
+        bytes32 solutionHash = genHashForZokratesArguments(proof, input);
         //  - make sure the solution is unique (has not been used before)
-        require(isSolutionRegistered(solutionHash), "Solution was already commited");
+        //require(isSolutionRegistered(solutionHash), "Solution was already commited");
         // TODO addSolution();
+        addSolution(solutionHash);
         // Verify that the proof is valid
-        /*
+
         // TODO proof input
-        if(verifier.verifyTx(proof, inputs)) {
+        if(verifier.verifyTx(proof, input)) {
             //  - make sure you handle metadata as well as tokenSuply
-            super.mint(to, tokenId);
+            //super.mint(to, tokenId);
+            super.mint(to, uint(solutionHash)); //tokendId is the solution Hash => ensured only one solution can have one token
         }
-        */
-
-
     }
 
     /********************************************************************************************/
     /*                                       UTILITY FUNCTIONS                                  */
     /********************************************************************************************/
+
+    function genHashForZokratesArguments(Verifier.Proof memory proof, uint[2] memory input)
+        public
+        pure
+        returns(bytes32)
+    {
+        /*
+        // we cannot pack structs, therefore we need to decompose them
+        struct Proof {
+            Pairing.G1Point a;
+            Pairing.G2Point b;
+            Pairing.G1Point c;
+        }
+            struct G1Point {
+                uint X;
+                uint Y;
+            }
+            // Encoding of field elements is: X[0] * z + X[1]
+            struct G2Point {
+                uint[2] X;
+                uint[2] Y;
+            }
+        */
+
+        // decompose proof struct with input and generate a hash
+        bytes32 solutionHash =  keccak256(abi.encodePacked(proof.a.X, proof.a.Y, proof.b.X, proof.b.Y, proof.c.X, proof.c.Y, input));
+        return solutionHash;
+    }
+
     function isSolutionRegistered (bytes32 solution)
         public
         view

@@ -1,19 +1,17 @@
 // migrating the appropriate contracts
 const SquareVerifier = artifacts.require("Verifier.sol");
-//const SolnSquareVerifier = artifacts.require("SolnSquareVerifier.sol");
-const ERC721Mintable = artifacts.require("ERC721Mintable.sol");
+const SolnSquareVerifier = artifacts.require("SolnSquareVerifier.sol");
+//const ERC721Mintable = artifacts.require("ERC721Mintable.sol");
 
-module.exports = function(deployer) {
-  deployer.deploy(SquareVerifier);
-  //deployer.deploy(SolnSquareVerifier);
-  deployer.deploy(ERC721Mintable, "HouseToken", "HT");
-  /*
-  await deployer.deploy(FlightSuretyData, firstAirline, {value: FUNDING_AIRLINE});
-  let flightSuretyDataInstance = await FlightSuretyData.deployed();
+module.exports = async function(deployer) {
+  await deployer.deploy(SquareVerifier);
 
-  await deployer.deploy(FlightSuretyApp, FlightSuretyData.address, MultiSignatureWallet.address); // parameter must set as an address, {value: 10});
-  let flightSuretyAppInstance = await FlightSuretyApp.deployed();
-  */
+  let squareVerifierInstance = await SquareVerifier.deployed();
+
+  await deployer.deploy(SolnSquareVerifier, SquareVerifier.address); // parameter must set as an address, {value: 10});
+  let solnSquareVerifierInstance = await SolnSquareVerifier.deployed();
+  //deployer.deploy(ERC721Mintable, "HouseToken", "HT");
+
   // mint 10 tokens
 
 };

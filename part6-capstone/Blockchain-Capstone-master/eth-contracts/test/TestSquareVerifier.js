@@ -7,6 +7,8 @@ const fs = require('fs'),
   path = require('path'),
   { initialize } = require('zokrates-js/node');
 
+
+//TODO important run util.js before
 contract('Verifier', async (accounts) => {
   //let verifier = await Verifier.deployed();
 

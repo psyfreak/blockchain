@@ -2,6 +2,12 @@
 
 The capstone will build upon the knowledge you have gained in the course in order to build a decentralized housing product. 
 
+## Run & Test 
+1. npm install
+2. Run diverse test scripts
+
+Optional: run util.js => it will generate a new verifier contract + all needed proofs (valid + invalid ones) for testing and deploying. 
+
 ## Update project to solidity 0.8
 - Update openzeppelin
 - Update oracalize 
@@ -14,9 +20,15 @@ The capstone will build upon the knowledge you have gained in the course in orde
   - update uinttostring to solidity 0.8.0 (endless loop before) see https://stackoverflow.com/questions/47129173/how-to-convert-uint-to-string-in-solidity
 
 ## Remarks
+### Project
+- mintToken uses the hash of the solution as the tokenId
 ### Zokrates
 - Fiddling around to generate an invalid proof. If you test with web3 in test.js files, then you can only change the inputs. Changing the proof lead to invalid opcode error, which seems to be an issue on ganache - in zokrate.js it shows invalid. 
 - Whenever you generate new verifier code, though the code did not change, you must also generate new proofs, otherwise you always get invalid proofs.
+
+### Solidity
+- I was not able to name the mint function just mint. it seems the compile has issues with overloading. whenever I called the function with 5 arguments, solidity compiler tries to call the mind in ERC721 with two arguments.
+  For this reason I needed to change the name.
 
 
 # Further references & help
