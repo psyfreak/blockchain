@@ -11,6 +11,14 @@ The capstone will build upon the knowledge you have gained in the course in orde
     - Line 1331: from codecopy(fmem, codesize, sub(msize, fmem)) => codecopy(fmem, codesize(), sub(msize(), fmem))
     - change format to set gas price return oraclize.queryN.value(price)(0, _datasource, args); => return oraclize.queryN{value: price}(0, _datasource, args);
     - change OraclizeI to abstract contract
+  - update uinttostring to solidity 0.8.0 (endless loop before) see https://stackoverflow.com/questions/47129173/how-to-convert-uint-to-string-in-solidity
+
+## Remarks
+### Zokrates
+- Fiddling around to generate an invalid proof. If you test with web3 in test.js files, then you can only change the inputs. Changing the proof lead to invalid opcode error, which seems to be an issue on ganache - in zokrate.js it shows invalid. 
+- Whenever you generate new verifier code, though the code did not change, you must also generate new proofs, otherwise you always get invalid proofs.
+
+
 # Further references & help
 - https://andresaaap.medium.com/capstone-real-estate-marketplace-project-faq-udacity-blockchain-69fe13b4c14e
 

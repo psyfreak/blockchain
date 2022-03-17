@@ -14,5 +14,6 @@ module.exports = function(deployer) {
   await deployer.deploy(FlightSuretyApp, FlightSuretyData.address, MultiSignatureWallet.address); // parameter must set as an address, {value: 10});
   let flightSuretyAppInstance = await FlightSuretyApp.deployed();
   */
+  // mint 10 tokens
 
 };
