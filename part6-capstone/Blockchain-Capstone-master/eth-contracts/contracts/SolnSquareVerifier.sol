@@ -68,17 +68,17 @@ contract SolnSquareVerifier is ERC721Mintable {
         // generate bytes32 => solution
         bytes32 solutionHash = genHashForZokratesArguments(proof, input);
         //  - make sure the solution is unique (has not been used before)
-        //require(isSolutionRegistered(solutionHash), "Solution was already commited");
+        require(!isSolutionRegistered(solutionHash), "Solution was already committed");
+
+        // Verify that the proof is valid
+        // TODO proof input
+        require(verifier.verifyTx(proof, input), "Verification invalid");
         // TODO addSolution();
         addSolution(solutionHash);
-        // Verify that the proof is valid
+        //  - make sure you handle metadata as well as tokenSuply
+        //super.mint(to, tokenId);
+        super.mint(to, uint(solutionHash)); //tokendId is the solution Hash => ensured only one solution can have one token
 
-        // TODO proof input
-        if(verifier.verifyTx(proof, input)) {
-            //  - make sure you handle metadata as well as tokenSuply
-            //super.mint(to, tokenId);
-            super.mint(to, uint(solutionHash)); //tokendId is the solution Hash => ensured only one solution can have one token
-        }
     }
 
     /********************************************************************************************/
