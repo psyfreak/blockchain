@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "lite-server",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "testERC721": "cd eth-contracts && truffle test ./test/TestERC721Mintable.js"
+    "testERC721": "cd eth-contracts && truffle test ./test/TestERC721Mintable.js",
+    "testSquareVerifier": "cd eth-contracts && truffle test ./test/TestSquareVerifier.js"
   },
   "keywords": [],
   "author": "pk <pkrasam@gmail.com> (https://ipfs.infura.io/ipfs/QmSXiR9Khm3yo1J67nUopvVBxFJ8YGN2fUGZ34Etr3m92x/)",
