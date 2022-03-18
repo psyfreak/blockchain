@@ -11,7 +11,7 @@ if (result.error) {
   throw result.error
 }
 console.log("Loaded config: ", result.parsed);
-const { ACCOUNT_PRIVATE_KEY, INFURA_KEY, INFURA_PRIVATE_KEY, INFURA_mnemonic, NFT_CONTRACT_ADDRESS_LOCAL, NFT_CONTRACT_ADDRESS_RINKEBY } = process.env;
+const { INFURA_KEY, INFURA_mnemonic, NFT_CONTRACT_ADDRESS_LOCAL, NFT_CONTRACT_ADDRESS_RINKEBY } = process.env;
 
 const fs = require('fs'),
   path = require('path'),
@@ -24,6 +24,7 @@ var SolnSquareVerifier = require('./build/contracts/SolnSquareVerifier.json');
 const solnSquareVerifier = new web3.eth.Contract(SolnSquareVerifier.abi, NFT_CONTRACT_ADDRESS_RINKEBY);
 //const solnSquareVerifier = new web3.eth.Contract(SolnSquareVerifier.abi, NFT_CONTRACT_ADDRESS_LOCAL);
 
+// read proofs for minting the tokens
 let path1 = path.join(__dirname, "../zokrates/res/proofs.json");
 let rawdata = fs.readFileSync(path1);
 const proofs = JSON.parse(rawdata);
@@ -34,7 +35,7 @@ const proofs = JSON.parse(rawdata);
   try {
     const accounts = await web3.eth.getAccounts();
     web3.eth.defaultAccount = accounts[0];
-    console.log("web3.eth.accounts", accounts)
+    //console.log("web3.eth.accounts", accounts)
     console.log("web3.eth.defaultAccount [0]", web3.eth.defaultAccount);
     for(let i = 0; i < 10; i++) {
       console.log("mintToken no/input ", i, proofs[i].inputs)
@@ -49,5 +50,4 @@ const proofs = JSON.parse(rawdata);
     // Deal with the fact the chain failed
     console.log("error", e.message)
   }
-  // `text` is not available here
 })();

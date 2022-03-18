@@ -8,7 +8,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "TestERC721Mintable": "cd eth-contracts && truffle test ./test/TestERC721Mintable.js",
     "TestSquareVerifier": "cd eth-contracts && truffle test ./test/TestSquareVerifier.js",
-    "TestSolnSquareVerifier": "cd eth-contracts && truffle test ./test/TestSolnSquareVerifier.js"
+    "TestSolnSquareVerifier": "cd eth-contracts && truffle test ./test/TestSolnSquareVerifier.js",
+    "GenerateVerifierAndProofs": "cd zokrates && ./util.js",
+    "MintTokens": "./mintTokens.js"
   },
   "keywords": [],
   "author": "pk <pkrasam@gmail.com> (https://ipfs.infura.io/ipfs/QmSXiR9Khm3yo1J67nUopvVBxFJ8YGN2fUGZ34Etr3m92x/)",

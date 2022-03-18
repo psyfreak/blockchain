@@ -25,7 +25,7 @@ if (result.error) {
   throw result.error
 }
 console.log("Loaded config: ", result.parsed);
-const { ACCOUNT_PRIVATE_KEY, INFURA_KEY, INFURA_PRIVATE_KEY, INFURA_mnemonic } = process.env;
+const { INFURA_KEY, INFURA_mnemonic } = process.env;
 
 
 module.exports = {

@@ -7,23 +7,39 @@ The capstone will build upon the knowledge you have gained in the course in orde
 - add openSeaMarketplace
 
 ## Run & Test 
-1. npm install
+1. Run ``npm install``
 2. Run diverse test scripts
+    - ``npm run-script TestERC721Mintable``
+    - ``npm run-script TestSquareVerifier``
+    - ``npm run-script TestSolnSquareVerifier``
+3. Deploy on rinkeby 
+  - rename .env.sample to .env
+  - fillout .env file i.e. with infura + contract data
+4. Run ``truffle migrate --reset --network rinkeby``
+   to deploy the contract Verifier.sol + SolnSquareVerifier.sol on rinkeby test network.
+5. Run ``npm run-script MintTokens`` 
+   Mint 10 house tokens (HT).
 
-``truffle migrate --reset --network rinkeby``
+### Optional - Regeneration of zokrates content
+Run (before step 2): ``npm run-script GenerateVerifierAndProofs``
 
-Optional: run util.js => it will generate a new verifier contract + all needed proofs (valid + invalid ones) for testing and deploying. 
+Script will generate a new verifier contract (./eth-contract/Verifier.sol) and all needed in-/valid proofs (./zokrates/res/proof.json + false-proof.json) for testing and deploying.
 
-Metadata is here: https://s3-us-west-2.amazonaws.com/udacity-blockchain/capstone/[TOKENID]
-e.g. https://s3-us-west-2.amazonaws.com/udacity-blockchain/capstone/1
 
-## Docs
-- Listing OpenSea: https://testnets.opensea.io/collection/housetoken-2rnessub6o
-- Token 0 - 4 were on sale 
-- Token 0: https://testnets.opensea.io/assets/0xab93a9a40dfb367da3a1c852654540a20528b936/0
-- ....
-- Token 4: https://testnets.opensea.io/assets/0xab93a9a40dfb367da3a1c852654540a20528b936/4
+## Documented steps 
+1. I conducted all above steps from 1-5 and deployed contract to rinkeby and minted 10 tokens.
+2. I imported the token contract in meta mask.
+3. Registered on open sea => collection already shown.
+   - Listing OpenSea: https://testnets.opensea.io/collection/housetoken-2rnessub6o
+4. Put the first 5 tokens (0-4) on sale.
+    - Token 0 - 4 were/are on sale 
+    - Token 0: https://testnets.opensea.io/assets/0xab93a9a40dfb367da3a1c852654540a20528b936/0
+    - ....
+    - Token 4: https://testnets.opensea.io/assets/0xab93a9a40dfb367da3a1c852654540a20528b936/4
 
+5. Purchased 2 of the 5 tokens with another metamask test account in particular token 1 and 3
+- Token 1: https://testnets.opensea.io/assets/0xab93a9a40dfb367da3a1c852654540a20528b936/1
+- Token 3: https://testnets.opensea.io/assets/0xab93a9a40dfb367da3a1c852654540a20528b936/1
 
 ## Update project to solidity 0.8
 - Update openzeppelin
