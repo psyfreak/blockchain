@@ -2,11 +2,18 @@
 
 The capstone will build upon the knowledge you have gained in the course in order to build a decentralized housing product. 
 
+## TODOs
+- deploy to testnet
+- add openSeaMarketplace
+
 ## Run & Test 
 1. npm install
 2. Run diverse test scripts
 
 Optional: run util.js => it will generate a new verifier contract + all needed proofs (valid + invalid ones) for testing and deploying. 
+
+Metadata is here: https://s3-us-west-2.amazonaws.com/udacity-blockchain/capstone/[TOKENID]
+e.g. https://s3-us-west-2.amazonaws.com/udacity-blockchain/capstone/1
 
 ## Update project to solidity 0.8
 - Update openzeppelin

@@ -9,8 +9,8 @@ contract Ownable {
     event Transfer(address indexed from, address indexed to);
 
     //  2) create an internal constructor that sets the _owner var to the creator of the contract
-    constructor(address owner) {
-        _owner = owner;
+    constructor(address newowner) {
+        _owner = newowner;
     }
 
     //  4) fill out the transferOwnership function

@@ -25,7 +25,7 @@ contract ERC721Mintable is ERC721Metadata {
         onlyOwner
         returns (bool)
     {
-        _mint(to, tokenId);
+        _mint(to, tokenId); // if openzeppelin use _safeMint(to, tokenId); instead
         setTokenURI(tokenId);
         return true;
     }

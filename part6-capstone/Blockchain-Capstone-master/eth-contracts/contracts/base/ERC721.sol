@@ -111,7 +111,6 @@ contract ERC721 is Pausable, ERC165 {
     /// @return The approved address for this NFT, or the zero address if there is none
     function getApproved(uint256 tokenId) public view returns (address) {
         // TODO return token approval if it exists
-        address currentOwner = ownerOf(tokenId);
         return _tokenApprovals[tokenId];
     }
 

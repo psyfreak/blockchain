@@ -16,7 +16,7 @@ contract SolnSquareVerifier is ERC721Mintable {
     // TODO define a contract call to the zokrates generated solidity contract <Verifier> or <renamedVerifier>
     Verifier verifier;
 
-    uint256 counter = 0;
+    Counters.Counter counter;
 
     // TODO define a solutions struct that can hold an index & an address
     // The solution refers to the set of variables that you pass to verifyTx
@@ -48,19 +48,24 @@ contract SolnSquareVerifier is ERC721Mintable {
     // The solution refers to the set of variables that you pass to verifyTx  .verifyTx(proof.proof, proof.inputs)
     function addSolution (bytes32 solutionHash)
         public
+        returns(uint256)
     {
+        require(!isSolutionRegistered(solutionHash), "Solution was already committed");
         // only add solution if not already existing
-        if(!isSolutionRegistered(solutionHash)) {
-            counter = counter.add(1); //TODO use counter openzeppelin lib instead
-            solutions[solutionHash].id = counter;
-            solutions[solutionHash].isRegistered = true;
-            solutions[solutionHash].registeredBy = msg.sender;
-            emit SolutionAdded(solutions[solutionHash].id, solutions[solutionHash].registeredBy, solutionHash);
-        }
+        //if(!isSolutionRegistered(solutionHash)) {
+        solutions[solutionHash].id = counter.current();
+        solutions[solutionHash].isRegistered = true;
+        solutions[solutionHash].registeredBy = msg.sender;
+        counter.increment();
+        emit SolutionAdded(solutions[solutionHash].id, solutions[solutionHash].registeredBy, solutionHash);
+        return solutions[solutionHash].id;
+        //}
     }
 
     // TODO Create a function to mint new NFT only after the solution has been verified
     // proof and input are taken from the verifier code
+    // TODO find out why - if I change this function name to mint only, then tests result in error =>
+    //   web3 calls the parent contract with different arg count
     function mintToken (Verifier.Proof memory proof, uint[2] memory input,  address to) //, uint256 tokenId
         public
     {
@@ -74,11 +79,10 @@ contract SolnSquareVerifier is ERC721Mintable {
         // TODO proof input
         require(verifier.verifyTx(proof, input), "Verification invalid");
         // TODO addSolution();
-        addSolution(solutionHash);
+        uint256 tokenId = addSolution(solutionHash);
         //  - make sure you handle metadata as well as tokenSuply
         //super.mint(to, tokenId);
-        super.mint(to, uint(solutionHash)); //tokendId is the solution Hash => ensured only one solution can have one token
-
+        super.mint(to, tokenId); //tokendId is directly taken from the incrementing id of the solution => ensured only one solution can have one token
     }
 
     /********************************************************************************************/
