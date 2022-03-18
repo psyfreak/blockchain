@@ -18,11 +18,15 @@
  *
  */
 
-// const HDWalletProvider = require('truffle-hdwallet-provider');
-// const infuraKey = "fj4jll3k.....";
-//
-// const fs = require('fs');
-// const mnemonic = fs.readFileSync(".secret").toString().trim();
+const HDWalletProvider = require('truffle-hdwallet-provider'),
+  result = require('dotenv').config();
+
+if (result.error) {
+  throw result.error
+}
+console.log("Loaded config: ", result.parsed);
+const { ACCOUNT_PRIVATE_KEY, INFURA_KEY, INFURA_PRIVATE_KEY, INFURA_mnemonic } = process.env;
+
 
 module.exports = {
   /**
@@ -48,6 +52,16 @@ module.exports = {
       network_id: "*",       // Any network (default: none)
        //websockets: true,
      },
+    rinkeby: {
+      provider: () => new HDWalletProvider(INFURA_mnemonic, `https://rinkeby.infura.io/v3/${INFURA_KEY}`),
+      //url: `"https://rinkeby.infura.io/v3/${INFURA_KEY}`,
+      //accounts: [`0x${ACCOUNT_PRIVATE_KEY}`]
+      network_id: 4,       // Rinkeby's id
+      gas: 5500000,        // Rinkeby has a lower block limit than mainnet
+      //confirmations: 2,    // # of confs to wait between deployments. (default: 0)
+      //timeoutBlocks: 200,  // # of blocks before a deployment times out  (minimum/default: 50)
+      //skipDryRun: true     // Skip dry run before migrations? (default: false for public nets )
+    },
 
     // Another network with more advanced options...
     // advanced: {

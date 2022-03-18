@@ -10,10 +10,20 @@ The capstone will build upon the knowledge you have gained in the course in orde
 1. npm install
 2. Run diverse test scripts
 
+``truffle migrate --reset --network rinkeby``
+
 Optional: run util.js => it will generate a new verifier contract + all needed proofs (valid + invalid ones) for testing and deploying. 
 
 Metadata is here: https://s3-us-west-2.amazonaws.com/udacity-blockchain/capstone/[TOKENID]
 e.g. https://s3-us-west-2.amazonaws.com/udacity-blockchain/capstone/1
+
+## Docs
+- Listing OpenSea: https://testnets.opensea.io/collection/housetoken-2rnessub6o
+- Token 0 - 4 were on sale 
+- Token 0: https://testnets.opensea.io/assets/0xab93a9a40dfb367da3a1c852654540a20528b936/0
+- ....
+- Token 4: https://testnets.opensea.io/assets/0xab93a9a40dfb367da3a1c852654540a20528b936/4
+
 
 ## Update project to solidity 0.8
 - Update openzeppelin
@@ -37,6 +47,8 @@ e.g. https://s3-us-west-2.amazonaws.com/udacity-blockchain/capstone/1
 - I was not able to name the mint function just mint. it seems the compile has issues with overloading. whenever I called the function with 5 arguments, solidity compiler tries to call the mind in ERC721 with two arguments.
   For this reason I needed to change the name.
 
+### OpenSea
+- If I add the token in metamask before I connect to OpenSea, I see the items automatically.
 
 # Further references & help
 - https://andresaaap.medium.com/capstone-real-estate-marketplace-project-faq-udacity-blockchain-69fe13b4c14e
@@ -181,3 +193,145 @@ Gerald Host
 @GeraldHost
 Mai 28 2021 23:18
 Ahh I understand now, it has just clicked! Thank you 🙌
+
+
+# Output
+## Deplyoment rinkeby
+Migrations dry-run (simulation)
+===============================
+> Network name:    'rinkeby-fork'
+> Network id:      4
+> Block gas limit: 29999972 (0x1c9c364)
+
+
+1_initial_migration.js
+======================
+
+   Deploying 'Migrations'
+   ----------------------
+   > block number:        10346919
+   > block timestamp:     1647576941
+   > account:             0x0b942ab0761F6AAbEd2de1d6fe64138942b6904A
+   > balance:             0.972281048799803808
+   > gas used:            255400 (0x3e5a8)
+   > gas price:           2 gwei
+   > value sent:          0 ETH
+   > total cost:          0.0005108 ETH
+
+   -------------------------------------
+   > Total cost:           0.0005108 ETH
+
+
+2_deploy_contracts.js
+=====================
+
+   Deploying 'Verifier'
+   --------------------
+   > block number:        10346921
+   > block timestamp:     1647576947
+   > account:             0x0b942ab0761F6AAbEd2de1d6fe64138942b6904A
+   > balance:             0.969140574799803808
+   > gas used:            1542699 (0x178a2b)
+   > gas price:           2 gwei
+   > value sent:          0 ETH
+   > total cost:          0.003085398 ETH
+
+
+   Deploying 'SolnSquareVerifier'
+   ------------------------------
+   > block number:        10346922
+   > block timestamp:     1647576974
+   > account:             0x0b942ab0761F6AAbEd2de1d6fe64138942b6904A
+   > balance:             0.961417500799803808
+   > gas used:            3861537 (0x3aec21)
+   > gas price:           2 gwei
+   > value sent:          0 ETH
+   > total cost:          0.007723074 ETH
+
+   -------------------------------------
+   > Total cost:         0.010808472 ETH
+
+
+Summary
+=======
+> Total deployments:   3
+> Final cost:          0.011319272 ETH
+
+
+
+
+
+Starting migrations...
+======================
+> Network name:    'rinkeby'
+> Network id:      4
+> Block gas limit: 29970705 (0x1c95111)
+
+
+1_initial_migration.js
+======================
+
+   Deploying 'Migrations'
+   ----------------------
+   > transaction hash:    0x9ee435d34824082c492368368eb2ebc90c0148b3e75f395c673c7f80416890ec
+   > Blocks: 1            Seconds: 16
+   > contract address:    0x288e1c8b1C411CeF314f39bFb8FefC96a6FC3fBD
+   > block number:        10346922
+   > block timestamp:     1647577007
+   > account:             0x0b942ab0761F6AAbEd2de1d6fe64138942b6904A
+   > balance:             0.972384301562992808
+   > gas used:            271700 (0x42554)
+   > gas price:           1.49998983 gwei
+   > value sent:          0 ETH
+   > total cost:          0.000407547236811 ETH
+
+
+   > Saving migration to chain.
+   > Saving artifacts
+   -------------------------------------
+   > Total cost:     0.000407547236811 ETH
+
+
+2_deploy_contracts.js
+=====================
+
+   Deploying 'Verifier'
+   --------------------
+   > transaction hash:    0xb258a4e437da9846a6ca9ab329fe0e4b8e2720f5cb272d33ab14cd686ce2c80a
+   > Blocks: 1            Seconds: 12
+   > contract address:    0xBFF5be92Bf47fc9FE5a46D6Bc3158ABb965F1179
+   > block number:        10346924
+   > block timestamp:     1647577037
+   > account:             0x0b942ab0761F6AAbEd2de1d6fe64138942b6904A
+   > balance:             0.970001361829948209
+   > gas used:            1542699 (0x178a2b)
+   > gas price:           1.499990097 gwei
+   > value sent:          0 ETH
+   > total cost:          0.002314033222651803 ETH
+
+
+   Deploying 'SolnSquareVerifier'
+   ------------------------------
+   > transaction hash:    0x3e2901a34741b549933df1f7e19499ad6b605e022f83b40dff186a791715fb9b
+   > Blocks: 1            Seconds: 8
+   > contract address:    0xaB93A9a40DFB367da3a1c852654540a20528b936
+   > block number:        10346925
+   > block timestamp:     1647577052
+   > account:             0x0b942ab0761F6AAbEd2de1d6fe64138942b6904A
+   > balance:             0.963939844291449787
+   > gas used:            4041037 (0x3da94d)
+   > gas price:           1.499990606 gwei
+   > value sent:          0 ETH
+   > total cost:          0.006061517538498422 ETH
+
+
+   > Saving migration to chain.
+   > Saving artifacts
+   -------------------------------------
+   > Total cost:     0.008375550761150225 ETH
+
+
+Summary
+=======
+> Total deployments:   3
+> Final cost:          0.008783097997961225 ETH
